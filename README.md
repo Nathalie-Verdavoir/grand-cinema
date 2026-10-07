@@ -1,4 +1,4 @@
-![Log-Grand Cinéma](./public/images/image_9a69b665.jpg)
+![Logo-Grand Cinéma](./public/images/image_9a69b665.jpg)
 
 # 🎬 Le Grand Cinéma - Application de Réservation en Ligne
 
