@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - Grand Cinéma
+{% endblock %}
+
+{% block body %}
+	<div class="container large-width">
+		<div class="row align-items-start">
+			<div class="col-12 col-lg-2 left-col d-none d-lg-inline">
+			</div>
+			<div class="col-12 col-lg-6 left-col m-0">
+				<img class="logo mx-auto d-block" src="{{ asset('images/logo.PNG') }}" alt="Logo Grand Cinéma"/>
+				<h1 class="title mx-auto d-block">Grand Cinéma</h1>
+
+				<div class="col-12 col-lg-4 g-0">
+					{% for i in 0..4 %}
+						<div class="d-flex {{ i is not same as(0) ? " d-none d-lg-inline" : " d-lg-inline" }}">
+
+						</div>
+					{% endfor %}
+				</div>
+			</div>
+
+		</div>
+	</div>
+{% endblock %}
