@@ -422,6 +422,11 @@ form {
   display: inline;
 }
 
+.form-control {
+  width: 20%;
+  margin : auto;
+}
+
 .photo-show {
   border-radius: 8px;
   display: block;
