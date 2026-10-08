@@ -1,0 +1,38 @@
+.film-form-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+    align-items: start;
+    gap: 1.5rem;
+}
+
+.film-form-fields {
+    min-width: 0;
+}
+
+.film-form-previews {
+    display: grid;
+    gap: 1rem;
+    position: sticky;
+    top: 1rem;
+}
+
+.film-form-previews .film-image-preview-card {
+    margin: 0;
+}
+
+.film-image-preview-card img {
+    display: block;
+    width: 100%;
+    max-height: 420px;
+    object-fit: contain;
+}
+
+@media (max-width: 900px) {
+    .film-form-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .film-form-previews {
+        position: static;
+    }
+}

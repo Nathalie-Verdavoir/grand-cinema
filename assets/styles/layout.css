@@ -1,0 +1,42 @@
+.container.large-width {
+    min-width: 95vw;
+}
+
+footer {
+    background-color: var(--color-global-5);
+    color: var(--color-beige-1);
+    font-family: 'Raleway', sans-serif;
+}
+
+footer.row {
+    padding: 0;
+}
+
+footer > .col-12 {
+    margin-top: 0;
+}
+
+.title-footer {
+    color: var(--color-global-2);
+}
+
+.plan-link {
+    color: var(--color-global-1);
+}
+
+.plan-link:hover {
+    color: var(--color-beige-1);
+}
+
+footer .list-group-item {
+    background-color: transparent;
+}
+
+footer a {
+    font-size: 1rem;
+}
+
+.card-text {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 1rem;
+}

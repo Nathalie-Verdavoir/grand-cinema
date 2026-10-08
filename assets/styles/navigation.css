@@ -1,0 +1,125 @@
+.admin-buttons {
+    position: absolute;
+    top: 1rem;
+    right: 6rem;
+    z-index: 100;
+}
+
+header > nav > .container-fluid > .navbar-toggler {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 100;
+    padding: 1rem;
+}
+
+.navbar {
+    width: auto;
+    background-color: var(--color-beige-2);
+    color: var(--color-global-1);
+}
+
+.navbar-nav {
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.nav-link {
+    margin-top: 0.4rem;
+    font-size: 1.1rem;
+}
+
+.navbar-toggler-icon {
+    margin-bottom: 5%;
+}
+
+.logo {
+    display: inline;
+    width: 8vw;
+    margin: 0;
+}
+
+.navbar-brand .logo {
+    max-width: 120px;
+    min-width: 48px;
+}
+
+.fond-gris {
+    width: auto;
+    background-color: var(--color-global-5);
+    color: var(--color-global-1);
+    font-size: 1.5rem;
+}
+
+#navbarScroll > ul > li > a {
+    padding-inline: 1rem;
+    border-radius: 5px;
+    background-image: linear-gradient(to right, var(--color-beige-1), var(--color-global-4));
+    background-size: 200% auto;
+    box-shadow: 10px 10px 5px var(--color-global-5);
+    color: var(--color-global-5);
+}
+
+#navbarScroll > ul > li > a.active {
+    border-right: 1px solid var(--color-global-1);
+    border-bottom: 1px solid var(--color-global-1);
+    background-image: linear-gradient(
+        to right,
+        var(--color-beige-2) 0%,
+        var(--color-global-1) 31%,
+        var(--color-global-3) 60%,
+        var(--color-global-4) 100%
+    );
+}
+
+.svg-container {
+    display: inline-block;
+    position: relative;
+    width: 2rem;
+    aspect-ratio: 1;
+    vertical-align: middle;
+}
+
+.svg-content {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.announcement {
+    overflow: hidden;
+}
+
+.announcement > :first-child {
+    display: inline-block;
+    padding-left: 100vw;
+    white-space: nowrap;
+    animation: announce 45s linear infinite;
+}
+
+@keyframes announce {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+
+    to {
+        transform: translate3d(-100%, 0, 0);
+    }
+}
+
+@media (min-width: 991px) {
+    .admin-buttons {
+        right: 1rem;
+    }
+
+    .nav-link {
+        font-size: 1.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .announcement > :first-child {
+        animation: none;
+        padding-left: 0;
+    }
+}

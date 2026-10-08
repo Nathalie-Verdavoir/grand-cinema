@@ -47,6 +47,18 @@
             "./migrations/.gitignore"
         ]
     },
+    "easycorp/easyadmin-bundle": {
+        "version": "4.29",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "4.14",
+            "ref": "13b3e524d1038a6861ad6c7fc64e31b644ba0c54"
+        },
+        "files": [
+            "./config/routes/easyadmin.yaml"
+        ]
+    },
     "phpunit/phpunit": {
         "version": "9.6",
         "recipe": {
@@ -173,6 +185,32 @@
             "./config/routes/security.yaml"
         ]
     },
+    "symfony/stimulus-bundle": {
+        "version": "2.36",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "2.13",
+            "ref": "cef742b8d032ecf36f5da9386af91d012b5f5110"
+        },
+        "files": [
+            "./assets/bootstrap.js",
+            "./assets/controllers.json"
+        ]
+    },
+    "symfony/translation": {
+        "version": "6.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "6.3",
+            "ref": "620a1b84865ceb2ba304c8f8bf2a185fbf32a843"
+        },
+        "files": [
+            "./config/packages/translation.yaml",
+            "./translations/.gitignore"
+        ]
+    },
     "symfony/twig-bundle": {
         "version": "6.4",
         "recipe": {
@@ -198,6 +236,18 @@
             "./config/packages/uid.yaml"
         ]
     },
+    "symfony/ux-twig-component": {
+        "version": "2.36",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "2.13",
+            "ref": "f367ae2a1faf01c503de2171f1ec22567febeead"
+        },
+        "files": [
+            "./config/packages/twig_component.yaml"
+        ]
+    },
     "symfony/validator": {
         "version": "6.4",
         "recipe": {
@@ -221,6 +271,22 @@
         "files": [
             "./config/packages/web_profiler.yaml",
             "./config/routes/web_profiler.yaml"
+        ]
+    },
+    "symfony/webpack-encore-bundle": {
+        "version": "2.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "2.2",
+            "ref": "b618bf5f17ed61f523da7153025bf58ec9502f65"
+        },
+        "files": [
+            "./assets/app.js",
+            "./assets/styles/app.css",
+            "./config/packages/webpack_encore.yaml",
+            "./package.json",
+            "./webpack.config.js"
         ]
     },
     "symfonycasts/verify-email-bundle": {
