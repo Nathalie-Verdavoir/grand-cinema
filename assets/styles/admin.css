@@ -27,6 +27,11 @@
     object-fit: contain;
 }
 
+.datagrid .ea-lightbox-thumbnail img {
+    max-block-size: 180px;
+    max-inline-size: 300px;
+}
+
 @media (max-width: 900px) {
     .film-form-layout {
         grid-template-columns: minmax(0, 1fr);

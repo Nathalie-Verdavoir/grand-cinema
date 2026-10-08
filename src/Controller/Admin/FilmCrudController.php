@@ -9,6 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use App\Service\CloudinaryImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 class FilmCrudController extends AbstractCrudController
@@ -28,6 +29,8 @@ class FilmCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
+            ->setPaginatorPageSize(10)
+            ->setSearchFields(['title'])
             ->setFormOptions([
                 'attr' => ['data-controller' => 'search-film']
             ]);
@@ -77,14 +80,23 @@ class FilmCrudController extends AbstractCrudController
 
         yield TextareaField::new('description', 'Description')
             ->setRequired(false)
+            ->setMaxLength(240)
             ->setHtmlAttribute('data-search-film-target', 'synopsisField');
 
         yield DateField::new('releaseDate', 'Date de sortie')
+            ->setFormat('dd/MM/yyyy')
             ->setRequired(false)
             ->setHtmlAttribute('data-search-film-target', 'releaseDateField');
 
+        yield ImageField::new('img', 'Affiche')
+            ->setBasePath('')
+            ->setRequired(false)
+            ->onlyOnIndex()
+        ;
+
         yield TextField::new('img', 'URL de l’affiche')
             ->setRequired(false)
+            ->onlyOnForms()
             ->setFormTypeOption('row_attr.class', 'd-none')
             ->setHtmlAttribute('data-search-film-target', 'imageField')
             ->setHtmlAttribute('data-action', 'input->search-film#updateImagePreview');
