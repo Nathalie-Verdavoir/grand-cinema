@@ -31,6 +31,9 @@ class Film
     #[ORM\OneToMany(targetEntity: Seance::class, mappedBy: 'film')]
     private Collection $seances;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $img = null;
+
     public function __construct()
     {
         $this->seances = new ArrayCollection();
@@ -103,6 +106,18 @@ class Film
                 $seance->setFilm(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getImg(): ?string
+    {
+        return $this->img;
+    }
+
+    public function setImg(?string $img): static
+    {
+        $this->img = $img;
 
         return $this;
     }
