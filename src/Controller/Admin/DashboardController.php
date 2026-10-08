@@ -21,7 +21,7 @@ class DashboardController extends AbstractDashboardController
         //return parent::index();
 
         $adminUrlGenerator = $this->container->get(AdminUrlGenerator::class);
-        $url = $adminUrlGenerator->setController(UserCrudController::class)->generateUrl();
+        $url = $adminUrlGenerator->setController(FilmCrudController::class)->generateUrl();
 
         return $this->redirect($url);
     }
@@ -42,10 +42,10 @@ class DashboardController extends AbstractDashboardController
     {
         yield MenuItem::linkToDashboard('Tableau de bord', 'fa fa-home');
         // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);
+        yield MenuItem::linkTo(FilmCrudController::class, 'Films', 'fas fa-film')->setAction(Action::INDEX);
 
         yield MenuItem::linkTo(UserCrudController::class, 'Utilisateurs', 'fas fa-users')->setAction(Action::INDEX);
 
-        yield MenuItem::linkTo(FilmCrudController::class, 'Films', 'fas fa-film')->setAction(Action::INDEX);
 
 
     }
