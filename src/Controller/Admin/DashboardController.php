@@ -45,6 +45,8 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(FilmCrudController::class, 'Films', 'fas fa-film')->setAction(Action::INDEX);
         yield MenuItem::linkTo(TarifCrudController::class, 'Tarifs', 'fas fa-euro-sign')->setAction(Action::INDEX);
         yield MenuItem::linkTo(SalleCrudController::class, 'Salles', 'fas fa-door-open')->setAction(Action::INDEX);
+        yield MenuItem::linkTo(ReservationCrudController::class, 'Réservations', 'fas fa-ticket-alt')->setAction(Action::INDEX);
+        yield MenuItem::linkTo(BilletCrudController::class, 'Billets', 'fas fa-ticket')->setAction(Action::INDEX);
 
         yield MenuItem::linkTo(UserCrudController::class, 'Utilisateurs', 'fas fa-users')->setAction(Action::INDEX);
 

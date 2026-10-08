@@ -11,6 +11,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 #[Route('/admin/api/film', name: 'admin_api_film_')]
 class FilmApiController extends AbstractController
 {
+    private const TMDB_API_BASE_URL = 'https://api.themoviedb.org/3';
+
     #[Route('/search', name: 'search', methods: ['GET'])]
     public function search(Request $request, HttpClientInterface $client): JsonResponse
     {
@@ -27,5 +29,20 @@ class FilmApiController extends AbstractController
         ]);
 
         return new JsonResponse($response->toArray()['results'] ?? []);
+    }
+
+    #[Route('/{id}/details', name: 'details', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function details(int $id, HttpClientInterface $client): JsonResponse
+    {
+        $response = $client->request('GET', self::TMDB_API_BASE_URL . '/movie/' . $id, [
+            'query' => ['language' => 'fr-FR'],
+            'headers' => [
+                'Authorization' => 'Bearer ' . $_ENV['TMDB_API_KEY'],
+                'Accept' => 'application/json',
+            ],
+        ]);
+        $movie = $response->toArray();
+
+        return new JsonResponse(['runtime' => $movie['runtime'] ?? null]);
     }
 }

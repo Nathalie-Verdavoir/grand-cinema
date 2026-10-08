@@ -34,6 +34,12 @@ class Film
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $img = null;
 
+    #[ORM\Column(options: ['default' => true])]
+    private bool $programmable = true;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $duration = null;
+
     public function __construct()
     {
         $this->seances = new ArrayCollection();
@@ -118,6 +124,30 @@ class Film
     public function setImg(?string $img): static
     {
         $this->img = $img;
+
+        return $this;
+    }
+
+    public function isProgrammable(): bool
+    {
+        return $this->programmable;
+    }
+
+    public function setProgrammable(bool $programmable): static
+    {
+        $this->programmable = $programmable;
+
+        return $this;
+    }
+
+    public function getDuration(): ?int
+    {
+        return $this->duration;
+    }
+
+    public function setDuration(?int $duration): static
+    {
+        $this->duration = $duration;
 
         return $this;
     }

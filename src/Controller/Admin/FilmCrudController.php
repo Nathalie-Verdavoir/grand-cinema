@@ -10,6 +10,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use App\Service\CloudinaryImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 class FilmCrudController extends AbstractCrudController
@@ -87,6 +89,12 @@ class FilmCrudController extends AbstractCrudController
             ->setFormat('dd/MM/yyyy')
             ->setRequired(false)
             ->setHtmlAttribute('data-search-film-target', 'releaseDateField');
+
+        yield BooleanField::new('programmable', 'Programmable');
+
+        yield IntegerField::new('duration', 'Durée (minutes)')
+            ->setRequired(false)
+            ->setHtmlAttribute('data-search-film-target', 'durationField');
 
         yield ImageField::new('img', 'Affiche')
             ->setBasePath('')

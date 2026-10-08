@@ -3,7 +3,7 @@
 
 import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
-    static targets = ["searchInput", "resultsSelect", "titleField", "synopsisField", "releaseDateField", "imageField"];
+    static targets = ["searchInput", "resultsSelect", "titleField", "synopsisField", "releaseDateField", "durationField", "imageField"];
 
     // Variable pour stocker les résultats complets de l'API temporairement
     filmsData = [];
@@ -12,6 +12,7 @@ export default class extends Controller {
         this.savedImageUrl = this.imageFieldTarget.value.trim();
         this.createImagePreview();
         this.updateSavedImagePreview();
+        this.createDurationStatus();
 
         if (!this.hasResultsSelectTarget) {
             const resultsSelect = this.element.querySelector('select[name$="[api_results]"]');
@@ -120,6 +121,19 @@ export default class extends Controller {
         this.previewMessage.classList.add('d-none');
     }
 
+    createDurationStatus() {
+        if (!this.hasDurationFieldTarget) {
+            return;
+        }
+
+        this.durationStatus = document.createElement('small');
+        this.durationStatus.className = 'form-text text-muted';
+        this.durationStatus.setAttribute('aria-live', 'polite');
+        const durationContainer = this.durationFieldTarget.closest('.form-group, .form-field')
+            || this.durationFieldTarget.parentElement;
+        durationContainer?.append(this.durationStatus);
+    }
+
     get resultsSelectElement() {
         return this.hasResultsSelectTarget
             ? this.resultsSelectTarget
@@ -164,7 +178,7 @@ export default class extends Controller {
     }
 
     // Étape 3 : L'admin sélectionne un film -> Remplissage automatique des inputs
-    selectMovie() {
+    async selectMovie() {
         const resultsSelect = this.resultsSelectElement;
         if (!resultsSelect) {
             throw new Error('Le champ des résultats de recherche est introuvable.');
@@ -190,6 +204,33 @@ export default class extends Controller {
                 ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
                 : '';
             this.updateImagePreview();
+        }
+
+        if (this.hasDurationFieldTarget) {
+            this.durationFieldTarget.value = '';
+            this.durationStatus.textContent = 'Vérification de la durée auprès de TMDB…';
+            this.durationStatus.className = 'form-text text-muted';
+
+            try {
+                const response = await fetch(`/admin/api/film/${encodeURIComponent(movie.id)}/details`);
+                if (!response.ok) {
+                    throw new Error(`La vérification TMDB a échoué (${response.status}).`);
+                }
+
+                const details = await response.json();
+                if (Number.isInteger(details.runtime) && details.runtime > 0) {
+                    this.durationFieldTarget.value = details.runtime;
+                    this.durationStatus.textContent = `Durée vérifiée via TMDB : ${details.runtime} min.`;
+                    this.durationStatus.className = 'form-text text-success';
+                } else {
+                    this.durationStatus.textContent = 'TMDB ne fournit pas la durée : veuillez la saisir manuellement.';
+                    this.durationStatus.className = 'form-text text-warning';
+                }
+            } catch (error) {
+                this.durationStatus.textContent = 'Impossible de vérifier la durée auprès de TMDB : veuillez la saisir manuellement.';
+                this.durationStatus.className = 'form-text text-warning';
+                console.error(error);
+            }
         }
     }
 }
