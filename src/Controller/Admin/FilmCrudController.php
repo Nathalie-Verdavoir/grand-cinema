@@ -13,7 +13,12 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use App\Service\CloudinaryImageUploader;
+use App\Controller\Admin\SeanceCrudController;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 class FilmCrudController extends AbstractCrudController
 {
     private $httpClient;
@@ -33,6 +38,8 @@ class FilmCrudController extends AbstractCrudController
         return $crud
             ->setPaginatorPageSize(10)
             ->setSearchFields(['title'])
+            ->overrideTemplate('crud/edit', 'admin/film/edit.html.twig')
+            ->overrideTemplate('crud/new', 'admin/film/new.html.twig')
             ->setFormOptions([
                 'attr' => ['data-controller' => 'search-film']
             ]);
@@ -54,6 +61,23 @@ class FilmCrudController extends AbstractCrudController
         }
 
         parent::updateEntity($entityManager, $entityInstance);
+    }
+
+    protected function getRedirectResponseAfterSave(\EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext $context, string $action): RedirectResponse
+    {
+        $submitButton = $context->getRequest()->request->all()['ea']['newForm']['btn'] ?? null;
+        if ('saveAndGoToSchedule' === $submitButton) {
+            $weekStart = (new DateTimeImmutable('today'))->modify('monday this week')->format('Y-m-d');
+            $url = $this->container->get(AdminUrlGenerator::class)
+                ->setController(SeanceCrudController::class)
+                ->setAction(Action::INDEX)
+                ->set('week', $weekStart)
+                ->generateUrl();
+
+            return $this->redirect($url);
+        }
+
+        return parent::getRedirectResponseAfterSave($context, $action);
     }
 
     public function configureFields(string $pageName): iterable

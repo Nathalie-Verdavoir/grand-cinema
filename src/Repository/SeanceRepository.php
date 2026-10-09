@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Salle;
 use App\Entity\Seance;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +16,25 @@ class SeanceRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Seance::class);
+    }
+
+    /**
+     * @return Seance[]
+     */
+    public function findForRoomBetween(Salle $salle, DateTimeImmutable $from, DateTimeImmutable $to): array
+    {
+        return $this->createQueryBuilder('seance')
+            ->addSelect('film')
+            ->join('seance.film', 'film')
+            ->andWhere('seance.salle = :salle')
+            ->andWhere('seance.dateTime >= :from')
+            ->andWhere('seance.dateTime < :to')
+            ->setParameter('salle', $salle)
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->orderBy('seance.dateTime', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     //    /**
