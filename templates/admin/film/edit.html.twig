@@ -1,0 +1,14 @@
+{% extends '@!EasyAdmin/crud/edit.html.twig' %}
+
+{% block page_actions %}
+    {{ parent() }}
+    <button
+        class="btn btn-secondary action-save-and-schedule"
+        type="submit"
+        form="edit-Film-form"
+        name="ea[newForm][btn]"
+        value="saveAndGoToSchedule"
+    >
+        Enregistrer et programmer
+    </button>
+{% endblock %}
