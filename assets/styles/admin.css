@@ -1,0 +1,243 @@
+.film-form-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+    align-items: start;
+    gap: 1.5rem;
+}
+
+.film-form-fields {
+    min-width: 0;
+}
+
+.film-form-previews {
+    display: grid;
+    gap: 1rem;
+    position: sticky;
+    top: 1rem;
+}
+
+.film-form-previews .film-image-preview-card {
+    margin: 0;
+}
+
+.film-image-preview-card img {
+    display: block;
+    width: 100%;
+    max-height: 420px;
+    object-fit: contain;
+}
+
+.datagrid .ea-lightbox-thumbnail img {
+    max-block-size: 180px;
+    max-inline-size: 300px;
+}
+
+.seance-planner-toolbar,
+.seance-week-navigation,
+.seance-room-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.seance-planner-toolbar {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.seance-room-selector label {
+    font-weight: 600;
+}
+
+.seance-room-selector select {
+    min-width: 12rem;
+}
+
+.seance-week-navigation strong {
+    white-space: nowrap;
+}
+
+.seance-planner-feedback {
+    min-height: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.seance-planner-feedback.is-error {
+    color: #b42318;
+}
+
+.seance-planner-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 17rem;
+    align-items: start;
+    gap: 1rem;
+}
+
+.schedule-calendar-scroll {
+    max-height: 75vh;
+    min-width: 0;
+    overflow: auto;
+    border: 1px solid var(--gray-200, #d9d9d9);
+}
+
+.schedule-grid-header,
+.schedule-grid-body {
+    display: grid;
+    grid-template-columns: 3.5rem repeat(7, minmax(7.5rem, 1fr));
+    min-width: 58rem;
+}
+
+.schedule-grid-header {
+    position: sticky;
+    z-index: 3;
+    top: 0;
+    background: #36597d;
+    color: #fff;
+}
+
+.schedule-time-heading,
+.schedule-day-heading {
+    min-height: 3.25rem;
+    padding: 0.4rem;
+    border-bottom: 1px solid var(--gray-200, #d9d9d9);
+    text-align: center;
+}
+
+.schedule-day-heading {
+    display: flex;
+    flex-direction: column;
+}
+
+.schedule-grid-body {
+    height: 1920px;
+}
+
+.schedule-time-axis,
+.schedule-day-lane {
+    position: relative;
+    height: 1920px;
+}
+
+.schedule-time-axis {
+    background: #36597d;
+    color: #fff;
+}
+
+.schedule-time-axis span {
+    position: absolute;
+    right: 0.35rem;
+    transform: translateY(-0.55em);
+    color: #fff;
+    font-size: 0.7rem;
+}
+
+.schedule-day-lane {
+    border-left: 1px solid #36597d;
+    background:
+        linear-gradient(to bottom, #a9c0d6, #a9c0d6) 0 0 / 100% var(--past-height, 0px) no-repeat,
+        repeating-linear-gradient(to bottom, transparent 0, transparent 39px, #36597d 39px, #36597d 40px);
+}
+
+.schedule-day-lane.is-drop-target {
+    background-color: rgba(33, 150, 83, 0.1);
+}
+
+.schedule-event {
+    position: absolute;
+    z-index: 1;
+    right: 2px;
+    left: 2px;
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+    padding: 0.25rem;
+    border-left: 3px solid #243f5a;
+    border-radius: 3px;
+    background: #36597d;
+    color: #fff;
+    font-size: 0.7rem;
+    line-height: 1.2;
+}
+
+.schedule-event span {
+    margin-top: 0.15rem;
+}
+
+.schedule-event-unknown {
+    border-color: #27375f;
+    background: #536b96;
+    color: #fff;
+}
+
+.seance-film-palette {
+    position: sticky;
+    top: 1rem;
+}
+
+.seance-film-palette h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+}
+
+.seance-film-palette > p {
+    font-size: 0.85rem;
+}
+
+.seance-film-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+    padding: 0.65rem;
+    border: 1px solid #d5d9dd;
+    border-radius: 4px;
+    background: #36597d;
+    font-size: 0.85rem;
+}
+
+.seance-film-card.is-unavailable {
+    color: inherit;
+    text-decoration: none;
+}
+
+.seance-film-card.is-unavailable:hover {
+    border-color: #8a80af;
+    background: #6b6392;
+    color: #fff;
+}
+
+.seance-film-card.is-draggable {
+    cursor: grab;
+}
+
+.seance-film-card.is-draggable:active {
+    cursor: grabbing;
+}
+
+.seance-film-card.is-unavailable {
+    background: #4b527d;
+    color: #fff;
+}
+
+[data-controller="seance-planner"][aria-busy="true"] {
+    cursor: progress;
+}
+
+@media (max-width: 900px) {
+    .film-form-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .film-form-previews {
+        position: static;
+    }
+
+    .seance-planner-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .seance-film-palette {
+        position: static;
+    }
+}

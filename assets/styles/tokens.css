@@ -1,0 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400..900&family=Nunito+Sans:wght@400;700&family=Raleway:wght@400;700&display=swap');
+
+:root {
+    --color-beige-1: #d0ccb6;
+    --color-beige-2: #ffffff66;
+    --color-beige-3: #858562;
+    --color-dark-grey: #262430;
+    --color-global-1: #9ec7ef;
+    --color-global-2: #62748e;
+    --color-global-3: #828c51;
+    --color-global-4: #335245;
+    --color-global-5: #182e41;
+}

@@ -1,0 +1,29 @@
+.btn {
+    border: 0;
+    background-color: var(--color-global-5);
+    box-shadow: 0 0 20px var(--color-beige-1);
+    color: var(--color-global-1);
+    font-size: 1.8rem;
+}
+
+.btn:hover {
+    border: 0;
+    background-color: var(--color-global-5);
+    color: var(--color-beige-3);
+}
+
+.alert-success {
+    border-color: var(--color-global-2);
+    background-color: var(--color-global-1);
+    color: var(--color-global-5);
+    font-family: 'Raleway', sans-serif;
+    font-size: 1rem;
+}
+
+#alert.alert {
+    position: fixed;
+    top: 5vh;
+    left: 5vh;
+    z-index: 100;
+    margin: 0;
+}
