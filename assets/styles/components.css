@@ -27,3 +27,22 @@
     z-index: 100;
     margin: 0;
 }
+
+.error-page {
+    display: grid;
+    min-height: 70vh;
+    place-items: center;
+    padding: 3rem 1.5rem;
+    color: var(--color-global-5);
+    text-align: center;
+}
+
+.error-page-code {
+    margin: 0;
+    color: var(--color-global-2);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(4rem, 14vw, 9rem);
+    font-weight: 900;
+    line-height: 1;
+    text-shadow: 4px 4px 0 var(--color-global-1);
+}
