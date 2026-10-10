@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Séances de {{ film.title }} - Grand Cinéma{% endblock %}
+
+{% block body %}
+	<div class="container home-page">
+		<section class="film-program-page" aria-labelledby="film-program-title">
+			<a class="film-program-back" href="{{ path('app_accueil') }}">← Retour à l’accueil</a>
+			<h1 id="film-program-title">{{ film.title }}</h1>
+			{% if film.img %}
+				<img class="film-program-poster" src="{{ film.img }}" alt="Affiche du film {{ film.title }}">
+			{% endif %}
+			{% if film.description %}
+				<p class="film-program-description">{{ film.description }}</p>
+			{% endif %}
+			<h2>Toutes les séances à venir</h2>
+			<div class="home-film-screenings-scroll">
+				<table class="home-film-screenings-table">
+					<caption class="visually-hidden">Toutes les séances à venir pour {{ film.title }}</caption>
+					<thead>
+						<tr>
+							<th scope="col">Jour et date</th>
+							<th scope="col">Heure</th>
+							<th scope="col">Salle</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for screening in screenings %}
+							<tr>
+								<td>{{ screening.date }}</td>
+								<td>{{ screening.time }}</td>
+								<td>{{ screening.room }}</td>
+							</tr>
+						{% else %}
+							<tr><td colspan="3">Aucune séance à venir.</td></tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			<a class="film-program-back" href="{{ path('app_accueil') }}">← Retour à l’accueil</a>
+		</section>
+	</div>
+{% endblock %}
