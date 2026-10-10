@@ -27,6 +27,8 @@ jobs:
           SOURCE_BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           if [[ -z "$SOURCE_BRANCH" || "$SOURCE_BRANCH" == "develop" || "$SOURCE_BRANCH" == "main" ]]; then
             echo "::error::La branche source doit être une branche différente de develop et main."
