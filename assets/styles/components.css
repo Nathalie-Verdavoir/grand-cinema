@@ -596,6 +596,25 @@
 }
 
 @media (max-width: 576px) {
+    .home-carousel {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .home-carousel-navigation {
+        order: 0;
+        border-top: 0;
+        border-bottom: 1px solid rgb(54 89 125 / 16%);
+    }
+
+    .home-carousel .carousel-indicators {
+        order: 1;
+    }
+
+    .home-carousel .carousel-inner {
+        order: 2;
+    }
+
     .home-film-slide {
         min-height: 0;
         grid-template-columns: minmax(0, 1fr);
