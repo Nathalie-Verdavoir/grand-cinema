@@ -64,7 +64,7 @@
 }
 
 .seance-planner-feedback.is-error {
-    color: #b42318;
+    color: var(--color-error-text);
 }
 
 .seance-planner-layout {
@@ -78,7 +78,7 @@
     max-height: 75vh;
     min-width: 0;
     overflow: auto;
-    border: 1px solid var(--gray-200, #d9d9d9);
+    border: 1px solid var(--color-global-2);
 }
 
 .schedule-grid-header,
@@ -92,15 +92,15 @@
     position: sticky;
     z-index: 3;
     top: 0;
-    background: #36597d;
-    color: #fff;
+    background: var(--color-global-2);
+    color: var(--color-white);
 }
 
 .schedule-time-heading,
 .schedule-day-heading {
     min-height: 3.25rem;
     padding: 0.4rem;
-    border-bottom: 1px solid var(--gray-200, #d9d9d9);
+    border-bottom: 1px solid var(--color-global-1);
     text-align: center;
 }
 
@@ -120,27 +120,27 @@
 }
 
 .schedule-time-axis {
-    background: #36597d;
-    color: #fff;
+    background: var(--color-global-2);
+    color: var(--color-white);
 }
 
 .schedule-time-axis span {
     position: absolute;
     right: 0.35rem;
     transform: translateY(-0.55em);
-    color: #fff;
+    color: var(--color-white);
     font-size: 0.7rem;
 }
 
 .schedule-day-lane {
-    border-left: 1px solid #36597d;
+    border-left: 1px solid var(--color-global-2);
     background:
-        linear-gradient(to bottom, #a9c0d6, #a9c0d6) 0 0 / 100% var(--past-height, 0px) no-repeat,
-        repeating-linear-gradient(to bottom, transparent 0, transparent 39px, #36597d 39px, #36597d 40px);
+        linear-gradient(to bottom, var(--color-schedule-past), var(--color-schedule-past)) 0 0 / 100% var(--past-height, 0px) no-repeat,
+        repeating-linear-gradient(to bottom, var(--color-transparent) 0, var(--color-transparent) 39px, var(--color-global-2) 39px, var(--color-global-2) 40px);
 }
 
 .schedule-day-lane.is-drop-target {
-    background-color: rgba(33, 150, 83, 0.1);
+    background-color: var(--color-success-background);
 }
 
 .schedule-event {
@@ -152,10 +152,10 @@
     overflow: hidden;
     flex-direction: column;
     padding: 0.25rem;
-    border-left: 3px solid #243f5a;
+    border-left: 3px solid var(--color-global-5);
     border-radius: 3px;
-    background: #36597d;
-    color: #fff;
+    background: var(--color-global-2);
+    color: var(--color-white);
     font-size: 0.7rem;
     line-height: 1.2;
 }
@@ -165,9 +165,9 @@
 }
 
 .schedule-event-unknown {
-    border-color: #27375f;
-    background: #536b96;
-    color: #fff;
+    border-color: var(--color-global-5);
+    background: var(--color-schedule-unknown);
+    color: var(--color-white);
 }
 
 .seance-film-palette {
@@ -190,9 +190,10 @@
     gap: 0.25rem;
     margin-bottom: 0.5rem;
     padding: 0.65rem;
-    border: 1px solid #d5d9dd;
+    border: 1px solid var(--color-global-2);
     border-radius: 4px;
-    background: #36597d;
+    background: var(--color-global-2);
+    color: var(--color-white);
     font-size: 0.85rem;
 }
 
@@ -202,9 +203,9 @@
 }
 
 .seance-film-card.is-unavailable:hover {
-    border-color: #8a80af;
-    background: #6b6392;
-    color: #fff;
+    border-color: var(--color-schedule-unavailable-hover);
+    background: var(--color-schedule-unavailable-hover);
+    color: var(--color-white);
 }
 
 .seance-film-card.is-draggable {
@@ -216,8 +217,8 @@
 }
 
 .seance-film-card.is-unavailable {
-    background: #4b527d;
-    color: #fff;
+    background: var(--color-schedule-unavailable);
+    color: var(--color-white);
 }
 
 [data-controller="seance-planner"][aria-busy="true"] {
