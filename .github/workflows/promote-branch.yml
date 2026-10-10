@@ -1,0 +1,65 @@
+name: Promouvoir une branche
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: branch-promotion
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Vérifier la branche source
+        shell: bash
+        env:
+          SOURCE_BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if [[ -z "$SOURCE_BRANCH" || "$SOURCE_BRANCH" == "develop" || "$SOURCE_BRANCH" == "main" ]]; then
+            echo "::error::La branche source doit être une branche différente de develop et main."
+            exit 1
+          fi
+
+          if [[ ! "$SOURCE_BRANCH" =~ ^[A-Za-z0-9._/-]+$ ]]; then
+            echo "::error::Nom de branche source invalide."
+            exit 1
+          fi
+
+          git fetch origin "refs/heads/$SOURCE_BRANCH:refs/remotes/origin/$SOURCE_BRANCH"
+
+      - name: Fusionner la branche source dans develop et pousser
+        shell: bash
+        env:
+          SOURCE_BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          git fetch origin develop
+          git checkout -B develop origin/develop
+          git merge --no-ff --no-edit "origin/$SOURCE_BRANCH"
+          git push origin develop
+
+      - name: Fusionner develop dans main et pousser
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch origin develop main
+          git checkout -B main origin/main
+          git merge --no-ff --no-edit origin/develop
+          git push origin main
