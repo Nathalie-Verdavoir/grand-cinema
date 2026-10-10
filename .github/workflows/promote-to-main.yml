@@ -4,7 +4,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pull-requests: write
 
 concurrency:
   group: promote-to-main
@@ -16,9 +17,10 @@ jobs:
     with:
       checkout_ref: develop
 
-  promote:
+  propose:
     needs: validate
     runs-on: ubuntu-24.04
+    environment: production
 
     steps:
       - name: Récupérer le dépôt
@@ -37,15 +39,21 @@ jobs:
             exit 1
           fi
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: Fusionner develop dans main et pousser
+      - name: Créer ou réutiliser la pull request
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
-          git fetch origin develop main
-          git checkout -B main origin/main
-          git merge --no-ff --no-edit origin/develop
-          git push origin main
+          existing_pr="$(gh pr list --base main --head develop --state open --json url --jq '.[0].url')"
+          if [[ -n "$existing_pr" ]]; then
+            echo "Pull request existante : $existing_pr"
+            exit 0
+          fi
+
+          gh pr create \
+            --base main \
+            --head develop \
+            --title "Promouvoir develop vers main" \
+            --body "Pull request créée automatiquement après validation de develop. La fusion reste soumise aux protections de main."
