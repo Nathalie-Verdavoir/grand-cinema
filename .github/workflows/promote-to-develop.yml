@@ -2,11 +2,6 @@ name: Promouvoir une branche vers develop
 
 on:
   workflow_dispatch:
-    inputs:
-      source_branch:
-        description: Branche à proposer pour develop
-        required: true
-        type: string
 
 permissions:
   contents: write
@@ -18,8 +13,6 @@ concurrency:
 jobs:
   validate:
     uses: ./.github/workflows/validate.yml
-    with:
-      checkout_ref: ${{ inputs.source_branch }}
 
   promote:
     needs: validate
@@ -32,12 +25,15 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Vérifier la branche source
+      - name: Configurer Git et vérifier la branche source
         shell: bash
         env:
-          SOURCE_BRANCH: ${{ inputs.source_branch }}
+          SOURCE_BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           if [[ -z "$SOURCE_BRANCH" || "$SOURCE_BRANCH" == "develop" || "$SOURCE_BRANCH" == "main" ]]; then
             echo "::error::La branche source doit être différente de develop et main."
@@ -49,16 +45,16 @@ jobs:
             exit 1
           fi
 
+          git fetch origin "refs/heads/$SOURCE_BRANCH:refs/remotes/origin/$SOURCE_BRANCH"
+
       - name: Fusionner la branche source dans develop et pousser
         shell: bash
         env:
-          SOURCE_BRANCH: ${{ inputs.source_branch }}
+          SOURCE_BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin develop "$SOURCE_BRANCH"
+          git fetch origin develop
           git checkout -B develop origin/develop
           git merge --no-ff --no-edit "origin/$SOURCE_BRANCH"
           git push origin develop
