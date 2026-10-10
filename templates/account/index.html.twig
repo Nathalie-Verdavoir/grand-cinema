@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon compte - Grand Cinéma{% endblock %}
+
+{% block body %}
+    <section class="account-page">
+        <div class="account-panel">
+            <h1>Mon compte</h1>
+
+            <div class="account-profile">
+                <h2>Mon profil</h2>
+                <dl>
+                    <dt>Adresse e-mail</dt>
+                    <dd>{{ user.email }}</dd>
+                    <dt>Adresse e-mail vérifiée</dt>
+                    <dd>{{ user.isVerified ? 'Oui' : 'Non' }}</dd>
+                </dl>
+            </div>
+
+            <div class="account-password">
+                <h2>Changer mon mot de passe</h2>
+                {{ form_start(passwordForm, {attr: {class: 'account-password-form'}}) }}
+                    {{ form_errors(passwordForm) }}
+                    {{ form_row(passwordForm.currentPassword) }}
+                    {{ form_row(passwordForm.newPassword.first) }}
+                    {{ form_row(passwordForm.newPassword.second) }}
+                    <button type="submit" class="btn">Enregistrer le nouveau mot de passe</button>
+                {{ form_end(passwordForm) }}
+            </div>
+        </div>
+    </section>
+{% endblock %}
