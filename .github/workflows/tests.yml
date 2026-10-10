@@ -18,6 +18,11 @@ jobs:
       - name: Récupérer le code
         uses: actions/checkout@v5
 
+      - name: Installer Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+
       - name: Installer PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -27,6 +32,12 @@ jobs:
 
       - name: Installer les dépendances
         run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Installer les dépendances JavaScript
+        run: npm ci
+
+      - name: Compiler les assets
+        run: npm run build
 
       - name: Lancer PHPUnit
         run: php vendor/bin/phpunit
