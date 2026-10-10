@@ -7,25 +7,48 @@
         <div class="account-panel">
             <h1>Mon compte</h1>
 
-            <div class="account-profile">
-                <h2>Mon profil</h2>
-                <dl>
-                    <dt>Adresse e-mail</dt>
-                    <dd>{{ user.email }}</dd>
-                    <dt>Adresse e-mail vérifiée</dt>
-                    <dd>{{ user.isVerified ? 'Oui' : 'Non' }}</dd>
-                </dl>
-            </div>
+            <div class="account-columns">
+                <div class="account-main-column">
+                    <div class="account-profile">
+                        <h2>Mon profil</h2>
+                        <dl>
+                            <dt>Adresse e-mail</dt>
+                            <dd class="account-email">
+                                <span>{{ user.email }}</span>
+                                <span
+                                    class="account-email-verification {{ user.isVerified ? 'is-verified' : 'is-unverified' }}"
+                                    role="img"
+                                    aria-label="{{ user.isVerified ? 'Adresse e-mail vérifiée' : 'Adresse e-mail non vérifiée' }}"
+                                    title="{{ user.isVerified ? 'Votre adresse e-mail a été vérifiée.' : 'Votre adresse e-mail n’a pas encore été vérifiée.' }}"
+                                    tabindex="0"
+                                >
+                                    {% if user.isVerified %}
+                                        <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                                            <path d="M7.7 13.3 4.4 10l-1.4 1.4 4.7 4.7L17 6.8l-1.4-1.4z"/>
+                                        </svg>
+                                    {% else %}
+                                        <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                                            <path d="m15.6 5.8-1.4-1.4L10 8.6 5.8 4.4 4.4 5.8 8.6 10l-4.2 4.2 1.4 1.4 4.2-4.2 4.2 4.2 1.4-1.4-4.2-4.2z"/>
+                                        </svg>
+                                    {% endif %}
+                                </span>
+                            </dd>
+                        </dl>
+                    </div>
 
-            <div class="account-password">
-                <h2>Changer mon mot de passe</h2>
-                {{ form_start(passwordForm, {attr: {class: 'account-password-form'}}) }}
-                    {{ form_errors(passwordForm) }}
-                    {{ form_row(passwordForm.currentPassword) }}
-                    {{ form_row(passwordForm.newPassword.first) }}
-                    {{ form_row(passwordForm.newPassword.second) }}
-                    <button type="submit" class="btn">Enregistrer le nouveau mot de passe</button>
-                {{ form_end(passwordForm) }}
+                    <div class="account-password">
+                        <h2>Changer mon mot de passe</h2>
+                        {{ form_start(passwordForm, {attr: {class: 'account-password-form'}}) }}
+                            {{ form_errors(passwordForm) }}
+                            {{ form_row(passwordForm.currentPassword) }}
+                            {{ form_row(passwordForm.newPassword.first) }}
+                            {{ form_row(passwordForm.newPassword.second) }}
+                            <button type="submit" class="btn">Enregistrer le nouveau mot de passe</button>
+                        {{ form_end(passwordForm) }}
+                    </div>
+                </div>
+
+                <aside class="account-future-column" aria-label="Autres informations du compte"></aside>
             </div>
         </div>
     </section>

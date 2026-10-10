@@ -22,10 +22,14 @@
 
 #alert.alert {
     position: fixed;
-    top: 5vh;
-    left: 5vh;
+    top: 1rem;
+    left: 50%;
     z-index: 100;
     margin: 0;
+    padding: 0.85rem 1.25rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1.5rem rgb(24 46 65 / 20%);
+    transform: translateX(-50%);
 }
 
 .account-page {
@@ -35,12 +39,28 @@
 }
 
 .account-panel {
-    width: min(100%, 48rem);
+    width: min(100%, 72rem);
     padding: clamp(1.25rem, 4vw, 2.5rem);
     border: 1px solid var(--color-global-2);
     border-radius: 0.5rem;
     background: rgb(208 204 182 / 35%);
     color: var(--color-global-5);
+}
+
+.account-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.account-main-column {
+    min-width: 0;
+    padding-right: clamp(1rem, 3vw, 2.5rem);
+}
+
+.account-future-column {
+    min-height: 20rem;
+    padding-left: clamp(1rem, 3vw, 2.5rem);
+    border-left: 1px solid var(--color-global-2);
 }
 
 .account-panel h1,
@@ -75,6 +95,67 @@
     overflow-wrap: anywhere;
 }
 
+.account-email {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.account-email-verification {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: 1.25rem;
+    height: 1.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: help;
+}
+
+.account-email-verification svg {
+    width: 1rem;
+    height: 1rem;
+    fill: currentColor;
+}
+
+.account-email-verification.is-verified {
+    background: #d8eee0;
+    color: #217346;
+}
+
+.account-email-verification.is-unverified {
+    background: #f5dede;
+    color: #a83232;
+}
+
+.account-email-verification::after {
+    position: absolute;
+    z-index: 2;
+    bottom: calc(100% + 0.5rem);
+    left: 50%;
+    width: max-content;
+    max-width: 16rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.25rem;
+    background: var(--color-global-5);
+    color: #fff;
+    content: attr(title);
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: normal;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 0.25rem);
+    transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.account-email-verification:hover::after,
+.account-email-verification:focus-visible::after {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
 .account-password-form .form-control {
     width: 100%;
     margin-bottom: 1rem;
@@ -93,6 +174,22 @@
 }
 
 @media (max-width: 576px) {
+    .account-columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .account-main-column {
+        padding-right: 0;
+    }
+
+    .account-future-column {
+        min-height: 8rem;
+        margin-top: 2rem;
+        padding: 1.5rem 0 0;
+        border-top: 1px solid var(--color-global-2);
+        border-left: 0;
+    }
+
     .account-profile dl {
         grid-template-columns: 1fr;
         gap: 0.2rem;
