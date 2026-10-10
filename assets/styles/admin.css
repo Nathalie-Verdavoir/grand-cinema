@@ -151,7 +151,7 @@
     display: flex;
     overflow: hidden;
     flex-direction: column;
-    padding: 0.25rem;
+    padding: 0.25rem 1.55rem 0.25rem 0.25rem;
     border-left: 3px solid var(--color-global-5);
     border-radius: 3px;
     background: var(--color-global-2);
@@ -162,6 +162,34 @@
 
 .schedule-event span {
     margin-top: 0.15rem;
+}
+
+.schedule-event-delete {
+    position: absolute;
+    top: 0.15rem;
+    right: 0.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.9rem;
+    height: 0.9rem;
+    padding: 0;
+    border: 1px solid var(--color-white);
+    border-radius: 2px;
+    background: var(--color-error-text);
+    color: var(--color-white);
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 0.75rem;
+    cursor: pointer;
+}
+
+.schedule-event-delete:hover,
+.schedule-event-delete:focus-visible {
+    border-color: var(--color-white);
+    background: var(--color-global-5);
+    color: var(--color-white);
 }
 
 .schedule-event-unknown {

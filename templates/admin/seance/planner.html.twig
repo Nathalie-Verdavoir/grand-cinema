@@ -77,6 +77,9 @@
                                     >
                                         <strong>{{ event.continuation ? '↳ ' : '' }}{{ event.title }}</strong>
                                         <span>{{ event.start }}{% if event.duration %} · {{ event.duration }} min + 20 min{% else %} · durée inconnue{% endif %}</span>
+                                        {% if event.canDelete %}
+                                            <button type="button" class="schedule-event-delete" aria-label="Supprimer la séance de {{ event.title }} à {{ event.start }}" title="Supprimer la séance">×</button>
+                                        {% endif %}
                                     </article>
                                 {% endfor %}
                             </div>

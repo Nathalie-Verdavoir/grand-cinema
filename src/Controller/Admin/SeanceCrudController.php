@@ -140,6 +140,7 @@ class SeanceCrudController extends AbstractCrudController
                     'duration' => $duration,
                     'unknownDuration' => null === $duration,
                     'continuation' => $startsAt < $dayStart,
+                    'canDelete' => $startsAt > $now,
                 ];
             }
         }
