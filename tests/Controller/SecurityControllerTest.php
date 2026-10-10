@@ -34,6 +34,26 @@ class SecurityControllerTest extends WebTestCase
         self::assertCount(1, $errorCrawler->filterXPath('//form[contains(@class, "login-form")]//div[contains(@class, "alert-danger")]'));
     }
 
+    public function testLoginAttemptsAreThrottled(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/login');
+        $email = sprintf('throttle-%s@example.test', bin2hex(random_bytes(8)));
+
+        for ($attempt = 0; $attempt < 3; ++$attempt) {
+            $this->submitLogin($client, $crawler, $email, 'wrong-password');
+            self::assertResponseRedirects('/login');
+        }
+
+        $this->submitLogin($client, $crawler, $email, 'wrong-password');
+        self::assertResponseRedirects('/login');
+        $throttledCrawler = $client->followRedirect();
+        self::assertStringContainsString(
+            'Too many failed login attempts',
+            $throttledCrawler->filterXPath('//form[contains(@class, "login-form")]//div[contains(@class, "alert-danger")]')->text()
+        );
+    }
+
     public function testValidCredentialsAuthenticateAndRedirectToHome(): void
     {
         $client = static::createClient();
