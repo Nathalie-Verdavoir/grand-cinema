@@ -6,38 +6,5 @@ on:
   workflow_dispatch:
 
 jobs:
-  phpunit:
-    runs-on: ubuntu-24.04
-
-    env:
-      APP_ENV: test
-      APP_SECRET: github-actions-test-secret
-      DATABASE_URL: sqlite:///%kernel.project_dir%/var/test.db
-
-    steps:
-      - name: Récupérer le code
-        uses: actions/checkout@v5
-
-      - name: Installer Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: '20'
-
-      - name: Installer PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
-          extensions: ctype, iconv, intl, pdo_sqlite
-          coverage: none
-
-      - name: Installer les dépendances
-        run: composer install --no-interaction --prefer-dist --no-progress
-
-      - name: Installer les dépendances JavaScript
-        run: npm ci
-
-      - name: Compiler les assets
-        run: npm run build
-
-      - name: Lancer PHPUnit
-        run: php vendor/bin/phpunit
+  validate:
+    uses: ./.github/workflows/validate.yml

@@ -11,7 +11,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+
   promote:
+    needs: validate
     runs-on: ubuntu-24.04
 
     steps:
