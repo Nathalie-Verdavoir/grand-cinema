@@ -9,8 +9,7 @@ on:
         type: string
 
 permissions:
-  contents: read
-  pull-requests: write
+  contents: write
 
 concurrency:
   group: promote-to-develop
@@ -22,7 +21,7 @@ jobs:
     with:
       checkout_ref: ${{ inputs.source_branch }}
 
-  propose:
+  promote:
     needs: validate
     runs-on: ubuntu-24.04
 
@@ -50,22 +49,16 @@ jobs:
             exit 1
           fi
 
-      - name: Créer ou réutiliser la pull request
+      - name: Fusionner la branche source dans develop et pousser
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
           set -euo pipefail
 
-          existing_pr="$(gh pr list --base develop --head "$SOURCE_BRANCH" --state open --json url --jq '.[0].url')"
-          if [[ -n "$existing_pr" ]]; then
-            echo "Pull request existante : $existing_pr"
-            exit 0
-          fi
-
-          gh pr create \
-            --base develop \
-            --head "$SOURCE_BRANCH" \
-            --title "Promouvoir $SOURCE_BRANCH vers develop" \
-            --body "Pull request créée automatiquement par le workflow de promotion. Les tests ont été validés avant sa création."
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin develop "$SOURCE_BRANCH"
+          git checkout -B develop origin/develop
+          git merge --no-ff --no-edit "origin/$SOURCE_BRANCH"
+          git push origin develop
