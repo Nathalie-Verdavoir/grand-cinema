@@ -65,7 +65,7 @@
 .account-panel h1,
 .account-panel h2 {
     color: var(--color-global-5);
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), serif;
 }
 
 .account-panel h1 {
@@ -86,7 +86,7 @@
     grid-template-columns: minmax(10rem, 1fr) 2fr;
     gap: 0.5rem 1rem;
     margin: 0;
-    font-family: var(--font-body);
+    font-family: var(--font-body), sans-serif;
 }
 
 .account-profile dd {
@@ -167,7 +167,7 @@
     border-radius: 0.375rem;
     background-color: var(--color-global-1);
     color: var(--color-global-5);
-    font-family: var(--font-body);
+    font-family: var(--font-body), sans-serif;
 }
 
 .account-password-form input[type='password']:focus-visible {
@@ -178,7 +178,7 @@
 .account-password-form label {
     display: block;
     margin-bottom: 0.25rem;
-    font-family: var(--font-body);
+    font-family: var(--font-body), sans-serif;
 }
 
 .account-password-form .btn {
@@ -231,4 +231,453 @@
     font-weight: 900;
     line-height: 1;
     text-shadow: 4px 4px 0 var(--color-global-1);
+}
+
+.home-page {
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+    color: var(--color-global-5);
+}
+
+.home-heading {
+    margin-bottom: 2.5rem;
+    text-align: center;
+}
+
+.home-heading .logo {
+    max-width: min(100%, 18rem);
+}
+
+.home-heading h1,
+.home-program h2,
+.home-film-details h3 {
+    font-family: var(--font-heading), serif;
+}
+
+.home-heading p {
+    font-family: var(--font-body), sans-serif;
+}
+
+.home-program {
+    max-width: 68rem;
+    margin: 0 auto;
+}
+
+.home-program h2 {
+    margin-bottom: 1.25rem;
+    color: var(--color-global-5);
+    font-size: clamp(1.35rem, 2.6vw, 2rem);
+    text-align: center;
+}
+
+.home-carousel {
+    overflow: hidden;
+    border: 1px solid rgb(54 89 125 / 18%);
+    border-radius: 0.5rem;
+    background: var(--color-global-1);
+    color: var(--color-global-5);
+    box-shadow: 0 0.75rem 2rem var(--color-shadow);
+}
+
+.home-carousel .carousel-item {
+    display: none;
+}
+
+.home-carousel .carousel-item.active {
+    display: block;
+}
+
+.home-film-slide {
+    display: grid;
+    min-height: 22rem;
+    grid-template-columns: minmax(10rem, 0.8fr) minmax(13rem, 1fr) minmax(17rem, 1.2fr);
+    align-items: start;
+    gap: clamp(0.75rem, 1.5vw, 1.25rem);
+    padding: 0.75rem;
+    background: linear-gradient(115deg, #edf3f8 0%, var(--color-global-1) 65%, #e5eef6 100%);
+}
+
+.home-film-poster {
+    overflow: hidden;
+    aspect-ratio: 2 / 3;
+    width: 100%;
+    justify-self: center;
+    border: 3px solid var(--color-white);
+    border-radius: 0.35rem;
+    background: var(--color-global-4);
+    box-shadow: 0 0.5rem 1.25rem rgb(24 46 65 / 22%);
+}
+
+.home-film-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.home-film-poster-placeholder {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    padding: 1rem;
+    color: var(--color-beige-1);
+    font-family: var(--font-heading), serif;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.home-film-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--color-global-2);
+    font-family: var(--font-body), sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.home-film-eyebrow::before {
+    width: 1.5rem;
+    height: 2px;
+    background: var(--color-global-3);
+    content: '';
+}
+
+.home-film-details h3 {
+    margin-bottom: 0.75rem;
+    color: var(--color-global-5);
+    font-size: clamp(1.5rem, 3.5vw, 2.75rem);
+    line-height: 1.15;
+}
+
+.home-film-duration {
+    display: inline-block;
+    margin-bottom: 0.75rem;
+    padding: 0.25rem 0.65rem;
+    border: 1px solid rgb(54 89 125 / 25%);
+    border-radius: 2rem;
+    background: rgb(255 255 255 / 55%);
+    color: var(--color-global-4);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.home-film-duration,
+.home-film-description {
+    font-family: var(--font-body), sans-serif;
+}
+
+.home-film-description {
+    display: -webkit-box;
+    overflow: hidden;
+    margin-bottom: 0;
+    color: var(--color-dark-grey);
+    font-size: 1rem;
+    line-height: 1.65;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 5;
+}
+
+.home-film-screenings {
+    min-width: 0;
+    align-self: start;
+}
+
+.home-film-screenings h4 {
+    margin-bottom: 0.4rem;
+    color: var(--color-global-5);
+    font-family: var(--font-heading), serif;
+    font-size: 1rem;
+}
+
+.home-film-screenings-upcoming-title {
+    margin-top: 0.9rem;
+}
+
+.home-film-screenings-more {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: var(--color-global-4);
+    font-family: var(--font-body), sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+}
+
+.film-program-page {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: clamp(1rem, 4vw, 2.5rem);
+    border: 1px solid rgb(54 89 125 / 18%);
+    border-radius: 0.5rem;
+    background: var(--color-white);
+    box-shadow: 0 0.5rem 1.5rem var(--color-shadow);
+}
+
+.film-program-page h1,
+.film-program-page h2 {
+    color: var(--color-global-5);
+    font-family: var(--font-heading), serif;
+}
+
+.film-program-page h1 {
+    margin: 1rem 0;
+}
+
+.film-program-back {
+    color: var(--color-global-4);
+    font-family: var(--font-body), sans-serif;
+    font-weight: 700;
+}
+
+.film-program-poster {
+    float: left;
+    width: min(30%, 12rem);
+    margin: 0 1.5rem 1rem 0;
+    border: 3px solid var(--color-white);
+    border-radius: 0.35rem;
+    box-shadow: 0 0.5rem 1.25rem var(--color-shadow);
+}
+
+.film-program-description {
+    min-height: 8rem;
+    padding-top: 0.5rem;
+    color: var(--color-dark-grey);
+    font-family: var(--font-body), sans-serif;
+    line-height: 1.65;
+}
+
+.film-program-page h2 {
+    clear: both;
+    padding-top: 1.5rem;
+    font-size: 1.4rem;
+}
+
+.film-program-page .home-film-screenings-scroll {
+    max-height: none;
+    overflow: visible;
+}
+
+.home-film-screenings-scroll {
+    max-height: 14rem;
+    overflow: auto;
+    border: 1px solid rgb(54 89 125 / 20%);
+    border-radius: 0.3rem;
+    background: rgb(255 255 255 / 55%);
+}
+
+.home-film-screenings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-body), sans-serif;
+    font-size: 0.85rem;
+}
+
+.home-film-screenings-table th,
+.home-film-screenings-table td {
+    padding: 0.35rem 0.6rem;
+    border-bottom: 1px solid rgb(54 89 125 / 14%);
+    text-align: left;
+}
+
+.home-film-screenings-table th:first-child,
+.home-film-screenings-table td:first-child,
+.home-film-screenings-table th:nth-child(2),
+.home-film-screenings-table td:nth-child(2) {
+    white-space: nowrap;
+}
+
+.home-film-screenings-table thead {
+    position: sticky;
+    top: 0;
+    background: var(--color-global-1);
+}
+
+.home-film-screenings-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.home-carousel .carousel-indicators {
+    position: static;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0.65rem 0.75rem;
+    background: var(--color-global-1);
+}
+
+.home-carousel .carousel-indicators [data-home-slide-to] {
+    width: 0.55rem;
+    height: 0.55rem;
+    margin: 0 0.15rem;
+    border: 0;
+    border-radius: 50%;
+    background-color: var(--color-global-2);
+}
+
+.home-carousel-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-top: 1px solid rgb(54 89 125 / 16%);
+    background: #edf3f8;
+}
+
+.home-carousel-nav-button,
+.home-carousel-toggle {
+    padding: 0.35rem 0.6rem;
+    border: 1px solid rgb(54 89 125 / 30%);
+    border-radius: 50%;
+    background: var(--color-white);
+    color: var(--color-global-5);
+    font-family: var(--font-body), sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.home-carousel-nav-button:hover,
+.home-carousel-toggle:hover {
+    background: var(--color-beige-2);
+}
+
+.home-carousel-nav-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.home-carousel-nav-button:focus-visible,
+.home-carousel-toggle:focus-visible {
+    outline: 2px solid var(--color-global-2);
+    outline-offset: 2px;
+}
+
+.home-carousel-nav-button,
+.home-carousel-toggle {
+    display: inline-grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: 0 0 auto;
+    place-items: center;
+    padding: 0.4rem;
+}
+
+.home-carousel-nav-button svg,
+.home-carousel-toggle svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+}
+
+.home-carousel-toggle svg[data-carousel-play-icon] path {
+    fill: currentColor;
+    stroke: none;
+}
+
+.home-carousel-nav-button:disabled {
+    opacity: 0.55;
+}
+
+.home-program-empty {
+    margin: 0;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    background: var(--color-global-1);
+    font-family: var(--font-body), sans-serif;
+    text-align: center;
+}
+
+@media (max-width: 576px) {
+    .home-carousel {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .home-carousel-navigation {
+        order: 0;
+        border-top: 0;
+        border-bottom: 1px solid rgb(54 89 125 / 16%);
+    }
+
+    .home-carousel .carousel-indicators {
+        order: 1;
+    }
+
+    .home-carousel .carousel-inner {
+        order: 2;
+    }
+
+    .home-film-slide {
+        min-height: 0;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.75rem;
+        padding: 0.5rem;
+    }
+
+    .home-film-poster {
+        width: calc(100% - 1rem);
+        margin: 0 auto;
+    }
+
+    .home-film-details {
+        align-self: start;
+        padding: 0.5rem;
+        text-align: center;
+    }
+
+    .home-film-screenings {
+        align-self: start;
+        padding: 0.5rem;
+    }
+
+    .home-film-eyebrow {
+        justify-content: center;
+        font-size: 0.7rem;
+    }
+
+    .home-film-eyebrow::before {
+        display: none;
+    }
+
+    .home-film-description {
+        -webkit-line-clamp: 4;
+    }
+
+    .home-carousel-navigation {
+        gap: 0.35rem;
+        padding: 0.4rem 0.5rem;
+    }
+
+    .home-carousel-nav-button,
+    .home-carousel-toggle {
+        width: 2rem;
+        height: 2rem;
+        padding: 0.35rem;
+    }
+}
+
+@media (min-width: 577px) and (max-width: 991px) {
+    .home-film-slide {
+        grid-template-columns: minmax(11rem, 0.8fr) minmax(0, 1.2fr);
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .home-film-poster {
+        width: min(100%, 15rem);
+    }
+
+    .home-film-screenings {
+        align-self: start;
+        grid-column: 1 / -1;
+        padding: 0 0.5rem 0.5rem;
+    }
 }

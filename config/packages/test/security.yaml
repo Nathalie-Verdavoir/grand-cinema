@@ -1,0 +1,11 @@
+security:
+    providers:
+        test_user_provider:
+            memory:
+                users:
+                    regular@example.test:
+                        password: '$2y$04$Gg3.f2Onhgy3Pmz/cyhvV.ByIJQ2x0eW1.FBzso4QUA4oajsgAOaW'
+                        roles: ['ROLE_USER']
+    firewalls:
+        main:
+            provider: test_user_provider

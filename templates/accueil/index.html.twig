@@ -4,23 +4,120 @@
 {% endblock %}
 
 {% block body %}
-	<div class="container large-width">
-		<div class="row align-items-start">
-			<div class="col-12 col-lg-2 left-col d-none d-lg-inline">
-			</div>
-			<div class="col-12 col-lg-6 left-col m-0">
-				<img class="logo mx-auto d-block" src="{{ asset('images/logo.PNG') }}" alt="Logo Grand Cinéma"/>
-				<h1 class="title mx-auto d-block">Grand Cinéma</h1>
-
-				<div class="col-12 col-lg-4 g-0">
-					{% for i in 0..4 %}
-						<div class="d-flex {{ i is not same as(0) ? " d-none d-lg-inline" : " d-lg-inline" }}">
-
+	<div class="container home-page">
+		<section class="home-program" aria-labelledby="home-program-title">
+			<h2 id="home-program-title">Découvrez les films actuellement à l'affiche.</h2>
+			{% if films is not empty %}
+				<div id="home-program-carousel" class="carousel slide home-carousel" data-home-carousel role="region" aria-roledescription="carrousel" aria-label="Films actuellement programmés">
+					{% if films|length > 1 %}
+						<div class="carousel-indicators">
+							{% for film in films %}
+								<button type="button" data-home-slide-to="{{ loop.index0 }}" class="{{ loop.first ? 'active' : '' }}" {% if loop.first %}aria-current="true"{% endif %} aria-label="Afficher le film {{ loop.index }}"></button>
+							{% endfor %}
 						</div>
-					{% endfor %}
-				</div>
-			</div>
+					{% endif %}
 
-		</div>
+					<div class="carousel-inner">
+						{% for film in films %}
+							<article class="carousel-item {{ loop.first ? 'active' : '' }}" aria-roledescription="diapositive" aria-label="{{ loop.index }} sur {{ films|length }}">
+								<div class="home-film-slide">
+									<div class="home-film-poster">
+										{% if film.img %}
+											<img src="{{ film.img }}" alt="Affiche du film {{ film.title }}" {% if not loop.first %}loading="lazy"{% endif %}>
+										{% else %}
+											<div class="home-film-poster-placeholder" role="img" aria-label="Affiche indisponible pour {{ film.title }}">
+												<span>{{ film.title }}</span>
+											</div>
+										{% endif %}
+									</div>
+									<div class="home-film-details">
+										<p class="home-film-eyebrow">Actuellement programmé</p>
+										<h3>{{ film.title }}</h3>
+										{% if film.duration %}
+											<p class="home-film-duration">{{ film.duration }} min</p>
+										{% endif %}
+										{% if film.description %}
+											<p class="home-film-description">{{ film.description }}</p>
+										{% endif %}
+									</div>
+									<div class="home-film-screenings">
+										<h4>Cette semaine</h4>
+										<div class="home-film-screenings-scroll">
+											<table class="home-film-screenings-table">
+												<caption class="visually-hidden">Séances de {{ film.title }} cette semaine</caption>
+												<thead>
+													<tr>
+														<th scope="col">Jour et date</th>
+														<th scope="col">Heure</th>
+														<th scope="col">Salle</th>
+													</tr>
+												</thead>
+												<tbody>
+													{% for screening in screeningsThisWeek[film.id] ?? [] %}
+														<tr>
+															<td>{{ screening.date }}</td>
+															<td>{{ screening.time }}</td>
+															<td>{{ screening.room }}</td>
+														</tr>
+													{% else %}
+														<tr>
+															<td colspan="3">Aucune séance prévue.</td>
+														</tr>
+													{% endfor %}
+												</tbody>
+											</table>
+										</div>
+										<h4 class="home-film-screenings-upcoming-title">À venir</h4>
+										<div class="home-film-screenings-scroll">
+											<table class="home-film-screenings-table">
+												<caption class="visually-hidden">Séances de {{ film.title }} après cette semaine</caption>
+												<thead>
+													<tr>
+														<th scope="col">Jour et date</th>
+														<th scope="col">Heure</th>
+														<th scope="col">Salle</th>
+													</tr>
+												</thead>
+												<tbody>
+													{% for screening in screeningsAfterThisWeek[film.id] ?? [] %}
+														<tr>
+															<td>{{ screening.date }}</td>
+															<td>{{ screening.time }}</td>
+															<td>{{ screening.room }}</td>
+														</tr>
+													{% else %}
+														<tr>
+															<td colspan="3">Aucune séance prévue.</td>
+														</tr>
+													{% endfor %}
+												</tbody>
+											</table>
+										</div>
+										<a class="home-film-screenings-more" href="{{ path('app_programmation_film', {id: film.id}) }}">Voir toutes les séances</a>
+									</div>
+								</div>
+							</article>
+						{% endfor %}
+					</div>
+
+					<nav class="home-carousel-navigation" aria-label="Navigation des films">
+						<button class="home-carousel-nav-button" type="button" data-carousel-direction="-1" aria-label="Film précédent" title="Film précédent" {% if films|length < 2 %}disabled{% endif %}>
+							<svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M19 12H5m0 0 7 7m-7-7 7-7"/></svg>
+						</button>
+						{% if films|length > 1 %}
+							<button class="home-carousel-toggle" type="button" data-carousel-toggle aria-label="Mettre en pause le défilement" title="Mettre en pause le défilement" aria-pressed="false">
+								<svg data-carousel-pause-icon aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M9 5v14m6-14v14"/></svg>
+								<svg data-carousel-play-icon aria-hidden="true" viewBox="0 0 24 24" focusable="false" hidden><path d="m8 5 12 7-12 7z"/></svg>
+							</button>
+						{% endif %}
+						<button class="home-carousel-nav-button" type="button" data-carousel-direction="1" aria-label="Film suivant" title="Film suivant" {% if films|length < 2 %}disabled{% endif %}>
+							<svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14m0 0-7-7m7 7-7 7"/></svg>
+						</button>
+					</nav>
+				</div>
+			{% else %}
+				<p class="home-program-empty">Aucun film n'est actuellement programmé. Revenez bientôt découvrir notre prochaine programmation.</p>
+			{% endif %}
+		</section>
 	</div>
 {% endblock %}
