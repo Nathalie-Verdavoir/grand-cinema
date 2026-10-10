@@ -27,3 +27,78 @@
     z-index: 100;
     margin: 0;
 }
+
+.account-page {
+    display: flex;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+}
+
+.account-panel {
+    width: min(100%, 48rem);
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+    border: 1px solid var(--color-global-2);
+    border-radius: 0.5rem;
+    background: rgb(208 204 182 / 35%);
+    color: var(--color-global-5);
+}
+
+.account-panel h1,
+.account-panel h2 {
+    color: var(--color-global-5);
+    font-family: 'Cinzel', serif;
+}
+
+.account-panel h1 {
+    margin-bottom: 2rem;
+}
+
+.account-panel h2 {
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+}
+
+.account-profile {
+    margin-bottom: 2rem;
+}
+
+.account-profile dl {
+    display: grid;
+    grid-template-columns: minmax(10rem, 1fr) 2fr;
+    gap: 0.5rem 1rem;
+    margin: 0;
+    font-family: 'Nunito Sans', sans-serif;
+}
+
+.account-profile dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.account-password-form .form-control {
+    width: 100%;
+    margin-bottom: 1rem;
+    font-family: 'Nunito Sans', sans-serif;
+}
+
+.account-password-form label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-family: 'Nunito Sans', sans-serif;
+}
+
+.account-password-form .btn {
+    padding: 0.65rem 1rem;
+    font-size: 1rem;
+}
+
+@media (max-width: 576px) {
+    .account-profile dl {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
+    }
+
+    .account-profile dd {
+        margin-bottom: 0.75rem;
+    }
+}
