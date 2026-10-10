@@ -19,6 +19,7 @@ jobs:
   promote:
     needs: validate
     runs-on: ubuntu-24.04
+    environment: production
 
     steps:
       - name: Récupérer le dépôt
@@ -37,14 +38,13 @@ jobs:
             exit 1
           fi
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
       - name: Fusionner develop dans main et pousser
         shell: bash
         run: |
           set -euo pipefail
 
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin develop main
           git checkout -B main origin/main
           git merge --no-ff --no-edit origin/develop
