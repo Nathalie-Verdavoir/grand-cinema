@@ -6,13 +6,13 @@
 .login-form .form-control {
     width: min(100% - 2rem, 24rem);
     margin: 0 auto 1rem;
-    font-family: 'Nunito Sans', sans-serif;
+    font-family: var(--font-body);
 }
 
 .login-form label {
     display: block;
     margin-bottom: 0.25rem;
-    font-family: 'Nunito Sans', sans-serif;
+    font-family: var(--font-body);
 }
 
 .login-form .alert {
