@@ -46,6 +46,7 @@ Le projet est piloté sur **Trello** à travers un découpage thématique par **
 *   ` US 0.2` - Connexion et gestion des rôles spectateurs (Espace personnel)
 *   ` US 1.1` - Consultation : film ou jour
 *   ` US 1.2` - Consultation : places disponibles (Affichage en temps réel)
+*   ` US 2.0` - Affichage des films dans un carrousel sur la page d'accueil
 *   ` US 2.1` - Réservation : sélection d'un film et d'un nombre de place (Mise au panier)
 *   ` US 2.2` - Réservation : paiement sécurisé
 *   ` US 3.1` - Billets dématérialisés (Affichage du QR Code/Code-barres)
