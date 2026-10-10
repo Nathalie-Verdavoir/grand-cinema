@@ -1,6 +1,7 @@
 import { Application } from '@hotwired/stimulus';
 import FilmCrudController from './controllers/search-film_controller.js';
 import SeancePlannerController from './controllers/seance-planner_controller.js';
+import './styles/tokens.css';
 import './styles/admin.css';
 
 const app = Application.start();

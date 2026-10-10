@@ -5,7 +5,6 @@
 footer {
     background-color: var(--color-global-5);
     color: var(--color-beige-1);
-    font-family: 'Raleway', sans-serif;
 }
 
 footer.row {
@@ -16,8 +15,12 @@ footer > .col-12 {
     margin-top: 0;
 }
 
+footer .footer-column {
+    border-color: var(--color-white) !important;
+}
+
 .title-footer {
-    color: var(--color-global-2);
+    color: var(--color-global-1);
 }
 
 .plan-link {
@@ -29,7 +32,7 @@ footer > .col-12 {
 }
 
 footer .list-group-item {
-    background-color: transparent;
+    background-color: var(--color-transparent);
 }
 
 footer a {
@@ -37,6 +40,6 @@ footer a {
 }
 
 .card-text {
-    font-family: 'Nunito Sans', sans-serif;
+    font-family: var(--font-body);
     font-size: 1rem;
 }
