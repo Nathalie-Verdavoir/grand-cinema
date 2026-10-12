@@ -5,6 +5,8 @@ namespace App\Controller\Admin;
 use App\Entity\Film;
 use App\Entity\Salle;
 use App\Entity\Seance;
+use App\Enum\SeanceStatus;
+use App\Enum\ReservationStatus;
 use App\Repository\FilmRepository;
 use App\Repository\SalleRepository;
 use App\Repository\SeanceRepository;
@@ -66,6 +68,8 @@ class SeanceCrudController extends AbstractCrudController
         }
 
         $request = $this->requestStack->getCurrentRequest();
+        $isDailyView = 'day' === $request?->query->get('view');
+        $now = new DateTimeImmutable('now');
         $weekStart = $this->getWeekStart($request?->query->get('week'));
         $weekEnd = $weekStart->modify('+7 days');
         $rooms = $this->salleRepository->findBy([], ['name' => 'ASC']);
@@ -91,20 +95,37 @@ class SeanceCrudController extends AbstractCrudController
         $seances = $selectedRoom instanceof Salle
             ? $this->seanceRepository->findForRoomBetween($selectedRoom, $weekStart->modify('-1 day'), $weekEnd)
             : [];
+        $selectedDate = $this->getSelectedDate($request?->query->get('day'));
+        $dayEnd = $selectedDate->modify('+1 day');
+        $dailyEventsByRoom = [];
+        foreach ($rooms as $room) {
+            $dailyEventsByRoom[$room->getId()] = [];
+        }
+        if ($isDailyView) {
+            foreach ($this->seanceRepository->findBetween($selectedDate, $dayEnd) as $seance) {
+                $startsAt = $seance->getDateTime();
+                $room = $seance->getSalle();
+                if (null === $startsAt || !$room instanceof Salle) {
+                    continue;
+                }
+                $start = DateTimeImmutable::createFromMutable($startsAt);
+                $duration = $seance->getFilm()?->getDuration();
+                $dailyEventsByRoom[$room->getId()][] = $this->buildEvent($seance, $start, $selectedDate, $dayEnd, $now);
+            }
+        }
 
         $weekDays = [];
         $dayNames = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
         $eventsByDay = [];
-        $now = new DateTimeImmutable('now');
         foreach ($dayNames as $index => $dayName) {
             $dayStart = $weekStart->modify(sprintf('+%d days', $index));
             $dayEnd = $dayStart->modify('+1 day');
             $blockedSlots = 0;
             if ($dayStart->format('Y-m-d') < $now->format('Y-m-d')) {
-                $blockedSlots = 48;
+                $blockedSlots = 96;
             } elseif ($dayStart->format('Y-m-d') === $now->format('Y-m-d')) {
                 $minutesSinceMidnight = ((int) $now->format('G') * 60) + (int) $now->format('i');
-                $blockedSlots = min(48, (int) ceil($minutesSinceMidnight / 30));
+                $blockedSlots = min(96, (int) ceil($minutesSinceMidnight / 15));
             }
 
             $weekDays[] = [
@@ -134,6 +155,7 @@ class SeanceCrudController extends AbstractCrudController
                 $eventsByDay[$dayStart->format('Y-m-d')][] = [
                     'id' => $seance->getId(),
                     'title' => $seance->getFilm()?->getTitle() ?? 'Film inconnu',
+                    'image' => $seance->getFilm()?->getImg(),
                     'start' => $startsAt->format('H:i'),
                     'topMinutes' => max(0, (int) (($visibleStart->getTimestamp() - $dayStart->getTimestamp()) / 60)),
                     'heightMinutes' => max(20, (int) (($visibleEnd->getTimestamp() - $visibleStart->getTimestamp()) / 60)),
@@ -141,6 +163,11 @@ class SeanceCrudController extends AbstractCrudController
                     'unknownDuration' => null === $duration,
                     'continuation' => $startsAt < $dayStart,
                     'canDelete' => $startsAt > $now,
+                    'status' => $seance->getStatus()->value,
+                    'statusLabel' => $seance->getStatus()->getLabel(),
+                    'canPublish' => $seance->getStatus() === SeanceStatus::DRAFT,
+                    'ended' => null !== $duration && $endsAt <= $now,
+                    ...$this->getOccupancy($seance),
                 ];
             }
         }
@@ -158,8 +185,79 @@ class SeanceCrudController extends AbstractCrudController
         $responseParameters->set('previousWeek', $weekStart->modify('-7 days')->format('Y-m-d'));
         $responseParameters->set('nextWeek', $weekStart->modify('+7 days')->format('Y-m-d'));
         $responseParameters->set('isCurrentWeek', $weekStart->format('Y-m-d') === $currentWeekStart->format('Y-m-d'));
+        $responseParameters->set('isDailyView', $isDailyView);
+        $responseParameters->set('selectedDate', $selectedDate);
+        $responseParameters->set('previousDay', $selectedDate->modify('-1 day')->format('Y-m-d'));
+        $responseParameters->set('nextDay', $selectedDate->modify('+1 day')->format('Y-m-d'));
+        $responseParameters->set('isToday', $selectedDate->format('Y-m-d') === (new DateTimeImmutable('today'))->format('Y-m-d'));
+        $dayBlockedSlots = $selectedDate->format('Y-m-d') < $now->format('Y-m-d') ? 96 : ($selectedDate->format('Y-m-d') === $now->format('Y-m-d') ? min(96, (int) ceil((((int) $now->format('G') * 60) + (int) $now->format('i')) / 15)) : 0);
+        $responseParameters->set('dayBlockedSlots', $dayBlockedSlots);
+        $responseParameters->set('dailyEventsByRoom', $dailyEventsByRoom);
 
         return $responseParameters;
+    }
+
+    private function getSelectedDate(mixed $day): DateTimeImmutable
+    {
+        if (is_string($day) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $day)) {
+            $date = DateTimeImmutable::createFromFormat('!Y-m-d', $day);
+            $errors = DateTimeImmutable::getLastErrors();
+            if ($date && (false === $errors || (0 === $errors['warning_count'] && 0 === $errors['error_count'])) && $date->format('Y-m-d') === $day) {
+                return $date;
+            }
+        }
+
+        return new DateTimeImmutable('today');
+    }
+
+    private function buildEvent(Seance $seance, DateTimeImmutable $startsAt, DateTimeImmutable $dayStart, DateTimeImmutable $dayEnd, DateTimeImmutable $now): array
+    {
+        $duration = $seance->getFilm()?->getDuration();
+        $endsAt = $startsAt->modify(sprintf('+%d minutes', ($duration ?? 0) + 20));
+        $visibleStart = $startsAt < $dayStart ? $dayStart : $startsAt;
+        $visibleEnd = $endsAt > $dayEnd ? $dayEnd : $endsAt;
+
+        return [
+            'id' => $seance->getId(),
+            'title' => $seance->getFilm()?->getTitle() ?? 'Film inconnu',
+            'image' => $seance->getFilm()?->getImg(),
+            'start' => $startsAt->format('H:i'),
+            'startTimestamp' => $startsAt->getTimestamp(),
+            'endTimestamp' => $endsAt->getTimestamp(),
+            'topMinutes' => max(0, (int) (($visibleStart->getTimestamp() - $dayStart->getTimestamp()) / 60)),
+            'heightMinutes' => max(20, (int) (($visibleEnd->getTimestamp() - $visibleStart->getTimestamp()) / 60)),
+            'duration' => $duration,
+            'unknownDuration' => null === $duration,
+            'continuation' => $startsAt < $dayStart,
+            'canDelete' => $startsAt > $now,
+            'status' => $seance->getStatus()->value,
+            'statusLabel' => $seance->getStatus()->getLabel(),
+            'canPublish' => $seance->getStatus() === SeanceStatus::DRAFT,
+            'ended' => null !== $duration && $endsAt <= $now,
+            ...$this->getOccupancy($seance),
+        ];
+    }
+
+    /**
+     * @return array{reservedSeats: int, capacity: int, occupancyPercent: int}
+     */
+    private function getOccupancy(Seance $seance): array
+    {
+        $reservedSeats = 0;
+        foreach ($seance->getReservations() as $reservation) {
+            if (in_array($reservation->getStatus(), [ReservationStatus::PENDING, ReservationStatus::PAID], true)) {
+                $reservedSeats += $reservation->getNbPlaces() ?? 0;
+            }
+        }
+
+        $capacity = max(0, $seance->getSalle()?->getCapacity() ?? 0);
+        $occupancyPercent = $capacity > 0 ? min(100, (int) round(($reservedSeats / $capacity) * 100)) : 0;
+
+        return [
+            'reservedSeats' => $reservedSeats,
+            'capacity' => $capacity,
+            'occupancyPercent' => $occupancyPercent,
+        ];
     }
 
     private function getWeekStart(mixed $week): DateTimeImmutable

@@ -37,6 +37,25 @@ class SeanceRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return Seance[]
+     */
+    public function findBetween(DateTimeImmutable $from, DateTimeImmutable $to): array
+    {
+        return $this->createQueryBuilder('seance')
+            ->addSelect('film', 'salle')
+            ->join('seance.film', 'film')
+            ->join('seance.salle', 'salle')
+            ->andWhere('seance.dateTime >= :from')
+            ->andWhere('seance.dateTime < :to')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->orderBy('salle.name', 'ASC')
+            ->addOrderBy('seance.dateTime', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Seance[] Returns an array of Seance objects
     //     */

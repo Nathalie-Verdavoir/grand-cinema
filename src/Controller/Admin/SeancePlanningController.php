@@ -5,9 +5,11 @@ namespace App\Controller\Admin;
 use App\Entity\Film;
 use App\Entity\Salle;
 use App\Entity\Seance;
+use App\Enum\SeanceStatus;
 use App\Repository\FilmRepository;
 use App\Repository\SalleRepository;
 use App\Repository\SeanceRepository;
+use App\Service\WeeklySeanceDraftGenerator;
 use DateTimeImmutable;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,6 +20,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Workflow\WorkflowInterface;
 
 #[IsGranted('ROLE_ADMIN')]
 class SeancePlanningController extends AbstractController
@@ -28,7 +31,93 @@ class SeancePlanningController extends AbstractController
         private readonly SeanceRepository $seanceRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
+        private readonly WorkflowInterface $seancePublishingStateMachine,
+        private readonly WeeklySeanceDraftGenerator $weeklySeanceDraftGenerator,
     ) {
+    }
+
+    #[Route('/admin/seances/generate-week', name: 'admin_seance_generate_week', methods: ['POST'])]
+    public function generateWeek(Request $request): \Symfony\Component\HttpFoundation\Response
+    {
+        if (!$this->isCsrfTokenValid('admin_generate_week', (string) $request->request->get('_token'))) {
+            $this->addFlash('danger', 'Votre session a expiré. Rechargez la page puis réessayez.');
+
+            return $this->redirectToRoute('admin_seance_index');
+        }
+
+        $week = $request->request->get('week');
+        $weekStart = is_string($week) ? DateTimeImmutable::createFromFormat('!Y-m-d', $week) : false;
+        $errors = DateTimeImmutable::getLastErrors();
+        if (false === $weekStart || (false !== $errors && (0 !== $errors['warning_count'] || 0 !== $errors['error_count'])) || $weekStart->format('Y-m-d') !== $week) {
+            $this->addFlash('danger', 'La semaine sélectionnée est invalide.');
+
+            return $this->redirectToRoute('admin_seance_index');
+        }
+
+        $weekStart = $weekStart->modify('monday this week');
+        $result = $this->weeklySeanceDraftGenerator->generate($weekStart);
+        $this->addFlash('success', sprintf('%d séance(s) brouillon(s) générée(s) pour la semaine du %s.%s', $result['created'], $weekStart->format('d/m/Y'), $result['skipped'] > 0 ? sprintf(' %d film(s) n’ont pas trouvé de créneau disponible.', $result['skipped']) : ''));
+
+        return $this->redirectToRoute('admin_seance_index', ['week' => $weekStart->format('Y-m-d')]);
+    }
+
+    #[Route('/admin/seances/generate-day', name: 'admin_seance_generate_day', methods: ['POST'])]
+    public function generateDay(Request $request): \Symfony\Component\HttpFoundation\Response
+    {
+        if (!$this->isCsrfTokenValid('admin_generate_day', (string) $request->request->get('_token'))) {
+            $this->addFlash('danger', 'Votre session a expiré. Rechargez la page puis réessayez.');
+
+            return $this->redirectToDailyView($request);
+        }
+
+        $day = $this->parseDate($request->request->get('day'));
+        if (null === $day) {
+            $this->addFlash('danger', 'Le jour sélectionné est invalide.');
+
+            return $this->redirectToDailyView($request);
+        }
+
+        $result = $this->weeklySeanceDraftGenerator->generateDay($day);
+        $this->addFlash('success', sprintf(
+            '%d séance(s) brouillon(s) générée(s) pour le %s.%s',
+            $result['created'],
+            $day->format('d/m/Y'),
+            $result['skipped'] > 0 ? sprintf(' %d film(s) n’ont pas trouvé de créneau disponible.', $result['skipped']) : ''
+        ));
+
+        return $this->redirectToDailyView($request, $day);
+    }
+
+    #[Route('/admin/seances/publish-day', name: 'admin_seance_publish_day', methods: ['POST'])]
+    public function publishDay(Request $request): \Symfony\Component\HttpFoundation\Response
+    {
+        if (!$this->isCsrfTokenValid('admin_publish_day', (string) $request->request->get('_token'))) {
+            $this->addFlash('danger', 'Votre session a expiré. Rechargez la page puis réessayez.');
+
+            return $this->redirectToDailyView($request);
+        }
+
+        $day = $this->parseDate($request->request->get('day'));
+        if (null === $day) {
+            $this->addFlash('danger', 'Le jour sélectionné est invalide.');
+
+            return $this->redirectToDailyView($request);
+        }
+
+        $published = 0;
+        foreach ($this->seanceRepository->findBetween($day, $day->modify('+1 day')) as $seance) {
+            if ($this->seancePublishingStateMachine->can($seance, 'publish')) {
+                $this->seancePublishingStateMachine->apply($seance, 'publish');
+                ++$published;
+            }
+        }
+        if ($published > 0) {
+            $this->entityManager->flush();
+        }
+
+        $this->addFlash('success', sprintf('%d séance(s) brouillon(s) publiée(s) pour le %s.', $published, $day->format('d/m/Y')));
+
+        return $this->redirectToDailyView($request, $day);
     }
 
     #[Route('/admin/api/seances', name: 'admin_api_seance_create', methods: ['POST'])]
@@ -48,7 +137,7 @@ class SeancePlanningController extends AbstractController
             return $this->json(['error' => 'Les informations de la séance sont incomplètes.'], 400);
         }
 
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !preg_match('/^(?:[01]\d|2[0-3]):(?:00|30)$/', $time)) {
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !preg_match('/^(?:[01]\d|2[0-3]):(?:00|15|30|45)$/', $time)) {
             return $this->json(['error' => 'La date ou le créneau horaire est invalide.'], 400);
         }
 
@@ -103,7 +192,8 @@ class SeancePlanningController extends AbstractController
         $seance = (new Seance())
             ->setFilm($film)
             ->setSalle($room)
-            ->setDateTime(DateTime::createFromImmutable($startsAt));
+            ->setDateTime(DateTime::createFromImmutable($startsAt))
+            ->setStatus(SeanceStatus::DRAFT);
 
         $this->entityManager->persist($seance);
         $this->entityManager->flush();
@@ -111,5 +201,80 @@ class SeancePlanningController extends AbstractController
         return $this->json([
             'message' => sprintf('%s est programmé le %s à %s.', $film->getTitle(), $startsAt->format('d/m/Y'), $startsAt->format('H:i')),
         ], 201);
+    }
+
+    #[Route('/admin/api/seances/{id}/publish', name: 'admin_api_seance_publish', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function publish(int $id, Request $request): JsonResponse
+    {
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('admin_publish_seance', (string) $request->headers->get('X-CSRF-Token')))) {
+            return $this->json(['error' => 'Votre session a expiré. Rechargez la page puis réessayez.'], 403);
+        }
+
+        $seance = $this->seanceRepository->find($id);
+        if (!$seance instanceof Seance) {
+            return $this->json(['error' => 'Cette séance n’existe plus. Rechargez le planning.'], 404);
+        }
+
+        if (!$this->seancePublishingStateMachine->can($seance, 'publish')) {
+            return $this->json(['error' => 'Cette séance est déjà publiée ou ne peut plus être publiée.'], 409);
+        }
+
+        $this->seancePublishingStateMachine->apply($seance, 'publish');
+        $this->entityManager->flush();
+
+        return $this->json(['message' => 'La séance est maintenant visible et réservable.']);
+    }
+
+    #[Route('/admin/api/seances/{id}', name: 'admin_api_seance_delete', requirements: ['id' => '\d+'], methods: ['DELETE'])]
+    public function delete(int $id, Request $request): JsonResponse
+    {
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('admin_delete_seance', (string) $request->headers->get('X-CSRF-Token')))) {
+            return $this->json(['error' => 'Votre session a expiré. Rechargez la page puis réessayez.'], 403);
+        }
+
+        $seance = $this->seanceRepository->find($id);
+        if (!$seance instanceof Seance) {
+            return $this->json(['error' => 'Cette séance n’existe plus. Rechargez le planning.'], 404);
+        }
+
+        $dateTime = $seance->getDateTime();
+        if (null === $dateTime || DateTimeImmutable::createFromMutable($dateTime) <= new DateTimeImmutable('now')) {
+            return $this->json(['error' => 'Une séance déjà commencée ne peut pas être supprimée.'], 409);
+        }
+
+        if (!$seance->getReservations()->isEmpty()) {
+            return $this->json(['error' => 'Cette séance ne peut pas être supprimée car elle possède des réservations.'], 409);
+        }
+
+        $this->entityManager->remove($seance);
+        $this->entityManager->flush();
+
+        return $this->json(['message' => 'La séance a été supprimée.']);
+    }
+
+    private function parseDate(mixed $value): ?DateTimeImmutable
+    {
+        if (!is_string($value) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            return null;
+        }
+
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value);
+        $errors = DateTimeImmutable::getLastErrors();
+
+        return $date && (false === $errors || (0 === $errors['warning_count'] && 0 === $errors['error_count'])) && $date->format('Y-m-d') === $value
+            ? $date
+            : null;
+    }
+
+    private function redirectToDailyView(Request $request, ?DateTimeImmutable $day = null): \Symfony\Component\HttpFoundation\RedirectResponse
+    {
+        $day ??= $this->parseDate($request->request->get('day')) ?? new DateTimeImmutable('today');
+        $room = filter_var($request->request->get('salle'), FILTER_VALIDATE_INT);
+
+        return $this->redirectToRoute('admin_seance_index', [
+            'view' => 'day',
+            'day' => $day->format('Y-m-d'),
+            'salle' => false !== $room ? $room : null,
+        ]);
     }
 }
