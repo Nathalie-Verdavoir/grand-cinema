@@ -72,6 +72,17 @@ class FilmRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function hasProgrammableFilms(): bool
+    {
+        return null !== $this->createQueryBuilder('film')
+            ->select('film.id')
+            ->andWhere('film.programmable = :programmable')
+            ->setParameter('programmable', true)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
 //    /**
 //     * @return Film[] Returns an array of Film objects
 //     */

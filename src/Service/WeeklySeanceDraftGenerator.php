@@ -31,10 +31,10 @@ final class WeeklySeanceDraftGenerator
     /**
      * @return array{created: int, skipped: int}
      */
-    public function generate(DateTimeImmutable $weekStart): array
+    public function generate(DateTimeImmutable $weekStart, ?Salle $room = null): array
     {
         $weekStart = $weekStart->setTime(0, 0);
-        return $this->generateRange($weekStart, $weekStart->modify('+7 days'));
+        return $this->generateRange($weekStart, $weekStart->modify('+7 days'), $room);
     }
 
     /**
@@ -42,19 +42,21 @@ final class WeeklySeanceDraftGenerator
      *
      * @return array{created: int, skipped: int}
      */
-    public function generateDay(DateTimeImmutable $day): array
+    public function generateDay(DateTimeImmutable $day, ?Salle $room = null): array
     {
         $day = $day->setTime(0, 0);
 
-        return $this->generateRange($day, $day->modify('+1 day'));
+        return $this->generateRange($day, $day->modify('+1 day'), $room);
     }
 
     /**
      * @return array{created: int, skipped: int}
      */
-    private function generateRange(DateTimeImmutable $rangeStart, DateTimeImmutable $rangeEnd): array
+    private function generateRange(DateTimeImmutable $rangeStart, DateTimeImmutable $rangeEnd, ?Salle $room = null): array
     {
-        $rooms = $this->salleRepository->findBy([], ['name' => 'ASC', 'id' => 'ASC']);
+        $rooms = $room instanceof Salle
+            ? [$room]
+            : $this->salleRepository->findBy([], ['name' => 'ASC', 'id' => 'ASC']);
         $films = $this->filmRepository->findProgrammableWithDuration();
         $now = new DateTimeImmutable();
         $occupied = [];
@@ -127,7 +129,7 @@ final class WeeklySeanceDraftGenerator
     {
         for ($date = $rangeStart; $date < $rangeEnd; $date = $date->modify('+1 day')) {
             $opening = $date->setTime(self::OPENING_HOUR, 0);
-            $closing = $this->closingTime($date);
+            $closing = $this->closingTime($opening);
             for ($slot = $opening; $slot < $closing; $slot = $slot->modify(sprintf('+%d minutes', self::SLOT_MINUTES))) {
                 if ($slot > $now) {
                     yield $slot;

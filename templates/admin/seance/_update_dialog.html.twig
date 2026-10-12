@@ -1,0 +1,11 @@
+<div class="seance-update-dialog" data-seance-planner-target="updateDialog" hidden>
+    <div class="seance-update-dialog-backdrop" data-action="click->seance-planner#closeUpdateDialog"></div>
+    <section class="seance-update-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="seance-update-dialog-title">
+        <h2 id="seance-update-dialog-title">Modifier la séance ?</h2>
+        <p data-seance-planner-target="updateSummary"></p>
+        <div class="seance-delete-dialog-actions">
+            <button type="button" class="btn btn-link" data-action="click->seance-planner#closeUpdateDialog">Annuler</button>
+            <button type="button" class="btn btn-primary" data-action="click->seance-planner#updateConfirmed">Confirmer</button>
+        </div>
+    </section>
+</div>

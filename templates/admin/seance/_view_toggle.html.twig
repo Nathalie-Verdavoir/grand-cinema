@@ -1,0 +1,15 @@
+<span class="seance-view-toggle" role="group" aria-label="Vue du planning">
+    <a
+        class="seance-view-switch {{ isDailyView ? 'is-daily' : 'is-weekly' }}"
+        href="{{ isDailyView
+            ? ea_url().setController('App\\Controller\\Admin\\SeanceCrudController').setAction('index').unset('view').unset('day').set('week', selectedDate|date('Y-m-d')).set('salle', selectedRoom ? selectedRoom.id : '')
+            : ea_url().setController('App\\Controller\\Admin\\SeanceCrudController').setAction('index').set('view', 'day').set('day', weekStart|date('Y-m-d')).set('salle', selectedRoom ? selectedRoom.id : '') }}"
+        role="switch"
+        aria-checked="{{ isDailyView ? 'true' : 'false' }}"
+        aria-label="{{ isDailyView ? 'Passer à la vue semaine' : 'Passer à la vue journée' }}"
+    >
+        <span>Semaine</span>
+        <span class="seance-view-switch-track" aria-hidden="true"><span></span></span>
+        <span>Journée</span>
+    </a>
+</span>

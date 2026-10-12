@@ -9,6 +9,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SeanceRepository::class)]
+#[ORM\Table(name: 'seance')]
+#[ORM\Index(name: 'IDX_SEANCE_SALLE_DATE_TIME', columns: ['salle_id', 'date_time'])]
+#[ORM\Index(name: 'IDX_SEANCE_DATE_TIME', columns: ['date_time'])]
 class Seance
 {
     #[ORM\Id]
