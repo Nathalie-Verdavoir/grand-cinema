@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement de la réservation - Grand Cinéma{% endblock %}
+
+{% block body %}
+    <div class="container home-page reservation-page">
+        <section class="reservation-panel reservation-payment-panel" aria-labelledby="payment-title">
+            <h1 id="payment-title">Paiement de votre réservation</h1>
+            <p class="reservation-payment-status" role="status">
+                {{ canPay ? 'Votre réservation est en attente de paiement.' : reservation.status.label }}
+            </p>
+
+            <dl class="reservation-details">
+                <div class="reservation-detail">
+                    <dt>Film</dt>
+                    <dd>{{ reservation.seance.film.title }}</dd>
+                </div>
+                <div class="reservation-detail">
+                    <dt>Séance</dt>
+                    <dd>{{ reservation.seance.dateTime|date('d/m/Y à H:i') }}</dd>
+                </div>
+                <div class="reservation-detail">
+                    <dt>Salle</dt>
+                    <dd>{{ reservation.seance.salle.name }}</dd>
+                </div>
+                <div class="reservation-detail">
+                    <dt>Référence</dt>
+                    <dd>{{ reservation.reference }}</dd>
+                </div>
+                <div class="reservation-detail">
+                    <dt>Places</dt>
+                    <dd>{{ reservation.nbPlaces }}</dd>
+                </div>
+                <div class="reservation-detail">
+                    <dt>Total à régler</dt>
+                    <dd>{{ reservation.totalPrice|number_format(2, ',', ' ') }} €</dd>
+                </div>
+            </dl>
+
+            <h2>Vos billets</h2>
+            <div class="reservation-tariffs-scroll">
+                <table class="reservation-tariffs-table reservation-payment-tickets">
+                    <caption class="visually-hidden">Billets inclus dans la réservation</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Tarif</th>
+                            <th scope="col">Prix du billet</th>
+                            <th scope="col">Référence billet</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for billet in reservation.billets %}
+                            <tr>
+                                <th scope="row">{{ billet.tarif.name }}</th>
+                                <td>{{ billet.priceApplied|number_format(2, ',', ' ') }} €</td>
+                                <td>{{ billet.reference }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if canPay %}
+                <p class="reservation-payment-notice">
+                    Le paiement sécurisé par Stripe sera disponible à l’étape suivante.
+                </p>
+            {% endif %}
+            <a class="film-program-back" href="{{ path('app_accueil') }}">← Retour à l’accueil</a>
+        </section>
+    </div>
+{% endblock %}

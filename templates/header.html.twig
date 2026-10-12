@@ -1,6 +1,7 @@
 <header>
 	<div class="admin-buttons">
 		{% if app.user %}
+			{% set pendingCartSeats = pending_reservation_seat_count(app.user) %}
 			<a type="button" class="btn d-inline-flex align-items-center" href="{{ path('app_account') }}" aria-label="Mon compte">
 				<span class="d-none d-lg-inline">Mon compte</span>
 				<span class="header-button-icon" aria-hidden="true">
@@ -10,6 +11,19 @@
 							<path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
 						</svg>
 					</span>
+				</span>
+			</a>
+			<a type="button" class="btn d-inline-flex align-items-center" href="{{ path('app_cart') }}" aria-label="Mon panier{% if pendingCartSeats > 0 %}, {{ pendingCartSeats }} place{{ pendingCartSeats > 1 ? 's' : '' }} en attente de paiement{% endif %}">
+				<span class="d-none d-lg-inline">Mon panier</span>
+				<span class="header-button-icon header-cart-icon" aria-hidden="true">
+					<span class="svg-container">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="svg-content bi bi-cart" viewBox="0 0 16 16">
+							<path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .49.402L2.89 3H14.5a.5.5 0 0 1 .48.64l-1.5 5A.5.5 0 0 1 13 9H4a.5.5 0 0 1-.49-.402L1.61 2H.5a.5.5 0 0 1-.5-.5ZM3.11 4l1.3 4h8.22l1.2-4H3.11ZM5 10a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/>
+						</svg>
+					</span>
+					{% if pendingCartSeats > 0 %}
+						<span class="cart-pending-badge">{{ pendingCartSeats }}</span>
+					{% endif %}
 				</span>
 			</a>
 			{% if "ROLE_ADMIN" in app.user.roles %}

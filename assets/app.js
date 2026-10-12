@@ -109,8 +109,64 @@ const initializeHomeCarousels = () => {
     });
 };
 
+const initializeReservationSelections = () => {
+    document.querySelectorAll('[data-reservation-selection]').forEach((selection) => {
+        const availableSeats = Number(selection.dataset.availableSeats);
+        const tickets = Array.from(selection.querySelectorAll('[data-reservation-ticket]'));
+        const summary = selection.querySelector('[data-reservation-total]');
+        const submitButton = selection.querySelector('[data-reservation-submit]');
+        const currencyFormatter = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' });
+
+        const update = (changedTicket = null) => {
+            if (changedTicket) {
+                const otherSeats = tickets
+                    .filter((ticket) => ticket !== changedTicket)
+                    .reduce((total, ticket) => total + Number(ticket.value || 0), 0);
+                const maximum = Math.max(0, availableSeats - otherSeats);
+                changedTicket.max = String(maximum);
+                changedTicket.value = String(Math.min(maximum, Math.max(0, Number(changedTicket.value) || 0)));
+            }
+
+            const selectedSeats = tickets.reduce((total, ticket) => total + Number(ticket.value || 0), 0);
+            tickets.forEach((ticket) => {
+                const otherSeats = selectedSeats - Number(ticket.value || 0);
+                ticket.max = String(Math.max(0, availableSeats - otherSeats));
+
+                const quantityControl = ticket.closest('.reservation-quantity-control');
+                quantityControl.querySelector('[data-reservation-step="-1"]').disabled = Number(ticket.value) <= 0;
+                quantityControl.querySelector('[data-reservation-step="1"]').disabled = Number(ticket.value) >= Number(ticket.max);
+            });
+
+            const totalInCents = tickets.reduce((total, ticket) => (
+                total + Math.round(Number(ticket.dataset.unitPrice) * 100) * Number(ticket.value || 0)
+            ), 0);
+            const placeLabel = selectedSeats > 1 ? 'places sélectionnées' : 'place sélectionnée';
+            summary.textContent = `${selectedSeats} ${placeLabel} · Total : ${currencyFormatter.format(totalInCents / 100)}`;
+            submitButton.disabled = selectedSeats === 0;
+        };
+
+        tickets.forEach((ticket) => ticket.addEventListener('input', () => update(ticket)));
+        selection.querySelectorAll('[data-reservation-step]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const ticket = button.closest('.reservation-quantity-control').querySelector('[data-reservation-ticket]');
+                ticket.value = String(Number(ticket.value) + Number(button.dataset.reservationStep));
+                update(ticket);
+            });
+        });
+        selection.addEventListener('submit', () => {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Enregistrement…';
+        });
+        update();
+    });
+};
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeHomeCarousels);
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeHomeCarousels();
+        initializeReservationSelections();
+    });
 } else {
     initializeHomeCarousels();
+    initializeReservationSelections();
 }

@@ -50,6 +50,128 @@
     border-left: 1px solid var(--color-global-2);
 }
 
+.cart-panel {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+    border: 1px solid rgb(54 89 125 / 18%);
+    border-radius: 0.5rem;
+    background: var(--color-white);
+    box-shadow: 0 0.5rem 1.5rem var(--color-shadow);
+}
+
+.cart-panel h1,
+.cart-reservation h2 {
+    color: var(--color-global-5);
+    font-family: var(--font-heading), serif;
+}
+
+.cart-panel h1 {
+    margin-bottom: 0.75rem;
+}
+
+.cart-introduction,
+.cart-reservation-heading p,
+.cart-empty {
+    color: var(--color-global-4);
+}
+
+.cart-reservations {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.cart-reservation {
+    padding: 1.25rem;
+    border: 1px solid rgb(54 89 125 / 20%);
+    border-radius: 0.4rem;
+    background: linear-gradient(115deg, #edf3f8 0%, var(--color-white) 70%);
+}
+
+.cart-reservation-heading,
+.cart-reservation-footer {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.cart-reservation h2 {
+    margin-bottom: 0.35rem;
+    font-size: 1.2rem;
+}
+
+.cart-reservation-heading p,
+.cart-reservation-footer p,
+.cart-reservation-tickets {
+    margin-bottom: 0.75rem;
+}
+
+.cart-reservation-status {
+    flex: 0 0 auto;
+    padding: 0.3rem 0.6rem;
+    border-radius: 2rem;
+    background: var(--color-global-1);
+    color: var(--color-global-5);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.cart-reservation-tickets {
+    padding-left: 1.2rem;
+    font-size: 0.9rem;
+}
+
+.cart-reservation-footer {
+    align-items: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgb(54 89 125 / 16%);
+}
+
+.cart-reservation-footer p {
+    margin: 0;
+}
+
+.cart-reservation-payment {
+    flex: 0 0 auto;
+    padding: 0.55rem 0.85rem;
+    border-radius: 0.35rem;
+    background: var(--color-global-5);
+    color: var(--color-white);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.cart-reservation-payment:hover {
+    background: var(--color-global-4);
+    color: var(--color-white);
+}
+
+.cart-empty {
+    margin: 0;
+    padding: 1.5rem;
+    border-radius: 0.35rem;
+    background: var(--color-global-1);
+    text-align: center;
+}
+
+@media (max-width: 576px) {
+    .cart-reservation-heading,
+    .cart-reservation-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .cart-reservation-status {
+        align-self: flex-start;
+    }
+
+    .cart-reservation-payment {
+        text-align: center;
+    }
+}
+
 .account-panel h1,
 .account-panel h2 {
     color: var(--color-global-5);
