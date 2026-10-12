@@ -20,7 +20,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Attribute\Route;
 
 class SeanceCrudController extends AbstractCrudController
 {
@@ -41,11 +43,24 @@ class SeanceCrudController extends AbstractCrudController
 
     public function configureCrud(Crud $crud): Crud
     {
+        $isPlanningFragmentRequest = 'XMLHttpRequest' === $this->requestStack->getCurrentRequest()?->headers->get('X-Requested-With');
+
         return $crud
             ->setEntityLabelInSingular('Séance')
             ->setEntityLabelInPlural('Séances')
             ->setPaginatorPageSize(10)
-            ->overrideTemplate('crud/index', 'admin/seance/planner.html.twig');
+            ->overrideTemplate('crud/index', $isPlanningFragmentRequest
+                ? 'admin/seance/planner_fragment.html.twig'
+                : 'admin/seance/planner.html.twig');
+    }
+
+    #[Route('/admin/seances/planner-fragment', name: 'admin_seance_planner_fragment', methods: ['GET'])]
+    public function plannerFragment(): Response
+    {
+        $responseParameters = KeyValueStore::new(['pageName' => Crud::PAGE_INDEX]);
+        $responseParameters = $this->configureResponseParameters($responseParameters);
+
+        return $this->render('admin/seance/planner_fragment.html.twig', $responseParameters->all());
     }
 
     public function configureActions(Actions $actions): Actions
@@ -76,25 +91,33 @@ class SeanceCrudController extends AbstractCrudController
         $weekEnd = $weekStart->modify('+7 days');
         $rooms = $this->salleRepository->findBy([], ['name' => 'ASC']);
         $roomId = filter_var($request?->query->get('salle'), FILTER_VALIDATE_INT);
-        $selectedRoom = false !== $roomId ? $this->salleRepository->find($roomId) : null;
+        $selectedRoom = null;
+        if (false !== $roomId) {
+            foreach ($rooms as $room) {
+                if ($room->getId() === $roomId) {
+                    $selectedRoom = $room;
+                    break;
+                }
+            }
+        }
 
         if (!$selectedRoom instanceof Salle) {
             $selectedRoom = $rooms[0] ?? null;
         }
 
-        $films = $this->filmRepository->findBy(['programmable' => true], ['title' => 'ASC']);
+        $films = $isDailyView ? [] : $this->filmRepository->findBy(['programmable' => true], ['title' => 'ASC']);
+        $hasProgrammableFilms = $isDailyView
+            ? $this->filmRepository->hasProgrammableFilms()
+            : [] !== $films;
         $filmEditUrls = [];
         foreach ($films as $film) {
-            if (null === $film->getDuration()) {
-                $filmEditUrls[$film->getId()] = $this->adminUrlGenerator
-                    ->setController(FilmCrudController::class)
-                    ->setAction(Action::EDIT)
-                    ->setEntityId($film->getId())
-                    ->generateUrl();
+            $filmEditUrl = $this->getFilmEditUrl($film);
+            if (null !== $filmEditUrl) {
+                $filmEditUrls[$film->getId()] = $filmEditUrl;
             }
         }
 
-        $seances = $selectedRoom instanceof Salle
+        $seances = !$isDailyView && $selectedRoom instanceof Salle
             ? $this->seanceRepository->findForRoomBetween($selectedRoom, $weekStart->modify('-1 day'), $weekEnd)
             : [];
         $selectedDate = $this->getSelectedDate($request?->query->get('day'));
@@ -156,6 +179,7 @@ class SeanceCrudController extends AbstractCrudController
                 $eventsByDay[$dayStart->format('Y-m-d')][] = [
                     'id' => $seance->getId(),
                     'title' => $seance->getFilm()?->getTitle() ?? 'Film inconnu',
+                    'filmEditUrl' => $this->getFilmEditUrl($seance->getFilm()),
                     'image' => $seance->getFilm()?->getImg(),
                     'start' => $startsAt->format('H:i'),
                     'startTimestamp' => $startsAt->getTimestamp(),
@@ -180,6 +204,7 @@ class SeanceCrudController extends AbstractCrudController
         $responseParameters->set('rooms', $rooms);
         $responseParameters->set('selectedRoom', $selectedRoom);
         $responseParameters->set('films', $films);
+        $responseParameters->set('hasProgrammableFilms', $hasProgrammableFilms);
         $responseParameters->set('filmEditUrls', $filmEditUrls);
         $responseParameters->set('weekStart', $weekStart);
         $responseParameters->set('weekEnd', $weekEnd->modify('-1 day'));
@@ -215,15 +240,17 @@ class SeanceCrudController extends AbstractCrudController
 
     private function buildEvent(Seance $seance, DateTimeImmutable $startsAt, DateTimeImmutable $dayStart, DateTimeImmutable $dayEnd, DateTimeImmutable $now): array
     {
-        $duration = $seance->getFilm()?->getDuration();
+        $film = $seance->getFilm();
+        $duration = $film?->getDuration();
         $endsAt = $startsAt->modify(sprintf('+%d minutes', ($duration ?? 0) + 20));
         $visibleStart = $startsAt < $dayStart ? $dayStart : $startsAt;
         $visibleEnd = $endsAt > $dayEnd ? $dayEnd : $endsAt;
 
         return [
             'id' => $seance->getId(),
-            'title' => $seance->getFilm()?->getTitle() ?? 'Film inconnu',
-            'image' => $seance->getFilm()?->getImg(),
+            'title' => $film?->getTitle() ?? 'Film inconnu',
+            'filmEditUrl' => $this->getFilmEditUrl($film),
+            'image' => $film?->getImg(),
             'start' => $startsAt->format('H:i'),
             'startTimestamp' => $startsAt->getTimestamp(),
             'endTimestamp' => $endsAt->getTimestamp(),
@@ -239,6 +266,19 @@ class SeanceCrudController extends AbstractCrudController
             'ended' => null !== $duration && $endsAt <= $now,
             ...$this->getOccupancy($seance),
         ];
+    }
+
+    private function getFilmEditUrl(?Film $film): ?string
+    {
+        if (null === $film || null === $film->getId()) {
+            return null;
+        }
+
+        return $this->adminUrlGenerator
+            ->setController(FilmCrudController::class)
+            ->setAction(Action::EDIT)
+            ->setEntityId($film->getId())
+            ->generateUrl();
     }
 
     /**

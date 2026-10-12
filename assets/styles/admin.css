@@ -70,7 +70,9 @@
 }
 
 .seance-week-navigation > a[aria-label="Semaine précédente"],
-.seance-week-navigation > a[aria-label="Semaine suivante"] {
+.seance-week-navigation > a[aria-label="Semaine suivante"],
+.seance-week-navigation > a[aria-label="Jour précédent"],
+.seance-week-navigation > a[aria-label="Jour suivant"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -85,8 +87,10 @@
 }
 
 .seance-view-toggle {
-    display: flex;
-    margin-left: auto;
+    display: inline-flex !important;
+    align-items: center;
+    margin-left: 0.75rem;
+    vertical-align: middle;
 }
 
 .seance-view-switch {
@@ -201,7 +205,25 @@
     border-left: 1px solid var(--color-global-2);
     background:
         linear-gradient(to bottom, var(--color-schedule-past), var(--color-schedule-past)) 0 0 / 100% var(--past-height, 0px) no-repeat,
-        repeating-linear-gradient(to bottom, var(--color-transparent) 0, var(--color-transparent) 17px, var(--color-global-2) 17px, var(--color-global-2) 18px);
+        repeating-linear-gradient(
+            to bottom,
+            #243f5a 0,
+            #1f3852 16px,
+            var(--color-global-2) 17px,
+            var(--color-global-2) 18px,
+            #213b56 18px,
+            #1c344d 34px,
+            var(--color-global-2) 35px,
+            var(--color-global-2) 36px,
+            #1e3852 36px,
+            #193047 52px,
+            var(--color-global-2) 53px,
+            var(--color-global-2) 54px,
+            #1b354e 54px,
+            #162c42 70px,
+            var(--color-global-2) 71px,
+            var(--color-global-2) 72px
+        );
 }
 
 .schedule-day-lane.is-drop-target {
@@ -275,7 +297,25 @@
     border-bottom: 1px solid var(--color-global-2);
     background:
         linear-gradient(to right, var(--color-schedule-past), var(--color-schedule-past)) 0 0 / var(--past-width, 0) 100% no-repeat,
-        repeating-linear-gradient(to right, transparent 0, transparent 35px, var(--color-global-2) 35px, var(--color-global-2) 36px);
+        repeating-linear-gradient(
+            to right,
+            #243f5a 0,
+            #1f3852 34px,
+            var(--color-global-2) 35px,
+            var(--color-global-2) 36px,
+            #213b56 36px,
+            #1c344d 70px,
+            var(--color-global-2) 71px,
+            var(--color-global-2) 72px,
+            #1e3852 72px,
+            #193047 106px,
+            var(--color-global-2) 107px,
+            var(--color-global-2) 108px,
+            #1b354e 108px,
+            #162c42 142px,
+            var(--color-global-2) 143px,
+            var(--color-global-2) 144px
+        );
 }
 
 .daily-room-lane .schedule-event {
@@ -395,6 +435,53 @@
     right: 1.15rem;
 }
 
+.schedule-event-film-edit {
+    position: absolute;
+    top: 0.15rem;
+    right: 0.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid var(--color-white);
+    border-radius: 3px;
+    background: var(--color-global-5);
+    color: var(--color-white);
+    font-size: 0.75rem;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.schedule-event-film-edit-icon {
+    display: block;
+    position: relative;
+    top: -1px;
+    margin-top: 0 !important;
+    transform: translateY(-1px);
+    font-size: 0.8rem;
+    line-height: 1;
+}
+
+.schedule-event-film-edit-with-publish {
+    right: 1.15rem;
+}
+
+.schedule-event-film-edit-with-delete {
+    right: 1.15rem;
+}
+
+.schedule-event-film-edit-with-publish-and-delete {
+    right: 2.15rem;
+}
+
+.schedule-event-film-edit:hover,
+.schedule-event-film-edit:focus-visible {
+    border-color: var(--color-white);
+    background: var(--color-global-2);
+    color: var(--color-white);
+}
+
 .schedule-event-publish span {
     display: block;
     position: relative;
@@ -471,6 +558,46 @@
     padding: 1rem;
 }
 
+.seance-update-dialog {
+    position: fixed;
+    z-index: 10;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+}
+
+.seance-update-dialog[hidden] {
+    display: none;
+}
+
+.seance-update-dialog-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgb(24 46 65 / 65%);
+}
+
+.seance-update-dialog-panel {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 28rem);
+    padding: 1.25rem;
+    border: 1px solid var(--color-global-2);
+    border-radius: 4px;
+    background: var(--color-global-5);
+    color: var(--color-white);
+    box-shadow: 0 0.75rem 2rem var(--color-shadow);
+}
+
+.seance-update-dialog-panel h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.15rem;
+}
+
+.seance-update-dialog-panel p {
+    margin-bottom: 1.25rem;
+}
+
 .seance-delete-dialog[hidden] {
     display: none;
 }
@@ -523,11 +650,12 @@
 }
 
 .seance-film-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
     margin-bottom: 0.5rem;
-    padding: 0.65rem;
+    padding: 0.65rem 2rem 0.65rem 0.65rem;
     border: 1px solid var(--color-global-2);
     border-radius: 4px;
     background: var(--color-global-2);
@@ -556,6 +684,34 @@
 
 .seance-film-card.is-unavailable {
     background: var(--color-schedule-unavailable);
+    color: var(--color-white);
+}
+
+.seance-film-card-edit {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    padding: 0;
+    border: 1px solid var(--color-white);
+    border-radius: 3px;
+    color: var(--color-white);
+    font-size: 0.85rem;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.seance-film-card-edit span {
+    display: block;
+}
+
+.seance-film-card-edit:hover,
+.seance-film-card-edit:focus-visible {
+    background: var(--color-global-5);
     color: var(--color-white);
 }
 

@@ -55,10 +55,21 @@ class SeancePlanningController extends AbstractController
         }
 
         $weekStart = $weekStart->modify('monday this week');
-        $result = $this->weeklySeanceDraftGenerator->generate($weekStart);
+        $roomId = filter_var($request->request->get('salle'), FILTER_VALIDATE_INT);
+        $room = false !== $roomId ? $this->salleRepository->find($roomId) : null;
+        if (!$room instanceof Salle) {
+            $this->addFlash('danger', 'La salle sélectionnée est invalide.');
+
+            return $this->redirectToRoute('admin_seance_index', ['week' => $weekStart->format('Y-m-d')]);
+        }
+
+        $result = $this->weeklySeanceDraftGenerator->generate($weekStart, $room);
         $this->addFlash('success', sprintf('%d séance(s) brouillon(s) générée(s) pour la semaine du %s.%s', $result['created'], $weekStart->format('d/m/Y'), $result['skipped'] > 0 ? sprintf(' %d film(s) n’ont pas trouvé de créneau disponible.', $result['skipped']) : ''));
 
-        return $this->redirectToRoute('admin_seance_index', ['week' => $weekStart->format('Y-m-d')]);
+        return $this->redirectToRoute('admin_seance_index', [
+            'week' => $weekStart->format('Y-m-d'),
+            'salle' => $room->getId(),
+        ]);
     }
 
     #[Route('/admin/seances/generate-day', name: 'admin_seance_generate_day', methods: ['POST'])]
@@ -201,6 +212,77 @@ class SeancePlanningController extends AbstractController
         return $this->json([
             'message' => sprintf('%s est programmé le %s à %s.', $film->getTitle(), $startsAt->format('d/m/Y'), $startsAt->format('H:i')),
         ], 201);
+    }
+
+    #[Route('/admin/api/seances/{id}', name: 'admin_api_seance_update', requirements: ['id' => '\d+'], methods: ['PATCH'])]
+    public function update(int $id, Request $request): JsonResponse
+    {
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('admin_update_seance', (string) $request->headers->get('X-CSRF-Token')))) {
+            return $this->json(['error' => 'Votre session a expiré. Rechargez la page puis réessayez.'], 403);
+        }
+
+        $seance = $this->seanceRepository->find($id);
+        if (!$seance instanceof Seance) {
+            return $this->json(['error' => 'Cette séance n’existe plus. Rechargez le planning.'], 404);
+        }
+
+        $currentDateTime = $seance->getDateTime();
+        if (null === $currentDateTime || DateTimeImmutable::createFromMutable($currentDateTime) <= new DateTimeImmutable('now')) {
+            return $this->json(['error' => 'Une séance déjà commencée ne peut pas être déplacée.'], 409);
+        }
+        if (!$seance->getReservations()->isEmpty()) {
+            return $this->json(['error' => 'Cette séance ne peut pas être déplacée car elle possède des réservations.'], 409);
+        }
+
+        $payload = $request->toArray();
+        $roomId = filter_var($payload['roomId'] ?? null, FILTER_VALIDATE_INT);
+        $date = $payload['date'] ?? null;
+        $time = $payload['time'] ?? null;
+        if (false === $roomId || $roomId < 1 || !is_string($date) || !is_string($time)) {
+            return $this->json(['error' => 'Les informations de la séance sont incomplètes.'], 400);
+        }
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !preg_match('/^(?:[01]\d|2[0-3]):(?:00|15|30|45)$/', $time)) {
+            return $this->json(['error' => 'La date ou le créneau horaire est invalide.'], 400);
+        }
+
+        $startsAt = DateTimeImmutable::createFromFormat('!Y-m-d H:i', $date.' '.$time);
+        $dateErrors = DateTimeImmutable::getLastErrors();
+        if (!$startsAt || (false !== $dateErrors && (0 !== $dateErrors['warning_count'] || 0 !== $dateErrors['error_count'])) || $startsAt->format('Y-m-d H:i') !== $date.' '.$time) {
+            return $this->json(['error' => 'La date ou le créneau horaire est invalide.'], 400);
+        }
+        if ($startsAt <= new DateTimeImmutable('now')) {
+            return $this->json(['error' => 'Impossible de déplacer une séance vers une date ou une heure déjà passée.'], 409);
+        }
+
+        $room = $this->salleRepository->find($roomId);
+        $duration = $seance->getFilm()?->getDuration();
+        if (!$room instanceof Salle || null === $duration || $duration < 1 || $duration > 600) {
+            return $this->json(['error' => 'La salle ou la durée du film est invalide.'], 422);
+        }
+
+        $endsAt = $startsAt->modify(sprintf('+%d minutes', $duration + 20));
+        foreach ($this->seanceRepository->findForRoomBetween($room, $startsAt->modify('-1 day'), $endsAt) as $existingSeance) {
+            if ($existingSeance === $seance) {
+                continue;
+            }
+            $existingStart = $existingSeance->getDateTime();
+            $existingDuration = $existingSeance->getFilm()?->getDuration();
+            if (null === $existingStart || null === $existingDuration) {
+                continue;
+            }
+            $existingStartAt = DateTimeImmutable::createFromMutable($existingStart);
+            $existingEndAt = $existingStartAt->modify(sprintf('+%d minutes', $existingDuration + 20));
+            if ($startsAt < $existingEndAt && $endsAt > $existingStartAt) {
+                return $this->json(['error' => 'Ce créneau chevauche une autre séance ou sa période de battement de 20 minutes.'], 409);
+            }
+        }
+
+        $seance->setSalle($room)->setDateTime(DateTime::createFromImmutable($startsAt));
+        $this->entityManager->flush();
+
+        return $this->json([
+            'message' => sprintf('%s est déplacé le %s à %s.', $seance->getFilm()?->getTitle(), $startsAt->format('d/m/Y'), $startsAt->format('H:i')),
+        ]);
     }
 
     #[Route('/admin/api/seances/{id}/publish', name: 'admin_api_seance_publish', requirements: ['id' => '\d+'], methods: ['POST'])]

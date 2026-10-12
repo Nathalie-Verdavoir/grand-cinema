@@ -24,8 +24,9 @@ class SeanceRepository extends ServiceEntityRepository
     public function findForRoomBetween(Salle $salle, DateTimeImmutable $from, DateTimeImmutable $to): array
     {
         return $this->createQueryBuilder('seance')
-            ->addSelect('film')
+            ->addSelect('film', 'reservation')
             ->join('seance.film', 'film')
+            ->leftJoin('seance.reservations', 'reservation')
             ->andWhere('seance.salle = :salle')
             ->andWhere('seance.dateTime >= :from')
             ->andWhere('seance.dateTime < :to')
@@ -43,9 +44,10 @@ class SeanceRepository extends ServiceEntityRepository
     public function findBetween(DateTimeImmutable $from, DateTimeImmutable $to): array
     {
         return $this->createQueryBuilder('seance')
-            ->addSelect('film', 'salle')
+            ->addSelect('film', 'salle', 'reservation')
             ->join('seance.film', 'film')
             ->join('seance.salle', 'salle')
+            ->leftJoin('seance.reservations', 'reservation')
             ->andWhere('seance.dateTime >= :from')
             ->andWhere('seance.dateTime < :to')
             ->setParameter('from', $from)
