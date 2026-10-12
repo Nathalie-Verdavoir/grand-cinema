@@ -63,7 +63,7 @@ final class WeeklySeanceDraftGenerator
 
         foreach ($rooms as $room) {
             $occupied[$room->getId() ?? spl_object_id($room)] = [];
-            foreach ($this->seanceRepository->findForRoomBetween($room, $rangeStart->modify('-1 day'), $rangeEnd) as $seance) {
+            foreach ($this->seanceRepository->findForRoomBetween($room, $rangeStart->modify('-1 day'), $rangeEnd->modify('+1 day')) as $seance) {
                 $start = $seance->getDateTime();
                 $duration = $seance->getFilm()?->getDuration();
                 if (null === $start) {
@@ -81,37 +81,68 @@ final class WeeklySeanceDraftGenerator
         }
 
         $created = 0;
-        $skipped = 0;
-        foreach ($films as $film) {
-            $duration = $film->getDuration();
-            if (null === $duration || [] === $rooms) {
-                ++$skipped;
-                continue;
-            }
+        $scheduledFilmKeys = [];
+        foreach ($rooms as $room) {
+            $roomKey = $room->getId() ?? spl_object_id($room);
+            for ($date = $rangeStart; $date < $rangeEnd; $date = $date->modify('+1 day')) {
+                $opening = $date->setTime(self::OPENING_HOUR, 0);
+                $closing = $this->closingTime($opening);
+                $cursor = $opening;
+                if ($now >= $cursor) {
+                    $elapsedSeconds = $now->getTimestamp() - $opening->getTimestamp();
+                    $cursor = $opening->modify(sprintf('+%d seconds', (int) (ceil($elapsedSeconds / (self::SLOT_MINUTES * 60)) * self::SLOT_MINUTES * 60)));
+                }
 
-            $scheduled = false;
-            foreach ($this->candidateSlots($rangeStart, $rangeEnd, $now) as $slot) {
-                foreach ($rooms as $room) {
-                    $roomKey = $room->getId() ?? spl_object_id($room);
-                    $end = $slot->modify(sprintf('+%d minutes', $duration + self::BUFFER_MINUTES));
-                    if ($end > $this->closingTime($slot) || $this->overlaps($occupied[$roomKey], $slot, $end)) {
+                while ($cursor < $closing) {
+                    $blockingEnd = null;
+                    $nextOccupied = null;
+                    foreach ($occupied[$roomKey] as [$existingStart, $existingEnd]) {
+                        if ($existingStart <= $cursor && $existingEnd > $cursor) {
+                            $blockingEnd = $existingEnd;
+                            break;
+                        }
+                        if ($existingStart > $cursor && (null === $nextOccupied || $existingStart < $nextOccupied[0])) {
+                            $nextOccupied = [$existingStart, $existingEnd];
+                        }
+                    }
+
+                    if (null !== $blockingEnd) {
+                        $cursor = $this->ceilToSlot($blockingEnd);
                         continue;
                     }
 
+                    $availableUntil = null !== $nextOccupied && $nextOccupied[0] < $closing
+                        ? $nextOccupied[0]
+                        : $closing;
+                    $fittingFilms = array_values(array_filter(
+                        $films,
+                        static fn (Film $film): bool => null !== $film->getDuration()
+                            && $film->getDuration() + self::BUFFER_MINUTES <= ($availableUntil->getTimestamp() - $cursor->getTimestamp()) / 60,
+                    ));
+
+                    if ([] === $fittingFilms) {
+                        if (null === $nextOccupied) {
+                            break;
+                        }
+
+                        $cursor = $this->ceilToSlot($nextOccupied[1]);
+                        continue;
+                    }
+
+                    $film = $fittingFilms[random_int(0, count($fittingFilms) - 1)];
+                    $duration = $film->getDuration();
+                    $end = $cursor->modify(sprintf('+%d minutes', $duration + self::BUFFER_MINUTES));
                     $seance = (new Seance())
                         ->setFilm($film)
                         ->setSalle($room)
-                        ->setDateTime(DateTime::createFromImmutable($slot))
+                        ->setDateTime(DateTime::createFromImmutable($cursor))
                         ->setStatus(SeanceStatus::DRAFT);
                     $this->entityManager->persist($seance);
-                    $occupied[$roomKey][] = [$slot, $end];
+                    $occupied[$roomKey][] = [$cursor, $end];
+                    $scheduledFilmKeys[$film->getId() ?? spl_object_id($film)] = true;
                     ++$created;
-                    $scheduled = true;
-                    break 2;
+                    $cursor = $this->ceilToSlot($end);
                 }
-            }
-            if (!$scheduled) {
-                ++$skipped;
             }
         }
 
@@ -119,23 +150,21 @@ final class WeeklySeanceDraftGenerator
             $this->entityManager->flush();
         }
 
+        $skipped = count(array_filter(
+            $films,
+            static fn (Film $film): bool => !isset($scheduledFilmKeys[$film->getId() ?? spl_object_id($film)]),
+        ));
+
         return ['created' => $created, 'skipped' => $skipped];
     }
 
-    /**
-     * @return \Generator<int, DateTimeImmutable>
-     */
-    private function candidateSlots(DateTimeImmutable $rangeStart, DateTimeImmutable $rangeEnd, DateTimeImmutable $now): \Generator
+    private function ceilToSlot(DateTimeImmutable $dateTime): DateTimeImmutable
     {
-        for ($date = $rangeStart; $date < $rangeEnd; $date = $date->modify('+1 day')) {
-            $opening = $date->setTime(self::OPENING_HOUR, 0);
-            $closing = $this->closingTime($opening);
-            for ($slot = $opening; $slot < $closing; $slot = $slot->modify(sprintf('+%d minutes', self::SLOT_MINUTES))) {
-                if ($slot > $now) {
-                    yield $slot;
-                }
-            }
-        }
+        $secondsPastSlot = $dateTime->getTimestamp() % (self::SLOT_MINUTES * 60);
+
+        return 0 === $secondsPastSlot
+            ? $dateTime
+            : $dateTime->modify(sprintf('+%d seconds', self::SLOT_MINUTES * 60 - $secondsPastSlot));
     }
 
     private function closingTime(DateTimeImmutable $date): DateTimeImmutable
@@ -150,19 +179,5 @@ final class WeeklySeanceDraftGenerator
         }
 
         return $programmingDate->setTime(self::CLOSING_HOUR, 0);
-    }
-
-    /**
-     * @param list<array{DateTimeImmutable, DateTimeImmutable}> $occupied
-     */
-    private function overlaps(array $occupied, DateTimeImmutable $start, DateTimeImmutable $end): bool
-    {
-        foreach ($occupied as [$existingStart, $existingEnd]) {
-            if ($start < $existingEnd && $end > $existingStart) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

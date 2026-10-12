@@ -19,18 +19,6 @@
     font-size: 1rem;
 }
 
-#alert.alert {
-    position: fixed;
-    top: 1rem;
-    left: 50%;
-    z-index: 100;
-    margin: 0;
-    padding: 0.85rem 1.25rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 0.5rem 1.5rem var(--color-shadow);
-    transform: translateX(-50%);
-}
-
 .account-page {
     display: flex;
     justify-content: center;

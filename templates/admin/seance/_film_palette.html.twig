@@ -4,16 +4,22 @@
     {% for film in films %}
         {% if film.duration %}
             <article class="seance-film-card is-draggable" draggable="true" data-action="dragstart->seance-planner#startDrag dragend->seance-planner#endDrag" data-film-id="{{ film.getId() }}" data-film-title="{{ film.title|e('html_attr') }}" data-film-duration="{{ film.duration }}">
-                <strong>{{ film.title }}</strong>
-                <span>{{ film.duration }} min + 20 min</span>
+                {% if film.img %}<img class="seance-film-card-poster" src="{{ film.img }}" alt="" loading="lazy" draggable="false">{% endif %}
+                <div class="seance-film-card-text">
+                    <strong>{{ film.title }}</strong>
+                    <span>{{ film.duration }} min + 20 min</span>
+                </div>
                 <a class="seance-film-card-edit" href="{{ filmEditUrls[film.id] }}" aria-label="Ouvrir la fiche de {{ film.title }}" title="Ouvrir la fiche du film">
                     <span aria-hidden="true">↗</span>
                 </a>
             </article>
         {% else %}
             <article class="seance-film-card is-unavailable">
-                <strong>{{ film.title }}</strong>
-                <span>Durée à renseigner</span>
+                {% if film.img %}<img class="seance-film-card-poster" src="{{ film.img }}" alt="" loading="lazy" draggable="false">{% endif %}
+                <div class="seance-film-card-text">
+                    <strong>{{ film.title }}</strong>
+                    <span>Durée à renseigner</span>
+                </div>
                 <a class="seance-film-card-edit" href="{{ filmEditUrls[film.id] }}" aria-label="Ouvrir la fiche de {{ film.title }}" title="Ouvrir la fiche du film">
                     <span aria-hidden="true">↗</span>
                 </a>

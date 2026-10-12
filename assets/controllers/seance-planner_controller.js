@@ -72,6 +72,11 @@ export default class extends Controller {
         if (!options.method && this.fragmentRequests.has(cacheKey)) {
             try {
                 const html = await this.fragmentRequests.get(cacheKey);
+                if (html === null) {
+                    this.feedbackTarget.textContent = 'Le planning n’a pas pu être actualisé.';
+                    this.feedbackTarget.classList.add('is-error');
+                    return;
+                }
                 this.replaceFragment(html, url);
             } catch (error) {
                 if (error.name !== 'AbortError') {
@@ -107,23 +112,25 @@ export default class extends Controller {
                 },
             }).then(async (response) => {
                 responseUrl = response.url;
-                const html = await response.text();
-                if (!response.ok) {
-                    throw new Error('Le planning n’a pas pu être actualisé.');
-                }
-
-                return html;
+                return response.ok ? response.text() : null;
             });
             if (!options.method) {
                 this.fragmentRequests.set(cacheKey, fetchPromise);
             }
             const html = await fetchPromise;
+            if (html === null) {
+                this.feedbackTarget.textContent = 'Le planning n’a pas pu être actualisé.';
+                this.feedbackTarget.classList.add('is-error');
+                return;
+            }
 
             const documentParser = new DOMParser();
             const parsedDocument = documentParser.parseFromString(html, 'text/html');
             const updatedPlanner = parsedDocument.querySelector('.seance-planner');
             if (!updatedPlanner) {
-                throw new Error('La réponse du planning est invalide.');
+                this.feedbackTarget.textContent = 'La réponse du planning est invalide.';
+                this.feedbackTarget.classList.add('is-error');
+                return;
             }
 
             if (!options.method) {
@@ -134,12 +141,17 @@ export default class extends Controller {
             this.replaceFragment(html, options.method ? responseUrl : url);
             if (options.method) {
                 const flashes = [...parsedDocument.querySelectorAll('#flash-messages .alert')]
-                    .map((alert) => alert.textContent.replace(/\s+/g, ' ').replace(/^×\s*/, '').trim())
-                    .filter(Boolean);
-                if (flashes.length > 0) {
-                    this.feedbackTarget.textContent = flashes.join(' ');
-                    this.feedbackTarget.classList.toggle('is-error', Boolean(parsedDocument.querySelector('#flash-messages .alert-danger, #flash-messages .alert-warning')));
-                }
+                    .map((alert) => ({
+                        message: (alert.querySelector('.flash-message-text')?.textContent || alert.textContent)
+                            .replace(/\s+/g, ' ')
+                            .replace(/^×\s*/, '')
+                            .trim(),
+                        type: alert.classList.contains('alert-danger') ? 'danger' : 'success',
+                    }))
+                    .filter((flash) => flash.message);
+                flashes.forEach((flash) => {
+                    document.dispatchEvent(new CustomEvent('flash:show', { detail: flash }));
+                });
             }
         } catch (error) {
             if (error.name === 'AbortError') {
@@ -463,6 +475,11 @@ export default class extends Controller {
                 return;
             }
 
+            if (result.message) {
+                document.dispatchEvent(new CustomEvent('flash:show', {
+                    detail: {message: result.message, type: 'success'},
+                }));
+            }
             this.fragmentCache.clear();
             await this.refreshFromRequest(window.location.href);
         } catch (error) {
