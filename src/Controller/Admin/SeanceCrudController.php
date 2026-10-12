@@ -10,6 +10,7 @@ use App\Enum\ReservationStatus;
 use App\Repository\FilmRepository;
 use App\Repository\SalleRepository;
 use App\Repository\SeanceRepository;
+use App\Service\DateFormatter;
 use DateTimeImmutable;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -29,6 +30,7 @@ class SeanceCrudController extends AbstractCrudController
         private readonly SeanceRepository $seanceRepository,
         private readonly RequestStack $requestStack,
         private readonly AdminUrlGenerator $adminUrlGenerator,
+        private readonly DateFormatter $dateFormatter,
     ) {
     }
 
@@ -115,9 +117,8 @@ class SeanceCrudController extends AbstractCrudController
         }
 
         $weekDays = [];
-        $dayNames = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
         $eventsByDay = [];
-        foreach ($dayNames as $index => $dayName) {
+        for ($index = 0; $index < 7; ++$index) {
             $dayStart = $weekStart->modify(sprintf('+%d days', $index));
             $dayEnd = $dayStart->modify('+1 day');
             $blockedSlots = 0;
@@ -130,7 +131,7 @@ class SeanceCrudController extends AbstractCrudController
 
             $weekDays[] = [
                 'date' => $dayStart->format('Y-m-d'),
-                'label' => $dayName,
+                'label' => $this->dateFormatter->weekday($dayStart),
                 'shortDate' => $dayStart->format('d/m'),
                 'blockedSlots' => $blockedSlots,
             ];
@@ -157,6 +158,8 @@ class SeanceCrudController extends AbstractCrudController
                     'title' => $seance->getFilm()?->getTitle() ?? 'Film inconnu',
                     'image' => $seance->getFilm()?->getImg(),
                     'start' => $startsAt->format('H:i'),
+                    'startTimestamp' => $startsAt->getTimestamp(),
+                    'endTimestamp' => $endsAt->getTimestamp(),
                     'topMinutes' => max(0, (int) (($visibleStart->getTimestamp() - $dayStart->getTimestamp()) / 60)),
                     'heightMinutes' => max(20, (int) (($visibleEnd->getTimestamp() - $visibleStart->getTimestamp()) / 60)),
                     'duration' => $duration,

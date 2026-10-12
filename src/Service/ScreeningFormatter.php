@@ -8,6 +8,10 @@ use DateTimeImmutable;
 
 final class ScreeningFormatter
 {
+    public function __construct(private DateFormatter $dateFormatter)
+    {
+    }
+
     /**
      * @return array{date: string, time: string, room: ?string}|null
      */
@@ -18,15 +22,12 @@ final class ScreeningFormatter
             return null;
         }
 
-        $weekdays = [1 => 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'];
-        $months = [1 => 'janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
-
         return [
             'date' => sprintf(
                 '%s %d %s',
-                $weekdays[(int) $dateTime->format('N')],
+                $this->dateFormatter->weekday($dateTime, true),
                 $dateTime->format('j'),
-                $months[(int) $dateTime->format('n')]
+                $this->dateFormatter->month($dateTime)
             ),
             'time' => $dateTime->format('H:i'),
             'room' => $seance->getSalle()?->getName(),

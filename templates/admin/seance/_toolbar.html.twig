@@ -34,17 +34,17 @@
 
     <nav class="seance-week-navigation" aria-label="Navigation entre les semaines">
         {% if isDailyView %}
-            <a class="btn btn-secondary" href="{{ ea_url().setAction('index').set('view', 'day').set('day', previousDay).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Jour précédent">&lsaquo;</a>
+            <a class="btn btn-secondary" href="{{ ea_url().setAction('index').set('view', 'day').set('day', previousDay).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Jour précédent"><span class="seance-navigation-arrow" aria-hidden="true">&lsaquo;</span></a>
             <strong>{{ selectedDate|date('d/m/Y') }}{% if isToday %} <span class="badge badge-success">Aujourd’hui</span>{% endif %}</strong>
-            <a class="btn btn-secondary" href="{{ ea_url().setAction('index').set('view', 'day').set('day', nextDay).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Jour suivant">&rsaquo;</a>
+            <a class="btn btn-secondary" href="{{ ea_url().setAction('index').set('view', 'day').set('day', nextDay).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Jour suivant"><span class="seance-navigation-arrow" aria-hidden="true">&rsaquo;</span></a>
             {% if not isToday %}<a class="btn btn-link" href="{{ ea_url().setAction('index').set('view', 'day').set('day', 'now'|date('Y-m-d')).set('salle', selectedRoom ? selectedRoom.id : '') }}">Aujourd’hui</a>{% endif %}
         {% else %}
-            <a class="btn btn-secondary" href="{{ ea_url().setAction('index').set('week', previousWeek).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Semaine précédente">&lsaquo;</a>
+            <a class="btn btn-secondary" href="{{ ea_url().setAction('index').set('week', previousWeek).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Semaine précédente" title="Semaine précédente"><span class="seance-navigation-arrow" aria-hidden="true">&lsaquo;</span></a>
             <strong>
                 {{ weekStart|date('d/m/Y') }} – {{ weekEnd|date('d/m/Y') }}
                 {% if isCurrentWeek %}<span class="badge badge-success">Cette semaine</span>{% endif %}
             </strong>
-            <a class="btn btn-secondary" href="{{ ea_url().setAction('index').set('week', nextWeek).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Semaine suivante">&rsaquo;</a>
+            <a class="btn btn-secondary" href="{{ ea_url().setAction('index').set('week', nextWeek).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Semaine suivante" title="Semaine suivante"><span class="seance-navigation-arrow" aria-hidden="true">&rsaquo;</span></a>
             {% if not isCurrentWeek %}
                 <a class="btn btn-link" href="{{ ea_url().setAction('index').set('salle', selectedRoom ? selectedRoom.id : '') }}">Aujourd’hui</a>
             {% endif %}
@@ -52,7 +52,18 @@
     </nav>
 
     <nav class="seance-view-toggle" aria-label="Vue du planning">
-        <a class="btn {{ isDailyView ? 'btn-secondary' : 'btn-primary' }}" href="{{ ea_url().setAction('index').set('week', weekStart|date('Y-m-d')).set('salle', selectedRoom ? selectedRoom.id : '') }}">Semaine</a>
-        <a class="btn {{ isDailyView ? 'btn-primary' : 'btn-secondary' }}" href="{{ ea_url().setAction('index').set('view', 'day').set('day', isDailyView ? selectedDate|date('Y-m-d') : weekStart|date('Y-m-d')).set('salle', selectedRoom ? selectedRoom.id : '') }}">Journée</a>
+        <a
+            class="seance-view-switch {{ isDailyView ? 'is-daily' : 'is-weekly' }}"
+            href="{{ isDailyView
+                ? ea_url().setAction('index').unset('view').unset('day').set('week', selectedDate|date('Y-m-d')).set('salle', selectedRoom ? selectedRoom.id : '')
+                : ea_url().setAction('index').set('view', 'day').set('day', weekStart|date('Y-m-d')).set('salle', selectedRoom ? selectedRoom.id : '') }}"
+            role="switch"
+            aria-checked="{{ isDailyView ? 'true' : 'false' }}"
+            aria-label="{{ isDailyView ? 'Passer à la vue semaine' : 'Passer à la vue journée' }}"
+        >
+            <span>Semaine</span>
+            <span class="seance-view-switch-track" aria-hidden="true"><span></span></span>
+            <span>Journée</span>
+        </a>
     </nav>
 </div>
