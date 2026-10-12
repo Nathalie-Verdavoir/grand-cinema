@@ -1,0 +1,22 @@
+<div class="daily-planner-scroll" data-seance-planner-target="dailyScroll">
+    <div class="daily-grid" style="--daily-width: 3456px">
+        <div class="daily-grid-header">
+            <div class="daily-room-heading">Salle</div>
+            <div class="daily-hours">
+                {% for slot in 0..95 %}
+                    {% if slot is divisible by(4) %}<span style="left: {{ slot * 36 }}px">{{ '%02d:00'|format(slot // 4) }}</span>{% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% for room in rooms %}
+            <div class="daily-grid-row">
+                <strong class="daily-room-label">{{ room.name }}</strong>
+                <div class="daily-room-lane schedule-day-lane" data-room-id="{{ room.id }}" data-date="{{ selectedDate|date('Y-m-d') }}" data-blocked-slots="{{ dayBlockedSlots }}" style="--past-width: {{ dayBlockedSlots * 36 }}px" data-action="dragover->seance-planner#allowDrop dragleave->seance-planner#leaveDrop drop->seance-planner#drop">
+                    {% for event in dailyEventsByRoom[room.id] %}
+                        {% include 'admin/seance/_schedule_event.html.twig' with {event: event, dailyEvent: true} only %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
