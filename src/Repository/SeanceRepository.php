@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Salle;
 use App\Entity\Seance;
+use App\Enum\SeanceStatus;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,6 +17,57 @@ class SeanceRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Seance::class);
+    }
+
+    /**
+     * @return Seance[]
+     */
+    public function findPublishedBetween(DateTimeImmutable $from, DateTimeImmutable $to): array
+    {
+        return $this->createQueryBuilder('seance')
+            ->addSelect('film')
+            ->join('seance.film', 'film')
+            ->andWhere('seance.dateTime >= :from')
+            ->andWhere('seance.dateTime < :to')
+            ->andWhere('seance.status = :status')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->setParameter('status', SeanceStatus::PUBLISHED)
+            ->orderBy('seance.dateTime', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return list<DateTimeImmutable>
+     */
+    public function findPublishedDateTimesFrom(DateTimeImmutable $from): array
+    {
+        $rows = $this->createQueryBuilder('seance')
+            ->select('DISTINCT seance.dateTime AS screeningDateTime')
+            ->andWhere('seance.dateTime >= :from')
+            ->andWhere('seance.status = :status')
+            ->setParameter('from', $from)
+            ->setParameter('status', SeanceStatus::PUBLISHED)
+            ->orderBy('seance.dateTime', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(
+            static function (array $row): DateTimeImmutable {
+                $dateTime = $row['screeningDateTime'];
+
+                if ($dateTime instanceof DateTimeImmutable) {
+                    return $dateTime;
+                }
+                if ($dateTime instanceof \DateTimeInterface) {
+                    return DateTimeImmutable::createFromInterface($dateTime);
+                }
+
+                return new DateTimeImmutable((string) $dateTime);
+            },
+            $rows
+        );
     }
 
     /**
