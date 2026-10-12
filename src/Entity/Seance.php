@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\SeanceStatus;
 use App\Repository\SeanceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -17,6 +18,9 @@ class Seance
 
     #[ORM\Column]
     private ?\DateTime $dateTime = null;
+
+    #[ORM\Column(length: 20, enumType: SeanceStatus::class, options: ['default' => 'draft'])]
+    private SeanceStatus $status = SeanceStatus::DRAFT;
 
     #[ORM\ManyToOne(inversedBy: 'seances')]
     #[ORM\JoinColumn(nullable: false)]
@@ -52,6 +56,28 @@ class Seance
         $this->dateTime = $dateTime;
 
         return $this;
+    }
+
+    public function getStatus(): SeanceStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(SeanceStatus $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getWorkflowStatus(): string
+    {
+        return $this->status->value;
+    }
+
+    public function setWorkflowStatus(string $status): void
+    {
+        $this->status = SeanceStatus::from($status);
     }
 
     public function getFilm(): ?Film

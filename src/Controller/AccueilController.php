@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Repository\FilmRepository;
+use App\Enum\SeanceStatus;
+use App\Service\ScreeningFormatter;
 use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,15 +14,13 @@ class AccueilController extends AbstractController
 {
 
     #[Route('/', name: 'app_accueil', methods: ['GET'])]
-    public function slide(FilmRepository $filmRepository): Response
+    public function slide(FilmRepository $filmRepository, ScreeningFormatter $screeningFormatter): Response
     {
         $films = $filmRepository->findInCurrentProgram();
         $now = new DateTimeImmutable();
         $endOfWeek = $now->modify('sunday this week')->setTime(23, 59, 59, 999999);
         $screeningsThisWeek = [];
         $screeningsAfterThisWeek = [];
-        $weekdays = [1 => 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'];
-        $months = [1 => 'janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
 
         foreach ($films as $film) {
             $filmId = $film->getId();
@@ -29,15 +29,19 @@ class AccueilController extends AbstractController
             }
 
             foreach ($film->getSeances() as $seance) {
+                if ($seance->getStatus() !== SeanceStatus::PUBLISHED) {
+                    continue;
+                }
                 $dateTime = $seance->getDateTime();
                 if (null === $dateTime || $dateTime < $now) {
                     continue;
                 }
 
-                $screening = [
-                    'dateTime' => $dateTime,
-                    'room' => $seance->getSalle()?->getName(),
-                ];
+                $screening = $screeningFormatter->format($seance);
+                if (null === $screening) {
+                    continue;
+                }
+                $screening['dateTime'] = $dateTime;
                 if ($dateTime <= $endOfWeek) {
                     $screeningsThisWeek[$filmId][] = $screening;
                 } else {
@@ -54,14 +58,10 @@ class AccueilController extends AbstractController
 
             $screeningsThisWeek[$filmId] = $this->formatScreenings(
                 $screeningsThisWeek[$filmId] ?? [],
-                $weekdays,
-                $months,
                 5
             );
             $screeningsAfterThisWeek[$filmId] = $this->formatScreenings(
                 $screeningsAfterThisWeek[$filmId] ?? [],
-                $weekdays,
-                $months,
                 3
             );
         }
@@ -73,7 +73,7 @@ class AccueilController extends AbstractController
         ]);
     }
 
-    private function formatScreenings(array $screenings, array $weekdays, array $months, int $limit): array
+    private function formatScreenings(array $screenings, int $limit): array
     {
         usort(
             $screenings,
@@ -81,20 +81,11 @@ class AccueilController extends AbstractController
         );
 
         return array_map(
-            static function (array $screening) use ($weekdays, $months): array {
-                $dateTime = $screening['dateTime'];
-
-                return [
-                    'date' => sprintf(
-                        '%s %d %s',
-                        $weekdays[(int) $dateTime->format('N')],
-                        $dateTime->format('j'),
-                        $months[(int) $dateTime->format('n')]
-                    ),
-                    'time' => $dateTime->format('H:i'),
-                    'room' => $screening['room'],
-                ];
-            },
+            static fn (array $screening): array => [
+                'date' => $screening['date'],
+                'time' => $screening['time'],
+                'room' => $screening['room'],
+            ],
             array_slice($screenings, 0, $limit)
         );
     }

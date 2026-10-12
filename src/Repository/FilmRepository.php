@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Film;
+use App\Entity\Seance;
+use App\Enum\SeanceStatus;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -27,7 +29,9 @@ class FilmRepository extends ServiceEntityRepository
             ->join('film.seances', 'seance')
             ->join('seance.salle', 'salle')
             ->andWhere('seance.dateTime >= :now')
+            ->andWhere('seance.status = :status')
             ->setParameter('now', new DateTimeImmutable())
+            ->setParameter('status', SeanceStatus::PUBLISHED)
             ->orderBy('seance.dateTime', 'ASC')
             ->getQuery()
             ->getResult();
@@ -41,11 +45,31 @@ class FilmRepository extends ServiceEntityRepository
             ->join('seance.salle', 'salle')
             ->andWhere('film.id = :id')
             ->andWhere('seance.dateTime >= :now')
+            ->andWhere('seance.status = :status')
             ->setParameter('id', $id)
             ->setParameter('now', new DateTimeImmutable())
+            ->setParameter('status', SeanceStatus::PUBLISHED)
             ->orderBy('seance.dateTime', 'ASC')
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    /**
+     * @return Film[]
+     */
+    public function findProgrammableWithDuration(): array
+    {
+        return $this->createQueryBuilder('film')
+            ->andWhere('film.programmable = :programmable')
+            ->andWhere('film.duration IS NOT NULL')
+            ->andWhere('film.duration BETWEEN :minimumDuration AND :maximumDuration')
+            ->setParameter('programmable', true)
+            ->setParameter('minimumDuration', 1)
+            ->setParameter('maximumDuration', 600)
+            ->orderBy('film.title', 'ASC')
+            ->addOrderBy('film.id', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
 //    /**

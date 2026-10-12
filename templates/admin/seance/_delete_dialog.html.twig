@@ -1,0 +1,11 @@
+<div class="seance-delete-dialog" data-seance-planner-target="deleteDialog" hidden>
+    <div class="seance-delete-dialog-backdrop" data-action="click->seance-planner#closeDeleteDialog"></div>
+    <section class="seance-delete-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="seance-delete-dialog-title">
+        <h2 id="seance-delete-dialog-title">Supprimer la séance ?</h2>
+        <p>Cette action supprimera la séance du planning.</p>
+        <div class="seance-delete-dialog-actions">
+            <button type="button" class="btn btn-link" data-action="click->seance-planner#closeDeleteDialog">Annuler</button>
+            <button type="button" class="btn btn-danger" data-action="click->seance-planner#deleteConfirmed">Confirmer</button>
+        </div>
+    </section>
+</div>

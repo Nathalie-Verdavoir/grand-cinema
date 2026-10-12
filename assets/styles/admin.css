@@ -37,13 +37,24 @@
 .seance-room-selector {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.4rem;
 }
 
 .seance-planner-toolbar {
-    justify-content: space-between;
+    justify-content: flex-start;
     flex-wrap: wrap;
     margin-bottom: 1rem;
+}
+
+.seance-planner-toolbar form {
+    margin: 0;
+}
+
+.seance-planner-toolbar .btn,
+.seance-week-navigation .btn,
+.seance-view-toggle .btn {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.8rem;
 }
 
 .seance-room-selector label {
@@ -51,11 +62,65 @@
 }
 
 .seance-room-selector select {
-    min-width: 12rem;
+    min-width: 9rem;
 }
 
 .seance-week-navigation strong {
     white-space: nowrap;
+}
+
+.seance-week-navigation > a[aria-label="Semaine précédente"],
+.seance-week-navigation > a[aria-label="Semaine suivante"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    line-height: 0.6rem;
+}
+
+.seance-navigation-arrow {
+    display: inline-block;
+    font-size: 2rem;
+    transform: translateY(-0.12em);
+}
+
+.seance-view-toggle {
+    display: flex;
+    margin-left: auto;
+}
+
+.seance-view-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.seance-view-switch-track {
+    display: inline-flex;
+    align-items: center;
+    width: 2.4rem;
+    height: 1.25rem;
+    padding: 0.15rem;
+    border: 1px solid var(--color-primary);
+    border-radius: 999px;
+    background: var(--color-primary);
+    box-sizing: border-box;
+}
+
+.seance-view-switch-track span {
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.15s ease;
+}
+
+.seance-view-switch.is-daily .seance-view-switch-track span {
+    transform: translateX(1.1rem);
 }
 
 .seance-planner-feedback {
@@ -110,13 +175,13 @@
 }
 
 .schedule-grid-body {
-    height: 1920px;
+    height: 1728px;
 }
 
 .schedule-time-axis,
 .schedule-day-lane {
     position: relative;
-    height: 1920px;
+    height: 1728px;
 }
 
 .schedule-time-axis {
@@ -136,11 +201,89 @@
     border-left: 1px solid var(--color-global-2);
     background:
         linear-gradient(to bottom, var(--color-schedule-past), var(--color-schedule-past)) 0 0 / 100% var(--past-height, 0px) no-repeat,
-        repeating-linear-gradient(to bottom, var(--color-transparent) 0, var(--color-transparent) 39px, var(--color-global-2) 39px, var(--color-global-2) 40px);
+        repeating-linear-gradient(to bottom, var(--color-transparent) 0, var(--color-transparent) 17px, var(--color-global-2) 17px, var(--color-global-2) 18px);
 }
 
 .schedule-day-lane.is-drop-target {
     background-color: var(--color-success-background);
+}
+
+.daily-planner-scroll {
+    width: min(100%, 72rem);
+    max-width: 100%;
+    max-height: 75vh;
+    overflow-x: auto;
+    overflow-y: auto;
+    border: 1px solid var(--color-global-2);
+}
+
+.daily-grid {
+    min-width: calc(7rem + var(--daily-width));
+}
+
+.daily-grid-header,
+.daily-grid-row {
+    display: grid;
+    grid-template-columns: 7rem var(--daily-width);
+}
+
+.daily-grid-header {
+    position: sticky;
+    z-index: 3;
+    top: 0;
+    background: var(--color-global-2);
+    color: var(--color-white);
+}
+
+.daily-room-heading,
+.daily-room-label {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid var(--color-global-1);
+    position: sticky;
+    left: 0;
+    width: 7rem;
+    box-sizing: border-box;
+}
+
+.daily-hours {
+    position: relative;
+    height: 2.75rem;
+    background: repeating-linear-gradient(to right, transparent 0, transparent 143px, var(--color-global-1) 143px, var(--color-global-1) 144px);
+}
+
+.daily-hours span {
+    position: absolute;
+    top: 0.75rem;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+}
+
+.daily-room-heading {
+    z-index: 4;
+    background: var(--color-global-2);
+}
+
+.daily-room-label {
+    z-index: 2;
+    background: var(--color-global-2);
+    color: var(--color-white);
+    box-shadow: 0.25rem 0 0.5rem rgb(0 0 0 / 15%);
+}
+
+.daily-room-lane {
+    height: 5rem;
+    border-bottom: 1px solid var(--color-global-2);
+    background:
+        linear-gradient(to right, var(--color-schedule-past), var(--color-schedule-past)) 0 0 / var(--past-width, 0) 100% no-repeat,
+        repeating-linear-gradient(to right, transparent 0, transparent 35px, var(--color-global-2) 35px, var(--color-global-2) 36px);
+}
+
+.daily-room-lane .schedule-event {
+    top: 0.35rem;
+    bottom: 0.35rem;
+    right: auto;
+    min-width: 2.5rem;
+    padding-left: 2.2rem;
 }
 
 .schedule-event {
@@ -151,7 +294,7 @@
     display: flex;
     overflow: hidden;
     flex-direction: column;
-    padding: 0.25rem;
+    padding: 0.25rem 1.55rem 0.25rem 2.2rem;
     border-left: 3px solid var(--color-global-5);
     border-radius: 3px;
     background: var(--color-global-2);
@@ -160,14 +303,209 @@
     line-height: 1.2;
 }
 
+.schedule-event-poster {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    width: 1.65rem;
+    min-height: 1rem;
+    border-radius: 2px;
+    object-fit: cover;
+    opacity: 0.9;
+}
+
 .schedule-event span {
     margin-top: 0.15rem;
+}
+
+.schedule-event-occupancy {
+    position: relative;
+    display: block;
+    height: 0.35rem;
+    margin-top: 0.25rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.schedule-event-occupancy > span {
+    display: block;
+    height: 100%;
+    margin-top: 0;
+    border-radius: inherit;
+    background: #68d391;
+}
+
+.schedule-event-occupancy b {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    color: var(--color-white);
+    font-size: 0.5rem;
+    line-height: 1;
+}
+
+.schedule-event-delete {
+    position: absolute;
+    top: 0.15rem;
+    right: 0.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    padding: 0;
+    border: 1px solid var(--color-white);
+    border-radius: 3px;
+    background: var(--color-error-text);
+    color: var(--color-white);
+    box-shadow: none;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.schedule-event-publish {
+    position: absolute;
+    top: 0.15rem;
+    right: 0.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    padding: 0;
+    border: 1px solid #68d391;
+    border-radius: 3px;
+    background: #276749;
+    color: #c6f6d5;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.schedule-event-publish-with-delete {
+    right: 1.15rem;
+}
+
+.schedule-event-publish span {
+    display: block;
+    position: relative;
+    top: -1px;
+    transform: translateY(-1px);
+}
+
+.schedule-event-publish:hover,
+.schedule-event-publish:focus-visible {
+    border-color: #9ae6b4;
+    background: #2f855a;
+    color: var(--color-white);
+}
+
+.schedule-event-status {
+    display: block;
+    margin-top: 4px;
+    font-size: 10px;
+    opacity: .75;
+}
+
+.schedule-event-delete span {
+    display: block;
+    position: relative;
+    top: -1px;
+    transform: translateY(-1px);
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 0.9;
+}
+
+.schedule-event-delete:hover,
+.schedule-event-delete:focus-visible {
+    border-color: var(--color-white);
+    background: var(--color-global-5);
+    color: var(--color-white);
 }
 
 .schedule-event-unknown {
     border-color: var(--color-global-5);
     background: var(--color-schedule-unknown);
     color: var(--color-white);
+}
+
+.schedule-event-draft {
+    border-left-color: #d69e2e;
+    background: #6b4f1d;
+}
+
+.schedule-event-published {
+    border-left-color: #38a169;
+    background: #245c46;
+}
+
+.schedule-event-cancelled {
+    border-left-color: #e53e3e;
+    background: #6b2727;
+    opacity: 0.75;
+    text-decoration: line-through;
+}
+
+.schedule-event-ended {
+    border-left-color: #718096;
+    background: #3f4652;
+    opacity: 0.7;
+}
+
+.seance-delete-dialog {
+    position: fixed;
+    z-index: 10;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+}
+
+.seance-delete-dialog[hidden] {
+    display: none;
+}
+
+.seance-delete-dialog-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgb(24 46 65 / 65%);
+}
+
+.seance-delete-dialog-panel {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 28rem);
+    padding: 1.25rem;
+    border: 1px solid var(--color-global-2);
+    border-radius: 4px;
+    background: var(--color-global-5);
+    color: var(--color-white);
+    box-shadow: 0 0.75rem 2rem var(--color-shadow);
+}
+
+.seance-delete-dialog-panel h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.15rem;
+}
+
+.seance-delete-dialog-panel p {
+    margin-bottom: 1.25rem;
+}
+
+.seance-delete-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
 }
 
 .seance-film-palette {
