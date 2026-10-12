@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
+#[ORM\UniqueConstraint(name: 'UNIQ_RESERVATION_STRIPE_SESSION', columns: ['stripe_checkout_session_id'])]
 class Reservation
 {
     #[ORM\Id]
@@ -36,6 +37,9 @@ class Reservation
 
     #[ORM\Column(enumType: ReservationStatus::class)]
     private ?ReservationStatus $status = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $stripeCheckoutSessionId = null;
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: false)]
@@ -125,6 +129,18 @@ class Reservation
     public function setStatus(ReservationStatus $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getStripeCheckoutSessionId(): ?string
+    {
+        return $this->stripeCheckoutSessionId;
+    }
+
+    public function setStripeCheckoutSessionId(?string $stripeCheckoutSessionId): static
+    {
+        $this->stripeCheckoutSessionId = $stripeCheckoutSessionId;
 
         return $this;
     }

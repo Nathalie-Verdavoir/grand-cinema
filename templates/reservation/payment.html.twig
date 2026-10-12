@@ -7,8 +7,18 @@
         <section class="reservation-panel reservation-payment-panel" aria-labelledby="payment-title">
             <h1 id="payment-title">Paiement de votre réservation</h1>
             <p class="reservation-payment-status" role="status">
-                {{ canPay ? 'Votre réservation est en attente de paiement.' : reservation.status.label }}
+                {% if paymentConfirmed %}
+                    Votre paiement est confirmé.
+                {% else %}
+                    {{ canPay ? 'Votre réservation est en attente de paiement.' : reservation.status.label }}
+                {% endif %}
             </p>
+
+            {% if checkoutCancelled %}
+                <p class="reservation-payment-notice">Le paiement a été annulé. Votre réservation reste dans votre panier.</p>
+            {% elseif paymentConfirmationPending %}
+                <p class="reservation-payment-notice">Nous vérifions le paiement auprès de Stripe. La réservation restera dans votre panier tant que le paiement n’est pas confirmé.</p>
+            {% endif %}
 
             <dl class="reservation-details">
                 <div class="reservation-detail">
@@ -61,9 +71,10 @@
             </div>
 
             {% if canPay %}
-                <p class="reservation-payment-notice">
-                    Le paiement sécurisé par Stripe sera disponible à l’étape suivante.
-                </p>
+                <form method="post" action="{{ path('app_reservation_paiement_checkout', {reference: reservation.reference}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('reservation-payment-' ~ reservation.reference) }}">
+                    <button class="cart-reservation-payment" type="submit">Payer avec Stripe</button>
+                </form>
             {% endif %}
             <a class="film-program-back" href="{{ path('app_accueil') }}">← Retour à l’accueil</a>
         </section>

@@ -12,6 +12,7 @@
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "^3.7",
         "easycorp/easyadmin-bundle": "^4.29",
+        "stripe/stripe-php": "^22.0",
         "symfony/asset": "6.4.*",
         "symfony/brevo-mailer": "6.4.*",
         "symfony/console": "6.4.*",

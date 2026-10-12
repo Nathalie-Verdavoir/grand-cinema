@@ -136,9 +136,11 @@
 .cart-reservation-payment {
     flex: 0 0 auto;
     padding: 0.55rem 0.85rem;
+    border: 0;
     border-radius: 0.35rem;
     background: var(--color-global-5);
     color: var(--color-white);
+    cursor: pointer;
     font-weight: 700;
     text-decoration: none;
 }
