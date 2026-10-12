@@ -7,6 +7,8 @@
 
 // any CSS you import will output into a single css file (app.css in this case)
 import './styles/app.css';
+import './styles/flash-messages.css';
+import './flash-messages.js';
 
 const initializeHomeCarousels = () => {
     document.querySelectorAll('[data-home-carousel]').forEach((carousel) => {

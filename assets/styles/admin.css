@@ -638,6 +638,9 @@
 .seance-film-palette {
     position: sticky;
     top: 1rem;
+    height: 75vh;
+    overflow-y: auto;
+    padding-right: 0.25rem;
 }
 
 .seance-film-palette h2 {
@@ -652,15 +655,32 @@
 .seance-film-card {
     position: relative;
     display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    margin-bottom: 0.5rem;
-    padding: 0.65rem 2rem 0.65rem 0.65rem;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+    padding: 0.35rem 1.7rem 0.35rem 0.5rem;
     border: 1px solid var(--color-global-2);
     border-radius: 4px;
     background: var(--color-global-2);
     color: var(--color-white);
-    font-size: 0.85rem;
+    font-size: 0.72rem;
+    line-height: 1.3;
+}
+
+.seance-film-card-poster {
+    flex: 0 0 auto;
+    width: 2rem;
+    aspect-ratio: 2 / 3;
+    border-radius: 2px;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+.seance-film-card-text {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.1rem;
 }
 
 .seance-film-card.is-unavailable {
@@ -689,18 +709,18 @@
 
 .seance-film-card-edit {
     position: absolute;
-    top: 0.35rem;
-    right: 0.35rem;
+    top: 0.3rem;
+    right: 0.3rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.15rem;
-    height: 1.15rem;
+    width: 1rem;
+    height: 1rem;
     padding: 0;
     border: 1px solid var(--color-white);
     border-radius: 3px;
     color: var(--color-white);
-    font-size: 0.85rem;
+    font-size: 0.72rem;
     line-height: 1;
     text-decoration: none;
 }
@@ -734,5 +754,7 @@
 
     .seance-film-palette {
         position: static;
+        height: auto;
+        max-height: 40vh;
     }
 }

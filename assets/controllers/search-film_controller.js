@@ -14,6 +14,12 @@ export default class extends Controller {
         this.updateSavedImagePreview();
         this.createDurationStatus();
 
+        const savedTitle = this.hasTitleFieldTarget ? this.titleFieldTarget.value.trim() : '';
+        if (savedTitle && !this.searchInputTarget.value.trim()) {
+            this.searchInputTarget.value = savedTitle;
+            this.search();
+        }
+
         if (!this.hasResultsSelectTarget) {
             const resultsSelect = this.element.querySelector('select[name$="[api_results]"]');
             if (resultsSelect) {
@@ -214,7 +220,10 @@ export default class extends Controller {
             try {
                 const response = await fetch(`/admin/api/film/${encodeURIComponent(movie.id)}/details`);
                 if (!response.ok) {
-                    throw new Error(`La vérification TMDB a échoué (${response.status}).`);
+                    console.error(new Error(`La vérification TMDB a échoué (${response.status}).`));
+                    this.durationStatus.textContent = 'Impossible de vérifier la durée auprès de TMDB : veuillez la saisir manuellement.';
+                    this.durationStatus.className = 'form-text text-warning';
+                    return;
                 }
 
                 const details = await response.json();

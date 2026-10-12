@@ -27,6 +27,13 @@
             <input type="hidden" name="salle" value="{{ selectedRoom ? selectedRoom.id : '' }}">
             <button type="submit" class="btn btn-success">Publier les brouillons du jour</button>
         </form>
+    {% elseif selectedRoom %}
+        <form method="post" action="{{ path('admin_seance_publish_week') }}" class="seance-publish-week-form">
+            <input type="hidden" name="_token" value="{{ csrf_token('admin_publish_week') }}">
+            <input type="hidden" name="week" value="{{ weekStart|date('Y-m-d') }}">
+            <input type="hidden" name="salle" value="{{ selectedRoom.id }}">
+            <button type="submit" class="btn btn-success">Publier les brouillons de la semaine</button>
+        </form>
     {% endif %}
 
     <nav class="seance-week-navigation" aria-label="Navigation entre les semaines">
