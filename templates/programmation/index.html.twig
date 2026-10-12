@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nos Séances - Grand Cinéma{% endblock %}
+
+{% block body %}
+    <div class="container home-page audience-program-page">
+        <h1>Nos Séances</h1>
+        <div class="audience-week-toolbar">
+            <form method="get" action="{{ path('app_programmation') }}">
+                <label class="visually-hidden" for="audience-week">Choisir une semaine</label>
+                <select id="audience-week" name="week" onchange="this.form.submit()">
+                    {% for option in weekOptions %}
+                        <option value="{{ option.value }}" {% if option.value == weekStart|date('Y-m-d') %}selected{% endif %}>{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+            <nav class="audience-week-navigation" aria-label="Navigation entre les semaines">
+                {% if weekStart > currentWeekStart %}
+                    <a class="audience-week-button" href="{{ path('app_programmation', {week: previousWeek|date('Y-m-d')}) }}" aria-label="Semaine précédente">
+                        <span class="audience-week-button-label">Semaine précédente</span>
+                        <span class="audience-week-button-icon" aria-hidden="true">‹</span>
+                    </a>
+                {% else %}
+                    <span class="audience-week-button is-disabled" aria-disabled="true" aria-label="Semaine précédente indisponible">
+                        <span class="audience-week-button-label">Semaine précédente</span>
+                        <span class="audience-week-button-icon" aria-hidden="true">‹</span>
+                    </span>
+                {% endif %}
+                <a class="audience-week-button" href="{{ path('app_programmation', {week: nextWeek|date('Y-m-d')}) }}" aria-label="Semaine suivante">
+                    <span class="audience-week-button-label">Semaine suivante</span>
+                    <span class="audience-week-button-icon" aria-hidden="true">›</span>
+                </a>
+            </nav>
+        </div>
+
+        {% if filmSchedules is not empty %}
+            <div class="audience-film-list">
+                {% for filmSchedule in filmSchedules %}
+                    <article class="audience-film-card">
+                        <div class="audience-film-identification">
+                            {% if filmSchedule.film.img %}
+                                <img
+                                    class="audience-film-poster"
+                                    src="{{ filmSchedule.film.img }}"
+                                    alt="Affiche du film {{ filmSchedule.film.title }}"
+                                    loading="lazy"
+                                >
+                            {% else %}
+                                <div class="audience-film-poster audience-film-poster-placeholder" role="img" aria-label="Affiche indisponible pour {{ filmSchedule.film.title }}">
+                                    {{ filmSchedule.film.title }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="audience-film-content">
+                            <div class="audience-film-heading">
+                                <div class="audience-film-info">
+                                    <h2>{{ filmSchedule.film.title }}</h2>
+                                    {% if filmSchedule.film.duration %}
+                                        <p>{{ '%02d'|format(filmSchedule.film.duration // 60) }}h{{ '%02d'|format(filmSchedule.film.duration % 60) }}</p>
+                                    {% endif %}
+                                </div>
+                                <a class="audience-film-details-link" href="{{ path('app_programmation_film', {id: filmSchedule.film.id}) }}" aria-label="Voir la fiche complète de {{ filmSchedule.film.title }}">
+                                    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    <span class="audience-film-details-label">Fiche complète</span>
+                                </a>
+                            </div>
+                            <table>
+                                <caption class="visually-hidden">
+                                    Séances de {{ filmSchedule.film.title }} du {{ weekStart|date('d/m/Y') }} au {{ weekEnd|date('d/m/Y') }}
+                                </caption>
+                                <thead>
+                                    <tr>
+                                        {% for day in days %}
+                                            <th scope="col" class="{{ day.isToday ? 'is-today' : '' }}">
+                                                <span>{{ day.label }}</span>
+                                                <strong>{{ day.number }}</strong>
+                                            </th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        {% for day in days %}
+                                            <td class="{{ day.isToday ? 'is-today' : '' }}">
+                                                {% for time in filmSchedule.screeningsByDay[day.value] ?? [] %}
+                                                    <span class="audience-screening-time">{{ time }}</span>
+                                                {% else %}
+                                                    <span class="audience-screening-empty" aria-label="Aucune séance">-</span>
+                                                {% endfor %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="audience-program-empty">Aucun film n’est programmé pour cette semaine.</p>
+        {% endif %}
+    </div>
+{% endblock %}
