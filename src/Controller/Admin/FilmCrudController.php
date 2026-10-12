@@ -57,7 +57,10 @@ class FilmCrudController extends AbstractCrudController
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         if ($entityInstance instanceof Film) {
-            $entityInstance->setImg($this->imageUploader->uploadFilmPoster($entityInstance->getImg()));
+            $originalImg = $entityManager->getUnitOfWork()->getOriginalEntityData($entityInstance)['img'] ?? null;
+            if (null === $originalImg || $entityInstance->getImg() !== $originalImg) {
+                $entityInstance->setImg($this->imageUploader->uploadFilmPoster($entityInstance->getImg()));
+            }
         }
 
         parent::updateEntity($entityManager, $entityInstance);

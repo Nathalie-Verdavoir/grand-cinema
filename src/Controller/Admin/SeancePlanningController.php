@@ -131,6 +131,52 @@ class SeancePlanningController extends AbstractController
         return $this->redirectToDailyView($request, $day);
     }
 
+    #[Route('/admin/seances/publish-week', name: 'admin_seance_publish_week', methods: ['POST'])]
+    public function publishWeek(Request $request): \Symfony\Component\HttpFoundation\Response
+    {
+        if (!$this->isCsrfTokenValid('admin_publish_week', (string) $request->request->get('_token'))) {
+            $this->addFlash('danger', 'Votre session a expiré. Rechargez la page puis réessayez.');
+
+            return $this->redirectToRoute('admin_seance_index');
+        }
+
+        $week = $request->request->get('week');
+        $weekStart = is_string($week) ? DateTimeImmutable::createFromFormat('!Y-m-d', $week) : false;
+        $errors = DateTimeImmutable::getLastErrors();
+        if (false === $weekStart || (false !== $errors && (0 !== $errors['warning_count'] || 0 !== $errors['error_count'])) || $weekStart->format('Y-m-d') !== $week) {
+            $this->addFlash('danger', 'La semaine sélectionnée est invalide.');
+
+            return $this->redirectToRoute('admin_seance_index');
+        }
+
+        $weekStart = $weekStart->modify('monday this week')->setTime(0, 0);
+        $roomId = filter_var($request->request->get('salle'), FILTER_VALIDATE_INT);
+        $room = false !== $roomId ? $this->salleRepository->find($roomId) : null;
+        if (!$room instanceof Salle) {
+            $this->addFlash('danger', 'La salle sélectionnée est invalide.');
+
+            return $this->redirectToRoute('admin_seance_index', ['week' => $weekStart->format('Y-m-d')]);
+        }
+
+        $published = 0;
+        foreach ($this->seanceRepository->findForRoomBetween($room, $weekStart, $weekStart->modify('+7 days')) as $seance) {
+            if ($this->seancePublishingStateMachine->can($seance, 'publish')) {
+                $this->seancePublishingStateMachine->apply($seance, 'publish');
+                ++$published;
+            }
+        }
+        if ($published > 0) {
+            $this->entityManager->flush();
+        }
+
+        $this->addFlash('success', sprintf('%d séance(s) brouillon(s) publiée(s) pour la semaine du %s.', $published, $weekStart->format('d/m/Y')));
+
+        return $this->redirectToRoute('admin_seance_index', [
+            'week' => $weekStart->format('Y-m-d'),
+            'salle' => $room->getId(),
+        ]);
+    }
+
     #[Route('/admin/api/seances', name: 'admin_api_seance_create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {

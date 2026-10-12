@@ -1,6 +1,7 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
 {% block content_title %}
+    {% include '_flash_messages.html.twig' %}
     <span class="seance-page-title">Planning des séances</span>
     {% include 'admin/seance/_view_toggle.html.twig' %}
 {% endblock %}

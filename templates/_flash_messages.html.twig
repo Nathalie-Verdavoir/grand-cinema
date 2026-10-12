@@ -1,0 +1,14 @@
+<div id="flash-messages" class="flash-messages" aria-live="polite" aria-relevant="additions">
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success flash-message" role="status">
+            <span class="flash-message-text">{{ message }}</span>
+            <button class="flash-message-dismiss" type="button" data-flash-dismiss aria-label="Fermer la notification">×</button>
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger flash-message" role="alert">
+            <span class="flash-message-text">{{ message }}</span>
+            <button class="flash-message-dismiss" type="button" data-flash-dismiss aria-label="Fermer la notification">×</button>
+        </div>
+    {% endfor %}
+</div>
