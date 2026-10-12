@@ -1,0 +1,22 @@
+<article
+    class="schedule-event schedule-event-{{ event.status }} {{ event.ended ? 'schedule-event-ended' }} {{ event.unknownDuration ? 'schedule-event-unknown' }}"
+    style="{{ dailyEvent ? 'left: ' ~ (event.topMinutes * 12 / 5) ~ 'px; width: ' ~ (event.heightMinutes * 12 / 5) ~ 'px' : 'top: ' ~ (event.topMinutes * 6 / 5) ~ 'px; height: ' ~ (event.heightMinutes * 6 / 5) ~ 'px' }}"
+    title="{{ event.title }} — {{ event.start }}{% if event.duration %}{% if not dailyEvent %}, {% else %} · {% endif %}{{ event.duration }} min{% if not dailyEvent %} + 20 min de battement{% endif %}{% else %}{% if dailyEvent %} ·{% else %}, {% endif %} durée inconnue{% endif %} — {{ event.statusLabel }}"
+    data-start-timestamp="{{ event.startTimestamp }}"
+    data-end-timestamp="{{ event.endTimestamp }}"
+    data-delete-url="{{ path('admin_api_seance_delete', {id: event.id}) }}"
+    data-publish-url="{{ path('admin_api_seance_publish', {id: event.id}) }}"
+>
+    {% if event.image %}<img class="schedule-event-poster" src="{{ event.image }}" alt="" loading="lazy">{% endif %}
+    <strong>{{ dailyEvent ? '' : (event.continuation ? '↳ ' : '') }}{{ event.title }}</strong>
+    <span>{{ event.start }}{% if event.duration %} · {{ event.duration }} min{% if not dailyEvent %} + 20 min{% endif %}{% else %} · durée inconnue{% endif %}</span>
+    <span class="schedule-event-occupancy" title="{{ event.reservedSeats }}/{{ event.capacity }} places réservées"><span style="width: {{ event.occupancyPercent }}%"></span><b>{{ event.occupancyPercent }}%</b></span>
+    {% if event.status == 'draft' %}
+        <button type="button" class="schedule-event-publish{{ event.canDelete ? ' schedule-event-publish-with-delete' }}" data-action="click->seance-planner#publish" aria-label="Publier la séance de {{ event.title }} à {{ event.start }}" title="Publier la séance"><span aria-hidden="true">✓</span></button>
+    {% elseif event.ended %}
+        <span class="schedule-event-status">Terminée</span>
+    {% endif %}
+    {% if event.canDelete %}
+        <button type="button" class="schedule-event-delete" data-action="click->seance-planner#confirmDelete" aria-label="Supprimer la séance de {{ event.title }} à {{ event.start }}" title="Supprimer la séance"><span aria-hidden="true">×</span></button>
+    {% endif %}
+</article>

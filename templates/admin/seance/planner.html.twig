@@ -8,38 +8,22 @@
     <section
         class="seance-planner"
         data-controller="seance-planner"
+        data-action="keydown.esc@window->seance-planner#closeDeleteDialog"
         data-create-url="{{ path('admin_api_seance_create') }}"
         data-csrf-token="{{ csrf_token('admin_create_seance') }}"
+        data-delete-csrf-token="{{ csrf_token('admin_delete_seance') }}"
+        data-publish-csrf-token="{{ csrf_token('admin_publish_seance') }}"
         data-room-id="{{ selectedRoom ? selectedRoom.id : '' }}"
+        data-is-today="{{ isToday ? 'true' : 'false' }}"
     >
-        <div class="seance-planner-toolbar">
-            <form method="get" action="{{ path('admin_seance_index') }}" class="seance-room-selector">
-                <label for="schedule-room">Salle</label>
-                <input type="hidden" name="week" value="{{ weekStart|date('Y-m-d') }}">
-                <select id="schedule-room" name="salle" class="form-select" {% if rooms is empty %}disabled{% endif %} onchange="this.form.submit()">
-                    {% for room in rooms %}
-                        <option value="{{ room.id }}" {% if selectedRoom and room.id == selectedRoom.id %}selected{% endif %}>{{ room.name }}</option>
-                    {% endfor %}
-                </select>
-            </form>
-
-            <nav class="seance-week-navigation" aria-label="Navigation entre les semaines">
-                <a class="btn btn-secondary" href="{{ ea_url().setAction('index').set('week', previousWeek).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Semaine précédente">&lsaquo;</a>
-                <strong>
-                    {{ weekStart|date('d/m/Y') }} – {{ weekEnd|date('d/m/Y') }}
-                    {% if isCurrentWeek %}<span class="badge badge-success">Cette semaine</span>{% endif %}
-                </strong>
-                <a class="btn btn-secondary" href="{{ ea_url().setAction('index').set('week', nextWeek).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Semaine suivante">&rsaquo;</a>
-                {% if not isCurrentWeek %}
-                    <a class="btn btn-link" href="{{ ea_url().setAction('index').set('salle', selectedRoom ? selectedRoom.id : '') }}">Aujourd’hui</a>
-                {% endif %}
-            </nav>
-        </div>
+        {% include 'admin/seance/_toolbar.html.twig' %}
 
         <p class="seance-planner-feedback" data-seance-planner-target="feedback" role="status" aria-live="polite"></p>
 
         {% if rooms is empty %}
             <div class="alert alert-warning">Créez une salle avant de programmer des séances.</div>
+        {% elseif isDailyView %}
+            {% include 'admin/seance/_daily_view.html.twig' %}
         {% elseif selectedRoom %}
             <div class="seance-planner-layout">
                 <div class="schedule-calendar-scroll">
@@ -54,9 +38,9 @@
                     </div>
                     <div class="schedule-grid-body">
                         <div class="schedule-time-axis">
-                            {% for slot in 0..47 %}
-                                {% if slot is even %}
-                                    <span style="top: {{ slot * 40 }}px">{{ '%02d'|format(slot // 2) }}:00</span>
+                            {% for slot in 0..95 %}
+                                {% if slot is divisible by(4) %}
+                                    <span style="top: {{ slot * 18 }}px">{{ '%02d'|format(slot // 4) }}:00</span>
                                 {% endif %}
                             {% endfor %}
                         </div>
@@ -65,46 +49,22 @@
                                 class="schedule-day-lane"
                                 data-date="{{ day.date }}"
                                 data-blocked-slots="{{ day.blockedSlots }}"
-                                style="--past-height: {{ day.blockedSlots * 40 }}px"
+                                style="--past-height: {{ day.blockedSlots * 18 }}px"
                                 aria-label="{{ day.label }} {{ day.shortDate }}"
                                 data-action="dragover->seance-planner#allowDrop dragleave->seance-planner#leaveDrop drop->seance-planner#drop"
                             >
                                 {% for event in eventsByDay[day.date] %}
-                                    <article
-                                        class="schedule-event {{ event.unknownDuration ? 'schedule-event-unknown' }}"
-                                        style="top: {{ event.topMinutes * 4 / 3 }}px; height: {{ event.heightMinutes * 4 / 3 }}px"
-                                        title="{{ event.title }} — {{ event.start }}{% if event.duration %}, {{ event.duration }} min + 20 min de battement{% else %}, durée inconnue{% endif %}"
-                                    >
-                                        <strong>{{ event.continuation ? '↳ ' : '' }}{{ event.title }}</strong>
-                                        <span>{{ event.start }}{% if event.duration %} · {{ event.duration }} min + 20 min{% else %} · durée inconnue{% endif %}</span>
-                                    </article>
+                                    {% include 'admin/seance/_schedule_event.html.twig' with {event: event, dailyEvent: false} only %}
                                 {% endfor %}
                             </div>
                         {% endfor %}
                     </div>
                 </div>
 
-                <aside class="seance-film-palette">
-                    <h2>Films programmables</h2>
-                    <p class="text-muted">Glissez un film sur un créneau de 30 minutes. Une pause de 20 minutes est automatiquement ajoutée après sa durée.</p>
-                    {% for film in films %}
-                        {% if film.duration %}
-                        <article class="seance-film-card is-draggable" draggable="true" data-action="dragstart->seance-planner#startDrag dragend->seance-planner#endDrag" data-film-id="{{ film.id }}" data-film-title="{{ film.title|e('html_attr') }}" data-film-duration="{{ film.duration }}">
-                        {% else %}
-                        <a class="seance-film-card is-unavailable" href="{{ filmEditUrls[film.id] }}" title="Modifier la fiche de ce film">
-                        {% endif %}
-                            <strong>{{ film.title }}</strong>
-                            {% if film.duration %}
-                                <span>{{ film.duration }} min + 20 min</span>
-                            {% else %}
-                                <span>Durée à renseigner — ouvrir la fiche du film</span>
-                            {% endif %}
-                        {% if film.duration %}</article>{% else %}</a>{% endif %}
-                    {% else %}
-                        <p class="text-muted">Aucun film programmable.</p>
-                    {% endfor %}
-                </aside>
+                {% include 'admin/seance/_film_palette.html.twig' %}
             </div>
         {% endif %}
+
+        {% include 'admin/seance/_delete_dialog.html.twig' %}
     </section>
 {% endblock %}
