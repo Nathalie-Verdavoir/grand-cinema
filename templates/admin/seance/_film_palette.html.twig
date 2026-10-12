@@ -3,15 +3,21 @@
     <p class="text-muted">Glissez un film sur un créneau de 15 minutes. Une pause de 20 minutes est automatiquement ajoutée après sa durée.</p>
     {% for film in films %}
         {% if film.duration %}
-            <article class="seance-film-card is-draggable" draggable="true" data-action="dragstart->seance-planner#startDrag dragend->seance-planner#endDrag" data-film-id="{{ film.id }}" data-film-title="{{ film.title|e('html_attr') }}" data-film-duration="{{ film.duration }}">
+            <article class="seance-film-card is-draggable" draggable="true" data-action="dragstart->seance-planner#startDrag dragend->seance-planner#endDrag" data-film-id="{{ film.getId() }}" data-film-title="{{ film.title|e('html_attr') }}" data-film-duration="{{ film.duration }}">
                 <strong>{{ film.title }}</strong>
                 <span>{{ film.duration }} min + 20 min</span>
+                <a class="seance-film-card-edit" href="{{ filmEditUrls[film.id] }}" aria-label="Ouvrir la fiche de {{ film.title }}" title="Ouvrir la fiche du film">
+                    <span aria-hidden="true">↗</span>
+                </a>
             </article>
         {% else %}
-            <a class="seance-film-card is-unavailable" href="{{ filmEditUrls[film.id] }}" title="Modifier la fiche de ce film">
+            <article class="seance-film-card is-unavailable">
                 <strong>{{ film.title }}</strong>
-                <span>Durée à renseigner — ouvrir la fiche du film</span>
-            </a>
+                <span>Durée à renseigner</span>
+                <a class="seance-film-card-edit" href="{{ filmEditUrls[film.id] }}" aria-label="Ouvrir la fiche de {{ film.title }}" title="Ouvrir la fiche du film">
+                    <span aria-hidden="true">↗</span>
+                </a>
+            </article>
         {% endif %}
     {% else %}
         <p class="text-muted">Aucun film programmable.</p>

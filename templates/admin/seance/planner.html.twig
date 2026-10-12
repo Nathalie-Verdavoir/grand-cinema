@@ -1,70 +1,12 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
-{% block content_title %}Planning des séances{% endblock %}
+{% block content_title %}
+    <span class="seance-page-title">Planning des séances</span>
+    {% include 'admin/seance/_view_toggle.html.twig' %}
+{% endblock %}
 
 {% block page_actions %}{% endblock %}
 
 {% block main %}
-    <section
-        class="seance-planner"
-        data-controller="seance-planner"
-        data-action="keydown.esc@window->seance-planner#closeDeleteDialog"
-        data-create-url="{{ path('admin_api_seance_create') }}"
-        data-csrf-token="{{ csrf_token('admin_create_seance') }}"
-        data-delete-csrf-token="{{ csrf_token('admin_delete_seance') }}"
-        data-publish-csrf-token="{{ csrf_token('admin_publish_seance') }}"
-        data-room-id="{{ selectedRoom ? selectedRoom.id : '' }}"
-        data-is-today="{{ isToday ? 'true' : 'false' }}"
-    >
-        {% include 'admin/seance/_toolbar.html.twig' %}
-
-        <p class="seance-planner-feedback" data-seance-planner-target="feedback" role="status" aria-live="polite"></p>
-
-        {% if rooms is empty %}
-            <div class="alert alert-warning">Créez une salle avant de programmer des séances.</div>
-        {% elseif isDailyView %}
-            {% include 'admin/seance/_daily_view.html.twig' %}
-        {% elseif selectedRoom %}
-            <div class="seance-planner-layout">
-                <div class="schedule-calendar-scroll">
-                    <div class="schedule-grid-header">
-                        <div class="schedule-time-heading">Heure</div>
-                        {% for day in weekDays %}
-                            <div class="schedule-day-heading">
-                                <strong>{{ day.label }}</strong>
-                                <span>{{ day.shortDate }}</span>
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <div class="schedule-grid-body">
-                        <div class="schedule-time-axis">
-                            {% for slot in 0..95 %}
-                                {% if slot is divisible by(4) %}
-                                    <span style="top: {{ slot * 18 }}px">{{ '%02d'|format(slot // 4) }}:00</span>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        {% for day in weekDays %}
-                            <div
-                                class="schedule-day-lane"
-                                data-date="{{ day.date }}"
-                                data-blocked-slots="{{ day.blockedSlots }}"
-                                style="--past-height: {{ day.blockedSlots * 18 }}px"
-                                aria-label="{{ day.label }} {{ day.shortDate }}"
-                                data-action="dragover->seance-planner#allowDrop dragleave->seance-planner#leaveDrop drop->seance-planner#drop"
-                            >
-                                {% for event in eventsByDay[day.date] %}
-                                    {% include 'admin/seance/_schedule_event.html.twig' with {event: event, dailyEvent: false} only %}
-                                {% endfor %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                {% include 'admin/seance/_film_palette.html.twig' %}
-            </div>
-        {% endif %}
-
-        {% include 'admin/seance/_delete_dialog.html.twig' %}
-    </section>
+    {% include 'admin/seance/_planner.html.twig' %}
 {% endblock %}
