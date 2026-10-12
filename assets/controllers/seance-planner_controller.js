@@ -175,7 +175,8 @@ export default class extends Controller {
             return;
         }
 
-        window.history.replaceState({}, '', url);
+        const pageUrl = new URL(url, window.location.href);
+        window.history.replaceState({}, '', `${pageUrl.pathname}${pageUrl.search}${pageUrl.hash}`);
         this.element.innerHTML = updatedPlanner.innerHTML;
             ['isToday', 'roomId'].forEach((attribute) => {
                 if (updatedPlanner.dataset[attribute] !== undefined) {
