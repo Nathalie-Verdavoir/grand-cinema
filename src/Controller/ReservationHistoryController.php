@@ -8,6 +8,7 @@ use App\Enum\ReservationStatus;
 use App\Repository\ReservationRepository;
 use App\Service\InvoiceSender;
 use App\Service\PaidReservationCanceller;
+use App\Service\RefundConfirmationSender;
 use Psr\Log\LoggerInterface;
 use Stripe\Exception\ApiErrorException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -90,6 +91,7 @@ class ReservationHistoryController extends AbstractController
         Request $request,
         ReservationRepository $reservationRepository,
         PaidReservationCanceller $canceller,
+        RefundConfirmationSender $refundConfirmationSender,
         LoggerInterface $logger,
     ): Response {
         $user = $this->getUser();
@@ -121,6 +123,15 @@ class ReservationHistoryController extends AbstractController
 
         if ($cancelled) {
             $this->addFlash('success', 'Votre réservation a été annulée et le remboursement a été demandé.');
+            try {
+                $refundConfirmationSender->send($reservation);
+            } catch (TransportExceptionInterface $exception) {
+                $logger->error('Unable to send the refund confirmation for a reservation.', [
+                    'reservationReference' => $reference,
+                    'exception' => $exception,
+                ]);
+                $this->addFlash('danger', 'Le remboursement a été demandé, mais le courriel de confirmation n’a pas pu être envoyé.');
+            }
         } else {
             $this->addFlash('warning', 'Cette réservation ne peut plus être annulée : l’annulation est possible jusqu’à une heure avant la séance.');
         }

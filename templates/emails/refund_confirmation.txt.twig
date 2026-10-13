@@ -1,0 +1,11 @@
+Bonjour,
+
+Le remboursement de votre réservation pour {{ reservation.seance.film.title }} a été demandé.
+
+Séance du {{ reservation.seance.dateTime|date('d/m/Y à H:i') }} — {{ reservation.seance.salle.name }}
+Référence de réservation : {{ reservation.reference }}
+Montant remboursé : {{ reservation.totalPrice|number_format(2, ',', ' ') }} €
+
+Le délai d’apparition du remboursement dépend de votre banque et peut prendre quelques jours.
+
+À bientôt au Grand Cinéma !
