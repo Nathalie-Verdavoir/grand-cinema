@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réinitialisation de votre mot de passe</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f1e8; color: #182e41; font-family: 'Nunito Sans', Arial, sans-serif;">
+    <div style="display: none; max-height: 0; overflow: hidden; opacity: 0;">
+        Un lien sécurisé vous permet de choisir un nouveau mot de passe pour votre compte Grand Cinéma.
+    </div>
+    <table role="presentation" style="width: 100%; border: 0; border-collapse: collapse; border-spacing: 0; background-color: #f4f1e8;">
+        <tr>
+            <td style="padding: 32px 16px; text-align: center;">
+                <table role="presentation" style="width: 100%; max-width: 600px; margin: 0 auto; border: 1px solid #dce8f2; border-collapse: collapse; border-spacing: 0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+                    <tr>
+                        <td style="padding: 28px 24px; background-color: #182e41; text-align: center;">
+                            <p style="margin: 0; color: #ffffff; font-family: Georgia, 'Times New Roman', serif; font-size: 24px; font-weight: 700; letter-spacing: 2px;">
+                                GRAND CINÉMA
+                            </p>
+                            <p style="margin: 10px 0 0; color: #dce8f2; font-size: 12px; letter-spacing: 2px; text-transform: uppercase;">
+                                Votre cinéma, votre compte
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 36px 32px 24px;">
+                            <h1 style="margin: 0 0 16px; color: #182e41; font-family: Georgia, 'Times New Roman', serif; font-size: 26px; font-weight: 600; line-height: 1.3;">
+                                Réinitialisez votre mot de passe
+                            </h1>
+                            <p style="margin: 0 0 24px; color: #243f5a; font-size: 16px; line-height: 1.6;">
+                                Une demande de réinitialisation a été faite pour votre compte Grand Cinéma. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe.
+                            </p>
+                            <table role="presentation" style="margin: 0 auto 24px; border: 0; border-collapse: collapse; border-spacing: 0;">
+                                <tr>
+                                    <td style="padding: 0; border: 2px solid #36597d; border-radius: 4px; background-color: #182e41; text-align: center;">
+                                        <a href="{{ url('app_reset_password', { token: resetToken.token }) }}" style="display: inline-block; padding: 14px 24px; color: #ffffff; font-size: 16px; font-weight: 700; line-height: 1.2; text-decoration: none;">
+                                            Choisir un nouveau mot de passe
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p style="margin: 0 0 8px; color: #243f5a; font-size: 14px; line-height: 1.6;">
+                                Ce lien est temporaire et ne peut être utilisé qu’une seule fois.
+                            </p>
+                            <p style="margin: 0; color: #243f5a; font-size: 14px; line-height: 1.6;">
+                                Si vous n’êtes pas à l’origine de cette demande, ignorez cet e-mail. Votre mot de passe restera inchangé.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 18px 24px; background-color: #f4f1e8; border-top: 1px solid #dce8f2; text-align: center;">
+                            <p style="margin: 0; color: #243f5a; font-size: 12px; line-height: 1.6;">
+                                L’équipe du Grand Cinéma · Lille
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
