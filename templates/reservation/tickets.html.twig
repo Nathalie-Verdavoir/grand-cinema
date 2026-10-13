@@ -12,6 +12,20 @@
                 · {{ reservation.seance.salle.name }}
             </p>
 
+            {% if reservation.billets is not empty %}
+                <div class="reservation-ticket-downloads">
+                    <button
+                        class="cart-reservation-action cart-reservation-payment"
+                        type="button"
+                        data-download-reservation
+                        data-reservation-reference="{{ reservation.reference }}"
+                    >
+                        Télécharger tous les billets (PDF)
+                    </button>
+                    <p class="reservation-ticket-download-status" data-download-status aria-live="polite"></p>
+                </div>
+            {% endif %}
+
             <div class="reservation-ticket-list">
                 {% for billet in reservation.billets %}
                     <article class="reservation-ticket" aria-label="Billet {{ loop.index }}">
@@ -52,6 +66,15 @@
                                 </dd>
                             </div>
                         </dl>
+                        <div class="reservation-ticket-actions">
+                            <button
+                                class="cart-reservation-action cart-reservation-payment"
+                                type="button"
+                                data-download-ticket
+                            >
+                                Télécharger ce billet (PDF)
+                            </button>
+                        </div>
                     </article>
                 {% else %}
                     <p class="cart-empty">Aucun billet n’est associé à cette réservation.</p>

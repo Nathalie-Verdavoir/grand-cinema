@@ -29,6 +29,9 @@
                                     <a class="cart-reservation-action cart-reservation-payment" href="{{ path('app_reservation_tickets', {reference: reservation.reference}) }}">
                                         Voir mes billets
                                     </a>
+                                    <a class="cart-reservation-action cart-reservation-payment" href="{{ path('app_reservation_tickets', {reference: reservation.reference}) }}?download=all">
+                                        Télécharger les billets (PDF)
+                                    </a>
                                     {% if reservation.canBeCancelledAfterPayment %}
                                         <button class="cart-reservation-action cart-reservation-cancel" type="button" data-bs-toggle="modal" data-bs-target="#paid-cancel-reservation-{{ reservation.reference }}">
                                             Annuler et être remboursé
