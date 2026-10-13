@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réserver {{ seance.film.title }} - Grand Cinéma{% endblock %}
+
+{% block body %}
+    <div class="container home-page reservation-page">
+        <section class="reservation-panel" aria-labelledby="reservation-title">
+            <a class="film-program-back" href="{{ path('app_programmation_film', {id: seance.film.id}) }}">← Retour aux séances du film</a>
+            {% if seance.film.img %}
+                <img class="reservation-film-poster" src="{{ seance.film.img }}" alt="Affiche du film {{ seance.film.title }}">
+            {% endif %}
+            <h1 id="reservation-title">Réserver une séance</h1>
+            <h2>{{ seance.film.title }}</h2>
+            <dl class="reservation-details">
+                <div class="reservation-detail">
+                    <dt>Date et heure</dt>
+                    <dd><time datetime="{{ seance.dateTime|date('Y-m-d\\TH:i') }}">{{ seance.dateTime|date('d/m/Y à H:i') }}</time></dd>
+                </div>
+                <div class="reservation-detail">
+                    <dt>Salle</dt>
+                    <dd>{{ seance.salle.name }}</dd>
+                </div>
+                <div class="reservation-detail">
+                    <dt>Places disponibles</dt>
+                    <dd>{{ availableSeats }}</dd>
+                </div>
+            </dl>
+
+            {% if availableSeats > 0 %}
+                <section class="reservation-tariffs" aria-labelledby="reservation-tariffs-title">
+                    <h3 id="reservation-tariffs-title">Choisissez vos tarifs</h3>
+                    {% if tarifs is not empty %}
+                        <form method="post" action="{{ path('app_reservation', {id: seance.id}) }}" data-reservation-selection data-available-seats="{{ availableSeats }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('reservation-' ~ seance.id) }}">
+                            <p class="reservation-availability">
+                                Sélectionnez le nombre de places pour chaque tarif ({{ availableSeats }} disponible{{ availableSeats > 1 ? 's' : '' }} au total).
+                            </p>
+                            <div class="reservation-tariffs-scroll">
+                                <table class="reservation-tariffs-table">
+                                    <caption class="visually-hidden">Quantité de places par tarif et prix unitaire</caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Tarif</th>
+                                            <th scope="col">Prix unitaire</th>
+                                            <th scope="col">Nombre de places</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for tarif in tarifs %}
+                                            <tr>
+                                                <th scope="row">
+                                                    {{ tarif.name }}
+                                                    <span class="reservation-tariff-mobile-price">({{ tarif.price|number_format(2, ',', ' ') }} €)</span>
+                                                </th>
+                                                <td class="reservation-tariff-unit-price">{{ tarif.price|number_format(2, ',', ' ') }} €</td>
+                                                <td>
+                                                    <div class="reservation-quantity-control">
+                                                        <button type="button" data-reservation-step="-1" aria-label="Réduire le nombre de places au tarif {{ tarif.name }}">−</button>
+                                                        <label class="visually-hidden" for="tarif-{{ tarif.id }}">Nombre de places au tarif {{ tarif.name }}</label>
+                                                        <input
+                                                            id="tarif-{{ tarif.id }}"
+                                                            name="tarifs[{{ tarif.id }}]"
+                                                            type="number"
+                                                            min="0"
+                                                            max="{{ availableSeats }}"
+                                                            step="1"
+                                                            value="0"
+                                                            data-reservation-ticket
+                                                            data-unit-price="{{ tarif.price }}"
+                                                        >
+                                                        <button type="button" data-reservation-step="1" aria-label="Augmenter le nombre de places au tarif {{ tarif.name }}">+</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="reservation-action-row">
+                                <p class="reservation-total" role="status" aria-live="polite" data-reservation-total>
+                                    0 place sélectionnée · Total : 0,00 €
+                                </p>
+                                <button class="reservation-submit" type="submit" data-reservation-submit>Réserver</button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <p class="reservation-availability">Aucun tarif n’est actuellement disponible.</p>
+                    {% endif %}
+                </section>
+            {% else %}
+                <p class="reservation-sold-out" role="status">Cette séance est complète.</p>
+            {% endif %}
+        </section>
+    </div>
+{% endblock %}

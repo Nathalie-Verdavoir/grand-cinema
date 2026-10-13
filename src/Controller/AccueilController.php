@@ -82,6 +82,7 @@ class AccueilController extends AbstractController
 
         return array_map(
             static fn (array $screening): array => [
+                'id' => $screening['id'],
                 'date' => $screening['date'],
                 'time' => $screening['time'],
                 'room' => $screening['room'],

@@ -28,7 +28,13 @@
 						{% for screening in screenings %}
 							<tr>
 								<td>{{ screening.date }}</td>
-								<td>{{ screening.time }}</td>
+								<td>
+									{% if screening.id %}
+										<a class="home-screening-link" href="{{ path('app_reservation', {id: screening.id}) }}" aria-label="Réserver {{ film.title }} le {{ screening.date }} à {{ screening.time }}">{{ screening.time }}</a>
+									{% else %}
+										{{ screening.time }}
+									{% endif %}
+								</td>
 								<td>{{ screening.room }}</td>
 							</tr>
 						{% else %}

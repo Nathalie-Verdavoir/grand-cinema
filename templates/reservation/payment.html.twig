@@ -1,0 +1,101 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement de la réservation - Grand Cinéma{% endblock %}
+
+{% block body %}
+    <div class="container home-page reservation-page">
+        <section class="reservation-panel reservation-payment-panel" aria-labelledby="payment-title">
+            <h1 id="payment-title">Paiement de votre réservation</h1>
+            <p class="reservation-payment-status" role="status">
+                {% if paymentConfirmed %}
+                    Votre paiement est confirmé.
+                {% else %}
+                    {{ canPay ? 'Votre réservation est en attente de paiement.' : reservation.status.label }}
+                {% endif %}
+            </p>
+
+            {% if checkoutCancelled %}
+                <p class="reservation-payment-notice">Le paiement a été annulé. Votre réservation reste dans votre panier.</p>
+            {% elseif paymentConfirmationPending %}
+                <p class="reservation-payment-notice">Nous vérifions le paiement auprès de Stripe. La réservation restera dans votre panier tant que le paiement n’est pas confirmé.</p>
+            {% endif %}
+
+            {% if canPay %}
+                <p class="reservation-countdown" data-reservation-countdown data-expiration-timestamp="{{ reservation_expiration_timestamp(reservation) * 1000 }}">
+                    Temps restant avant expiration : <time>Calcul en cours…</time>
+                </p>
+            {% endif %}
+
+            <dl class="reservation-details">
+                <div class="reservation-detail">
+                    <dt>Film</dt>
+                    <dd>{{ reservation.seance.film.title }}</dd>
+                </div>
+                <div class="reservation-detail">
+                    <dt>Séance</dt>
+                    <dd>{{ reservation.seance.dateTime|date('d/m/Y à H:i') }}</dd>
+                </div>
+                <div class="reservation-detail">
+                    <dt>Salle</dt>
+                    <dd>{{ reservation.seance.salle.name }}</dd>
+                </div>
+                <div class="reservation-detail">
+                    <dt>Référence</dt>
+                    <dd>{{ reservation.reference }}</dd>
+                </div>
+                <div class="reservation-detail">
+                    <dt>Places</dt>
+                    <dd>{{ reservation.nbPlaces }}</dd>
+                </div>
+                <div class="reservation-detail">
+                    <dt>Total à régler</dt>
+                    <dd>{{ reservation.totalPrice|number_format(2, ',', ' ') }} €</dd>
+                </div>
+            </dl>
+
+            {% if reservation.status.value == 'paid' %}
+                <h2>Vos billets</h2>
+                <div class="reservation-tariffs-scroll">
+                    <table class="reservation-tariffs-table reservation-payment-tickets">
+                        <caption class="visually-hidden">Billets inclus dans la réservation</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Tarif</th>
+                                <th scope="col">Prix du billet</th>
+                                <th scope="col">Référence billet</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for billet in reservation.billets %}
+                                <tr>
+                                    <th scope="row">{{ billet.tarif.name }}</th>
+                                    <td>{{ billet.priceApplied|number_format(2, ',', ' ') }} €</td>
+                                    <td>{{ billet.reference }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <h2>Places réservées</h2>
+                <ul class="cart-reservation-tickets">
+                    {% for ticketGroup in reservation_ticket_summary(reservation) %}
+                        <li>
+                            {{ ticketGroup.tarif }} — {{ ticketGroup.quantity }}
+                            × {{ ticketGroup.unitPrice|number_format(2, ',', ' ') }} €
+                            = {{ ticketGroup.subtotal|number_format(2, ',', ' ') }} €
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if canPay %}
+                <form method="post" action="{{ path('app_reservation_paiement_checkout', {reference: reservation.reference}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('reservation-payment-' ~ reservation.reference) }}">
+                    <button class="cart-reservation-payment" type="submit">Payer avec Stripe</button>
+                </form>
+            {% endif %}
+            <a class="film-program-back" href="{{ path('app_reservation_history') }}">← Retour à mes réservations</a>
+        </section>
+    </div>
+{% endblock %}

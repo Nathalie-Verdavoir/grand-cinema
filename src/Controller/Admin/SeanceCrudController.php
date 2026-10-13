@@ -6,11 +6,11 @@ use App\Entity\Film;
 use App\Entity\Salle;
 use App\Entity\Seance;
 use App\Enum\SeanceStatus;
-use App\Enum\ReservationStatus;
 use App\Repository\FilmRepository;
 use App\Repository\SalleRepository;
 use App\Repository\SeanceRepository;
 use App\Service\DateFormatter;
+use App\Service\ScreeningAvailability;
 use DateTimeImmutable;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -33,6 +33,7 @@ class SeanceCrudController extends AbstractCrudController
         private readonly RequestStack $requestStack,
         private readonly AdminUrlGenerator $adminUrlGenerator,
         private readonly DateFormatter $dateFormatter,
+        private readonly ScreeningAvailability $screeningAvailability,
     ) {
     }
 
@@ -194,7 +195,7 @@ class SeanceCrudController extends AbstractCrudController
                     'statusLabel' => $seance->getStatus()->getLabel(),
                     'canPublish' => $seance->getStatus() === SeanceStatus::DRAFT,
                     'ended' => null !== $duration && $endsAt <= $now,
-                    ...$this->getOccupancy($seance),
+                    ...$this->screeningAvailability->calculate($seance),
                 ];
             }
         }
@@ -264,7 +265,7 @@ class SeanceCrudController extends AbstractCrudController
             'statusLabel' => $seance->getStatus()->getLabel(),
             'canPublish' => $seance->getStatus() === SeanceStatus::DRAFT,
             'ended' => null !== $duration && $endsAt <= $now,
-            ...$this->getOccupancy($seance),
+            ...$this->screeningAvailability->calculate($seance),
         ];
     }
 
@@ -279,28 +280,6 @@ class SeanceCrudController extends AbstractCrudController
             ->setAction(Action::EDIT)
             ->setEntityId($film->getId())
             ->generateUrl();
-    }
-
-    /**
-     * @return array{reservedSeats: int, capacity: int, occupancyPercent: int}
-     */
-    private function getOccupancy(Seance $seance): array
-    {
-        $reservedSeats = 0;
-        foreach ($seance->getReservations() as $reservation) {
-            if (in_array($reservation->getStatus(), [ReservationStatus::PENDING, ReservationStatus::PAID], true)) {
-                $reservedSeats += $reservation->getNbPlaces() ?? 0;
-            }
-        }
-
-        $capacity = max(0, $seance->getSalle()?->getCapacity() ?? 0);
-        $occupancyPercent = $capacity > 0 ? min(100, (int) round(($reservedSeats / $capacity) * 100)) : 0;
-
-        return [
-            'reservedSeats' => $reservedSeats,
-            'capacity' => $capacity,
-            'occupancyPercent' => $occupancyPercent,
-        ];
     }
 
     private function getWeekStart(mixed $week): DateTimeImmutable

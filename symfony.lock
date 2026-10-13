@@ -73,6 +73,9 @@
             "./tests/bootstrap.php"
         ]
     },
+    "stripe/stripe-php": {
+        "version": "v22.0.0"
+    },
     "symfony/brevo-mailer": {
         "version": "6.4",
         "recipe": {
