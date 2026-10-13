@@ -56,7 +56,7 @@
 													{% for screening in screeningsThisWeek[film.id] ?? [] %}
 														<tr>
 															<td>{{ screening.date }}</td>
-															<td>{{ screening.time }}</td>
+															<td><a class="home-screening-link" href="{{ path('app_reservation', {id: screening.id}) }}" aria-label="Réserver {{ film.title }} le {{ screening.date }} à {{ screening.time }}">{{ screening.time }}</a></td>
 															<td>{{ screening.room }}</td>
 														</tr>
 													{% else %}
@@ -82,7 +82,7 @@
 													{% for screening in screeningsAfterThisWeek[film.id] ?? [] %}
 														<tr>
 															<td>{{ screening.date }}</td>
-															<td>{{ screening.time }}</td>
+															<td><a class="home-screening-link" href="{{ path('app_reservation', {id: screening.id}) }}" aria-label="Réserver {{ film.title }} le {{ screening.date }} à {{ screening.time }}">{{ screening.time }}</a></td>
 															<td>{{ screening.room }}</td>
 														</tr>
 													{% else %}

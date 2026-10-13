@@ -87,7 +87,9 @@
                                         {% for day in days %}
                                             <td class="{{ day.isToday ? 'is-today' : '' }}">
                                                 {% for time in filmSchedule.screeningsByDay[day.value] ?? [] %}
-                                                    <span class="audience-screening-time">{{ time }}</span>
+                                                    <a class="audience-screening-time audience-screening-link" href="{{ path('app_reservation', {id: time.id}) }}" aria-label="Réserver {{ filmSchedule.film.title }} le {{ day.number }} {{ day.label|lower }} à {{ time.time }}">
+                                                        {{ time.time }}
+                                                    </a>
                                                 {% else %}
                                                     <span class="audience-screening-empty" aria-label="Aucune séance">-</span>
                                                 {% endfor %}

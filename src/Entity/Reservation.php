@@ -11,8 +11,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
+#[ORM\UniqueConstraint(name: 'UNIQ_RESERVATION_STRIPE_SESSION', columns: ['stripe_checkout_session_id'])]
 class Reservation
 {
+    public const PENDING_TIMEOUT_MINUTES = 15;
+    public const PAID_CANCELLATION_MINUTES_BEFORE_SCREENING = 60;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -36,6 +40,9 @@ class Reservation
 
     #[ORM\Column(enumType: ReservationStatus::class)]
     private ?ReservationStatus $status = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $stripeCheckoutSessionId = null;
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: false)]
@@ -93,6 +100,30 @@ class Reservation
         return $this;
     }
 
+    public function getExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->reservedAt?->modify(sprintf('+%d minutes', self::PENDING_TIMEOUT_MINUTES));
+    }
+
+    public function getCancellationDeadline(): ?\DateTimeImmutable
+    {
+        $dateTime = $this->seance?->getDateTime();
+
+        return null === $dateTime
+            ? null
+            : \DateTimeImmutable::createFromInterface($dateTime)
+                ->modify(sprintf('-%d minutes', self::PAID_CANCELLATION_MINUTES_BEFORE_SCREENING));
+    }
+
+    public function canBeCancelledAfterPayment(?\DateTimeImmutable $now = null): bool
+    {
+        $deadline = $this->getCancellationDeadline();
+
+        return ReservationStatus::PAID === $this->status
+            && null !== $deadline
+            && ($now ?? new \DateTimeImmutable()) <= $deadline;
+    }
+
     public function getTotalPrice(): ?string
     {
         return $this->totalPrice;
@@ -125,6 +156,18 @@ class Reservation
     public function setStatus(ReservationStatus $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getStripeCheckoutSessionId(): ?string
+    {
+        return $this->stripeCheckoutSessionId;
+    }
+
+    public function setStripeCheckoutSessionId(?string $stripeCheckoutSessionId): static
+    {
+        $this->stripeCheckoutSessionId = $stripeCheckoutSessionId;
 
         return $this;
     }

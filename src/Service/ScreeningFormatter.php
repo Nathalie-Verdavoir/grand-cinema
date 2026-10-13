@@ -13,7 +13,7 @@ final class ScreeningFormatter
     }
 
     /**
-     * @return array{date: string, time: string, room: ?string}|null
+     * @return array{id: ?int, date: string, time: string, room: ?string}|null
      */
     public function format(Seance $seance): ?array
     {
@@ -23,6 +23,7 @@ final class ScreeningFormatter
         }
 
         return [
+            'id' => $seance->getId(),
             'date' => sprintf(
                 '%s %d %s',
                 $this->dateFormatter->weekday($dateTime, true),
@@ -37,7 +38,7 @@ final class ScreeningFormatter
     /**
      * @param iterable<Seance> $seances
      *
-     * @return list<array{date: string, time: string, room: ?string}>
+     * @return list<array{id: ?int, date: string, time: string, room: ?string}>
      */
     public function formatUpcoming(iterable $seances, DateTimeImmutable $now, ?int $limit = null): array
     {

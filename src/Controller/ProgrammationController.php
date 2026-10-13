@@ -71,7 +71,10 @@ class ProgrammationController extends AbstractController
                 'film' => $film,
                 'screeningsByDay' => [],
             ];
-            $filmSchedules[$filmId]['screeningsByDay'][$dateTime->format('Y-m-d')][] = $dateTime->format('H:i');
+            $filmSchedules[$filmId]['screeningsByDay'][$dateTime->format('Y-m-d')][] = [
+                'id' => $seance->getId(),
+                'time' => $dateTime->format('H:i'),
+            ];
         }
 
         $weekOptions = [];

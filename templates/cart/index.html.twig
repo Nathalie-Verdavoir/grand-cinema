@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon panier - Grand Cinéma{% endblock %}
+
+{% block body %}
+    <div class="container home-page cart-page">
+        <section class="cart-panel" aria-labelledby="cart-title">
+            <h1 id="cart-title">Mon panier</h1>
+            <p class="cart-introduction">Retrouvez vos réservations en attente et reprenez le paiement quand vous le souhaitez.</p>
+
+            <div class="cart-reservations">
+                {% for reservation in pendingReservations %}
+                    {% include 'cart/_reservation.html.twig' with {reservation: reservation} only %}
+                {% else %}
+                    <p class="cart-empty">Votre panier ne contient aucune réservation en attente.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+{% endblock %}

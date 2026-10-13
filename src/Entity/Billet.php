@@ -23,7 +23,7 @@ class Billet
     #[ORM\JoinColumn(nullable: false)]
     private ?Tarif $tarif = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 0)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 7, scale: 2)]
     private ?string $priceApplied = null;
 
     // seatNumber can be a string like "A1", "B2", etc. It represents the seat assigned to this ticket.
