@@ -17,6 +17,7 @@
         "build": "encore production --progress"
     },
     "dependencies": {
-        "heroku": "^11.11.0"
+        "heroku": "^11.11.0",
+        "qrcode": "^1.5.4"
     }
 }
