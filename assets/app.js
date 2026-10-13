@@ -10,6 +10,9 @@ import './styles/app.css';
 import './styles/flash-messages.css';
 import './flash-messages.js';
 import QRCode from 'qrcode';
+import { jsPDF } from 'jspdf';
+
+const ticketQrInitialization = new WeakMap();
 
 const initializeHomeCarousels = () => {
     document.querySelectorAll('[data-home-carousel]').forEach((carousel) => {
@@ -230,24 +233,237 @@ const drawPosterInQrCode = async (canvas, posterUrl) => {
 
 const initializeTicketQrCodes = () => {
     document.querySelectorAll('[data-ticket-qr]').forEach(async (canvas) => {
-        try {
-            await QRCode.toCanvas(canvas, canvas.dataset.ticketQr, {
-                width: 240,
-                margin: 2,
-                errorCorrectionLevel: 'H',
-            });
-            if (canvas.dataset.ticketPoster) {
-                await drawPosterInQrCode(canvas, canvas.dataset.ticketPoster);
+        const initialization = (async () => {
+            try {
+                await QRCode.toCanvas(canvas, canvas.dataset.ticketQr, {
+                    width: 240,
+                    margin: 2,
+                    errorCorrectionLevel: 'H',
+                });
+                if (canvas.dataset.ticketPoster) {
+                    await drawPosterInQrCode(canvas, canvas.dataset.ticketPoster);
+                }
+                canvas.hidden = false;
+            } catch (error) {
+                console.error('Impossible de générer le code QR du billet.', error);
+                const fallback = document.createElement('span');
+                fallback.className = 'reservation-ticket-qr-error';
+                fallback.textContent = 'Code QR indisponible. Utilisez la référence affichée.';
+                canvas.after(fallback);
             }
-            canvas.hidden = false;
-        } catch (error) {
-            console.error('Impossible de générer le code QR du billet.', error);
-            const fallback = document.createElement('span');
-            fallback.className = 'reservation-ticket-qr-error';
-            fallback.textContent = 'Code QR indisponible. Utilisez la référence affichée.';
-            canvas.after(fallback);
-        }
+        })();
+        ticketQrInitialization.set(canvas, initialization);
     });
+};
+
+const initializeTicketDownloads = () => {
+    const downloadButtons = document.querySelectorAll('[data-download-ticket], [data-download-reservation]');
+    const downloadStatus = document.querySelector('[data-download-status]');
+
+    const downloadTickets = async (button) => {
+        const selectedTicket = button.closest('.reservation-ticket');
+        const tickets = selectedTicket
+            ? [selectedTicket]
+            : Array.from(document.querySelectorAll('.reservation-ticket'));
+
+        if (tickets.length === 0) {
+            return;
+        }
+
+        button.disabled = true;
+        if (downloadStatus) {
+            downloadStatus.textContent = '';
+        }
+
+        try {
+            const isSingleTicket = Boolean(selectedTicket);
+            const layoutPdf = new jsPDF({ unit: 'mm', format: 'a4' });
+            const sheetWidth = 210;
+            const sheetHeight = 297;
+            const columns = 4;
+            const ticketsPerPage = 16;
+            const printMargin = 8;
+            const gap = 2;
+            const cardWidth = (sheetWidth - printMargin * 2 - gap * (columns - 1)) / columns;
+            const cardHeight = (sheetHeight - printMargin * 2 - gap * (columns - 1)) / columns;
+            const titleFontSize = 6.5;
+            const titleLineHeight = 2.3;
+            const labelFontSize = 4.4;
+            const labelLineHeight = 1.8;
+            const valueFontSize = 5.2;
+            const valueLineHeight = 2.1;
+            const qrSize = 27;
+            const textWidth = cardWidth - 6.8;
+            const pages = [];
+
+            for (const ticket of tickets) {
+                const reference = ticket.querySelector('.reservation-ticket-reference span')?.textContent?.trim();
+                if (!reference) {
+                    throw new Error('La référence du billet est introuvable.');
+                }
+
+                const title = ticket.querySelector('h2')?.textContent?.trim() ?? 'Billet de cinéma';
+                const details = Array.from(ticket.querySelectorAll('dl > div')).map((row) => {
+                    const label = row.querySelector('dt')?.textContent?.trim() ?? '';
+                    const value = label === 'Référence du billet'
+                        ? reference
+                        : row.querySelector('dd')?.textContent?.trim() ?? '';
+
+                    return [label, value];
+                });
+
+                const qrCanvas = ticket.querySelector('[data-ticket-qr]');
+                const qrInitialization = qrCanvas ? ticketQrInitialization.get(qrCanvas) : null;
+                if (qrInitialization) {
+                    await qrInitialization;
+                }
+
+                let qrCode;
+                try {
+                    qrCode = qrCanvas && !qrCanvas.hidden
+                        ? qrCanvas.toDataURL('image/png')
+                        : undefined;
+                } catch (error) {
+                    console.warn('Le code QR du billet ne peut pas être exporté avec son affiche.', error);
+                }
+                if (!qrCode) {
+                    qrCode = await QRCode.toDataURL(reference, {
+                        width: 240,
+                        margin: 2,
+                        errorCorrectionLevel: 'H',
+                    });
+                }
+
+                layoutPdf.setFont('times', 'normal');
+                layoutPdf.setFontSize(titleFontSize);
+                const titleLines = layoutPdf.splitTextToSize(title, textWidth);
+
+                let y = 4 + titleLines.length * titleLineHeight + 0.8;
+                const rows = details.map(([label, value]) => {
+                    layoutPdf.setFont('helvetica', 'bold');
+                    layoutPdf.setFontSize(labelFontSize);
+                    const labelLines = layoutPdf.splitTextToSize(label, textWidth);
+                    layoutPdf.setFont('helvetica', 'normal');
+                    layoutPdf.setFontSize(valueFontSize);
+                    const valueLines = layoutPdf.splitTextToSize(value, textWidth);
+                    const row = { labelLines, valueLines };
+                    y += labelLines.length * labelLineHeight
+                        + 0.3
+                        + valueLines.length * valueLineHeight
+                        + 0.5;
+
+                    return row;
+                });
+
+                const qrY = y + 0.5;
+                pages.push({
+                    titleLines,
+                    rows,
+                    qrCode,
+                    qrY,
+                });
+            }
+
+            const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+            pages.forEach((page, index) => {
+                if (index > 0 && index % ticketsPerPage === 0) {
+                    pdf.addPage('a4');
+                }
+
+                const firstTicketOnPage = Math.floor(index / ticketsPerPage) * ticketsPerPage;
+                const row = Math.floor((index - firstTicketOnPage) / columns);
+                const column = (index - firstTicketOnPage) % columns;
+                const cardX = printMargin + column * (cardWidth + gap);
+                const cardY = printMargin + row * (cardHeight + gap);
+
+                pdf.setFillColor(247, 250, 252);
+                pdf.roundedRect(cardX + 1.5, cardY + 1.5, cardWidth - 3, cardHeight - 3, 1.5, 1.5, 'F');
+                pdf.setFillColor(24, 46, 65);
+                pdf.roundedRect(
+                    cardX + 1,
+                    cardY + 1,
+                    1.2,
+                    cardHeight - 2,
+                    1,
+                    1,
+                    'F'
+                );
+                pdf.setDrawColor(54, 89, 125);
+                pdf.setLineWidth(0.25);
+                pdf.setLineDashPattern([1, 0.8], 0);
+                pdf.roundedRect(cardX + 1.5, cardY + 1.5, cardWidth - 3, cardHeight - 3, 1.5, 1.5, 'S');
+                pdf.setLineDashPattern([], 0);
+
+                pdf.setTextColor(24, 46, 65);
+                pdf.setFont('times', 'normal');
+                pdf.setFontSize(titleFontSize);
+                const contentX = cardX + 3;
+                const contentTop = cardY + 4;
+                pdf.text(page.titleLines, contentX, contentTop + 0.8);
+
+                let y = contentTop + page.titleLines.length * titleLineHeight + 0.8;
+                page.rows.forEach((row) => {
+                    pdf.setTextColor(36, 63, 90);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(labelFontSize);
+                    pdf.text(row.labelLines, contentX, y);
+                    y += row.labelLines.length * labelLineHeight + 0.3;
+
+                    pdf.setTextColor(24, 46, 65);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setFontSize(valueFontSize);
+                    pdf.text(row.valueLines, contentX, y);
+                    y += row.valueLines.length * valueLineHeight + 0.5;
+                });
+
+                const qrX = cardX + (cardWidth - qrSize) / 2;
+                const qrBorder = 2;
+                pdf.setFillColor(255, 255, 255);
+                pdf.setDrawColor(207, 219, 230);
+                pdf.setLineWidth(0.3);
+                pdf.roundedRect(qrX, cardY + page.qrY, qrSize, qrSize, 1, 1, 'FD');
+                pdf.addImage(
+                    page.qrCode,
+                    'PNG',
+                    qrX + qrBorder,
+                    cardY + page.qrY + qrBorder,
+                    qrSize - qrBorder * 2,
+                    qrSize - qrBorder * 2
+                );
+
+                pdf.setTextColor(36, 63, 90);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(4.8);
+                pdf.text(
+                    'Présentez ce code QR à l’entrée.',
+                    contentX,
+                    cardY + page.qrY + qrSize + 1.8
+                );
+            });
+
+            const reference = isSingleTicket
+                ? tickets[0].querySelector('.reservation-ticket-reference span')?.textContent?.trim()
+                : button.dataset.reservationReference;
+            await pdf.save(`${isSingleTicket ? 'billet' : 'billets-reservation'}-${reference}.pdf`, {
+                returnPromise: true,
+            });
+        } catch (error) {
+            console.error('Impossible de télécharger le PDF des billets.', error);
+            if (downloadStatus) {
+                downloadStatus.textContent = 'Le téléchargement des billets a échoué. Veuillez réessayer.';
+            }
+        } finally {
+            button.disabled = false;
+        }
+    };
+
+    downloadButtons.forEach((button) => {
+        button.addEventListener('click', () => downloadTickets(button));
+    });
+
+    if (new URLSearchParams(window.location.search).get('download') === 'all') {
+        document.querySelector('[data-download-reservation]')?.click();
+    }
 };
 
 if (document.readyState === 'loading') {
@@ -256,10 +472,12 @@ if (document.readyState === 'loading') {
         initializeReservationSelections();
         initializeReservationCountdowns();
         initializeTicketQrCodes();
+        initializeTicketDownloads();
     });
 } else {
     initializeHomeCarousels();
     initializeReservationSelections();
     initializeReservationCountdowns();
     initializeTicketQrCodes();
+    initializeTicketDownloads();
 }
