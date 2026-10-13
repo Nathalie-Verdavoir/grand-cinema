@@ -18,6 +18,7 @@ final class StripeCheckoutService implements ReservationPaymentSessionManager
         private readonly ReservationRepository $reservationRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly ReservationConfirmationSender $reservationConfirmationSender,
     ) {
     }
 
@@ -221,15 +222,18 @@ final class StripeCheckoutService implements ReservationPaymentSessionManager
             return false;
         }
 
-        if (ReservationStatus::PAID === $reservation->getStatus()) {
-            return true;
-        }
-        if (ReservationStatus::PENDING !== $reservation->getStatus()) {
+        if (ReservationStatus::PENDING === $reservation->getStatus()) {
+            $reservation->setStatus(ReservationStatus::PAID);
+            $this->entityManager->flush();
+        } elseif (ReservationStatus::PAID !== $reservation->getStatus()) {
             return false;
         }
 
-        $reservation->setStatus(ReservationStatus::PAID);
-        $this->entityManager->flush();
+        if (null === $reservation->getConfirmationEmailSentAt()) {
+            $this->reservationConfirmationSender->send($reservation);
+            $reservation->setConfirmationEmailSentAt(new \DateTimeImmutable());
+            $this->entityManager->flush();
+        }
 
         return true;
     }
