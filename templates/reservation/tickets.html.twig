@@ -37,7 +37,19 @@
                             {% endif %}
                             <div>
                                 <dt>Référence du billet</dt>
-                                <dd>{{ billet.reference }}</dd>
+                                <dd>
+                                    <div class="reservation-ticket-reference">
+                                        <span>{{ billet.reference }}</span>
+                                        <canvas
+                                            class="reservation-ticket-qr"
+                                            data-ticket-qr="{{ billet.reference }}"
+                                            {% if reservation.seance.film.img %}data-ticket-poster="{{ reservation.seance.film.img }}"{% endif %}
+                                            hidden
+                                            aria-hidden="true"
+                                        ></canvas>
+                                    </div>
+                                    <small>Présentez ce code QR à l’entrée.</small>
+                                </dd>
                             </div>
                         </dl>
                     </article>
