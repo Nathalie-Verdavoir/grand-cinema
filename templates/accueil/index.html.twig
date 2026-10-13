@@ -56,7 +56,13 @@
 													{% for screening in screeningsThisWeek[film.id] ?? [] %}
 														<tr>
 															<td>{{ screening.date }}</td>
-															<td><a class="home-screening-link" href="{{ path('app_reservation', {id: screening.id}) }}" aria-label="Réserver {{ film.title }} le {{ screening.date }} à {{ screening.time }}">{{ screening.time }}</a></td>
+                                                            <td>
+                                                                {% if screening.inProgress %}
+                                                                    <span class="screening-in-progress-label" title="En cours · réservation indisponible" aria-label="Séance de {{ film.title }} à {{ screening.time }} en cours, réservation indisponible">{{ screening.time }}</span>
+                                                                {% else %}
+                                                                    <a class="home-screening-link" href="{{ path('app_reservation', {id: screening.id}) }}" aria-label="Réserver {{ film.title }} le {{ screening.date }} à {{ screening.time }}">{{ screening.time }}</a>
+                                                                {% endif %}
+                                                            </td>
 															<td>{{ screening.room }}</td>
 														</tr>
 													{% else %}
@@ -82,7 +88,13 @@
 													{% for screening in screeningsAfterThisWeek[film.id] ?? [] %}
 														<tr>
 															<td>{{ screening.date }}</td>
-															<td><a class="home-screening-link" href="{{ path('app_reservation', {id: screening.id}) }}" aria-label="Réserver {{ film.title }} le {{ screening.date }} à {{ screening.time }}">{{ screening.time }}</a></td>
+                                                            <td>
+                                                                {% if screening.inProgress %}
+                                                                    <span class="screening-in-progress-label" title="En cours · réservation indisponible" aria-label="Séance de {{ film.title }} à {{ screening.time }} en cours, réservation indisponible">{{ screening.time }}</span>
+                                                                {% else %}
+                                                                    <a class="home-screening-link" href="{{ path('app_reservation', {id: screening.id}) }}" aria-label="Réserver {{ film.title }} le {{ screening.date }} à {{ screening.time }}">{{ screening.time }}</a>
+                                                                {% endif %}
+                                                            </td>
 															<td>{{ screening.room }}</td>
 														</tr>
 													{% else %}

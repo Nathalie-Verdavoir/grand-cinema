@@ -292,6 +292,18 @@
     white-space: nowrap;
 }
 
+.audience-screening-time.is-in-progress {
+    background: var(--color-global-3);
+    color: var(--color-global-4);
+}
+
+.screening-in-progress-label {
+    color: var(--color-global-4);
+    font-size: inherit;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
 .audience-screening-link {
     text-decoration: none;
     transition: background-color 150ms ease, color 150ms ease;
