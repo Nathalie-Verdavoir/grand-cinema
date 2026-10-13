@@ -1,0 +1,11 @@
+Bonjour,
+
+Le paiement de votre réservation pour {{ reservation.seance.film.title }} est confirmé.
+
+Séance du {{ reservation.seance.dateTime|date('d/m/Y à H:i') }} — {{ reservation.seance.salle.name }}
+Référence de réservation : {{ reservation.reference }}
+Total réglé : {{ reservation.totalPrice|number_format(2, ',', ' ') }} €
+
+Vos billets sont joints à ce message au format PDF. Vous pouvez les présenter sur votre téléphone ou les imprimer.
+
+À bientôt au Grand Cinéma !

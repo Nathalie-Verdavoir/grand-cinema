@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page { size: A4; margin: 8mm; }
+        body { margin: 0; color: #182e41; font-family: "DejaVu Sans", sans-serif; }
+        .ticket-page { position: relative; width: 194mm; height: 280mm; overflow: hidden; }
+        .page-break { page-break-after: always; }
+        .ticket-card { position: absolute; box-sizing: border-box; width: 44mm; height: 65.75mm; overflow: hidden; padding: 2.5mm 1.5mm 1mm; border: 0.25mm dashed #36597d; border-left: 1.2mm solid #182e41; border-radius: 1.5mm; background: #f7fafc; }
+        h1 { margin: 0 0 1mm; font-family: "DejaVu Serif", serif; font-size: 6.5pt; font-weight: normal; line-height: 1.18; }
+        .detail { margin-bottom: 1mm; }
+        .label { color: #243f5a; font-family: "DejaVu Sans", sans-serif; font-size: 4.4pt; font-weight: bold; line-height: 1.1; }
+        .value { margin-top: 0.3mm; font-size: 5.2pt; line-height: 1.15; overflow-wrap: anywhere; }
+        .qr { margin-top: 1mm; text-align: center; }
+        .qr-border { display: inline-block; padding: 2mm; border: 0.3mm solid #cfdbe6; border-radius: 1mm; background: #fff; }
+        .qr img { display: block; width: 23mm; height: 23mm; }
+        .instruction { margin-top: 1mm; color: #243f5a; font-size: 4.8pt; }
+    </style>
+</head>
+<body>
+    {% for page in pages %}
+        <section class="ticket-page{% if not loop.last %} page-break{% endif %}">
+            {% for ticket in page %}
+                <article class="ticket-card" style="left: {{ ticket.x }}mm; top: {{ ticket.y }}mm;">
+                    <h1>{{ ticket.title }}</h1>
+                    {% for detail in ticket.details %}
+                        <div class="detail">
+                            <div class="label">{{ detail.label }}</div>
+                            <div class="value">{{ detail.value }}</div>
+                        </div>
+                    {% endfor %}
+                    <div class="qr">
+                        <div class="qr-border">
+                            <img src="{{ ticket.qrCode }}" alt="">
+                        </div>
+                        <div class="instruction">Présentez ce code QR à l’entrée.</div>
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
+    {% endfor %}
+</body>
+</html>
