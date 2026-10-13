@@ -31,6 +31,9 @@ final class TicketsTemplateTest extends TestCase
         self::assertStringContainsString('data-ticket-qr="'.$second.'"', $html);
         self::assertSame(2, substr_count($html, 'data-ticket-poster="https://example.test/affiche.jpg"'));
         self::assertSame(2, substr_count($html, '<canvas'));
+        self::assertSame(2, substr_count($html, 'data-download-ticket'));
+        self::assertStringContainsString('data-download-reservation', $html);
+        self::assertStringContainsString('Télécharger tous les billets (PDF)', $html);
     }
 
     public function testQrCodeHasNoPosterAttributeWhenTheFilmHasNoImage(): void
@@ -54,7 +57,7 @@ final class TicketsTemplateTest extends TestCase
             ->setDateTime(new \DateTime('2026-10-20 20:00:00'));
         $tarif = (new Tarif())->setName('Normal')->setPrice('8.50')->setCode('normal');
 
-        $reservation = (new Reservation())->setSeance($seance);
+        $reservation = (new Reservation())->setSeance($seance)->setReference(new Ulid());
         foreach ($references as $reference) {
             $reservation->addBillet(
                 (new Billet())->setTarif($tarif)->setPriceApplied('8.50')->setReference($reference)
