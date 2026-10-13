@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Vérifiez votre boîte e-mail{% endblock %}
+
+{% block body %}
+    <div class="reset-password-page">
+        <section class="reset-password-card" aria-labelledby="check-email-title">
+            <h1 id="check-email-title">Vérifiez votre boîte e-mail</h1>
+            <p>Si un compte correspond à l’adresse indiquée, un lien de réinitialisation vient de vous être envoyé.</p>
+            <p>Le lien est temporaire et ne peut être utilisé qu’une seule fois. Pensez également à vérifier vos courriers indésirables.</p>
+            <a class="reset-password-back-link" href="{{ path('login') }}">Retour à la connexion</a>
+        </section>
+    </div>
+{% endblock %}

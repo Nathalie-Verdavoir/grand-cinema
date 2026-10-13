@@ -18,8 +18,51 @@ class SecurityControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertCount(1, $crawler->filterXPath('//form[contains(@class, "login-form")]'));
+        self::assertCount(1, $crawler->filterXPath('//form[contains(@class, "registration-form")]'));
+        self::assertCount(1, $crawler->filterXPath('//button[contains(concat(" ", normalize-space(@class), " "), " navbar-toggler ") and contains(concat(" ", normalize-space(@class), " "), " btn ")]'));
         self::assertSame('email', $crawler->filterXPath('//*[@id="username"]')->attr('type'));
         self::assertSame('password', $crawler->filterXPath('//*[@id="password"]')->attr('type'));
+        self::assertSame('/reset-password', $crawler->filterXPath('//a[contains(@class, "forgot-password-link")]')->attr('href'));
+        self::assertCount(1, $crawler->filterXPath('//button[@type="submit" and normalize-space()="Se connecter"]'));
+    }
+
+    public function testRegistrationPageUsesTheCombinedAuthenticationPage(): void
+    {
+        $client = static::createClient();
+
+        $crawler = $client->request('GET', '/register');
+
+        self::assertResponseIsSuccessful();
+        self::assertCount(1, $crawler->filterXPath('//form[contains(@class, "login-form")]'));
+        self::assertCount(1, $crawler->filterXPath('//form[contains(@class, "registration-form")]'));
+        self::assertSame('/register', $crawler->filterXPath('//form[contains(@class, "registration-form")]')->attr('action'));
+    }
+
+    public function testForgotPasswordRequestPageDisplaysEmailForm(): void
+    {
+        $client = static::createClient();
+
+        $crawler = $client->request('GET', '/reset-password');
+
+        self::assertResponseIsSuccessful();
+        self::assertCount(1, $crawler->filterXPath('//form[contains(@class, "reset-password-form")]'));
+        self::assertSame(
+            'email',
+            $crawler->filterXPath('//form[contains(@class, "reset-password-form")]//input[@type="email"]')->attr('type')
+        );
+    }
+
+    public function testCheckEmailPageDoesNotRevealWhetherAnAccountExists(): void
+    {
+        $client = static::createClient();
+
+        $crawler = $client->request('GET', '/reset-password/check-email');
+
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString(
+            'Si un compte correspond à l’adresse indiquée',
+            $crawler->filterXPath('//section[@aria-labelledby="check-email-title"]')->text()
+        );
     }
 
     public function testInvalidCredentialsReturnToLoginWithAnError(): void
