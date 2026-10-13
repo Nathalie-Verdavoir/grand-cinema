@@ -24,13 +24,15 @@ class FilmRepository extends ServiceEntityRepository
      */
     public function findInCurrentProgram(): array
     {
+        $now = new DateTimeImmutable();
+
         return $this->createQueryBuilder('film')
             ->select('film', 'seance', 'salle')
             ->join('film.seances', 'seance')
             ->join('seance.salle', 'salle')
             ->andWhere('seance.dateTime >= :now')
             ->andWhere('seance.status = :status')
-            ->setParameter('now', new DateTimeImmutable())
+            ->setParameter('now', $now->modify(sprintf('-%d minutes', $this->findMaximumDurationMinutes())))
             ->setParameter('status', SeanceStatus::PUBLISHED)
             ->orderBy('seance.dateTime', 'ASC')
             ->getQuery()
@@ -39,6 +41,8 @@ class FilmRepository extends ServiceEntityRepository
 
     public function findInCurrentProgramById(int $id): ?Film
     {
+        $now = new DateTimeImmutable();
+
         return $this->createQueryBuilder('film')
             ->select('film', 'seance', 'salle')
             ->join('film.seances', 'seance')
@@ -47,7 +51,7 @@ class FilmRepository extends ServiceEntityRepository
             ->andWhere('seance.dateTime >= :now')
             ->andWhere('seance.status = :status')
             ->setParameter('id', $id)
-            ->setParameter('now', new DateTimeImmutable())
+            ->setParameter('now', $now->modify(sprintf('-%d minutes', $this->findMaximumDurationMinutes())))
             ->setParameter('status', SeanceStatus::PUBLISHED)
             ->orderBy('seance.dateTime', 'ASC')
             ->getQuery()
@@ -65,11 +69,21 @@ class FilmRepository extends ServiceEntityRepository
             ->andWhere('film.duration BETWEEN :minimumDuration AND :maximumDuration')
             ->setParameter('programmable', true)
             ->setParameter('minimumDuration', 1)
-            ->setParameter('maximumDuration', 600)
+            ->setParameter('maximumDuration', Film::MAX_PROGRAMMABLE_DURATION_MINUTES)
             ->orderBy('film.title', 'ASC')
             ->addOrderBy('film.id', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    public function findMaximumDurationMinutes(): int
+    {
+        $maximumDuration = $this->createQueryBuilder('film')
+            ->select('MAX(film.duration)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return max(0, (int) $maximumDuration);
     }
 
     public function hasProgrammableFilms(): bool

@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Repository\FilmRepository;
-use App\Enum\SeanceStatus;
 use App\Service\ScreeningFormatter;
 use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,6 +16,7 @@ class AccueilController extends AbstractController
     public function slide(FilmRepository $filmRepository, ScreeningFormatter $screeningFormatter): Response
     {
         $films = $filmRepository->findInCurrentProgram();
+        $filmsWithAvailableScreenings = [];
         $now = new DateTimeImmutable();
         $endOfWeek = $now->modify('sunday this week')->setTime(23, 59, 59, 999999);
         $screeningsThisWeek = [];
@@ -28,28 +28,33 @@ class AccueilController extends AbstractController
                 continue;
             }
 
+            $hasAvailableScreening = false;
             foreach ($film->getSeances() as $seance) {
-                if ($seance->getStatus() !== SeanceStatus::PUBLISHED) {
-                    continue;
-                }
                 $dateTime = $seance->getDateTime();
-                if (null === $dateTime || $dateTime < $now) {
+                if (null === $dateTime || !$screeningFormatter->isUpcomingOrInProgress($seance, $now)) {
                     continue;
                 }
 
-                $screening = $screeningFormatter->format($seance);
+                $screening = $screeningFormatter->format($seance, $now);
                 if (null === $screening) {
                     continue;
                 }
                 $screening['dateTime'] = $dateTime;
+                $screening['inProgress'] = $screeningFormatter->isInProgress($seance, $now);
+                $hasAvailableScreening = true;
                 if ($dateTime <= $endOfWeek) {
                     $screeningsThisWeek[$filmId][] = $screening;
                 } else {
                     $screeningsAfterThisWeek[$filmId][] = $screening;
                 }
             }
+
+            if ($hasAvailableScreening) {
+                $filmsWithAvailableScreenings[] = $film;
+            }
         }
 
+        $films = $filmsWithAvailableScreenings;
         foreach ($films as $film) {
             $filmId = $film->getId();
             if (null === $filmId) {
@@ -86,6 +91,7 @@ class AccueilController extends AbstractController
                 'date' => $screening['date'],
                 'time' => $screening['time'],
                 'room' => $screening['room'],
+                'inProgress' => $screening['inProgress'],
             ],
             array_slice($screenings, 0, $limit)
         );

@@ -18,8 +18,10 @@ class ProgrammationController extends AbstractController
     #[Route('/programmation', name: 'app_programmation', methods: ['GET'])]
     public function index(
         Request $request,
+        FilmRepository $filmRepository,
         SeanceRepository $seanceRepository,
-        DateFormatter $dateFormatter
+        DateFormatter $dateFormatter,
+        ScreeningFormatter $screeningFormatter
     ): Response {
         $now = new DateTimeImmutable();
         $today = $now->setTime(0, 0);
@@ -56,14 +58,20 @@ class ProgrammationController extends AbstractController
         }
 
         $filmSchedules = [];
-        $screeningsStart = $weekStart->format('Y-m-d') === $currentWeekStart->format('Y-m-d')
-            ? max($weekStart, $now)
-            : $weekStart;
+        $maximumDuration = $filmRepository->findMaximumDurationMinutes();
+        $screeningsStart = max(
+            $weekStart->modify(sprintf('-%d minutes', $maximumDuration)),
+            $now->modify(sprintf('-%d minutes', $maximumDuration)),
+        );
         foreach ($seanceRepository->findPublishedBetween($screeningsStart, $weekEnd) as $seance) {
             $film = $seance->getFilm();
             $dateTime = $seance->getDateTime();
             $filmId = $film?->getId();
             if (null === $film || null === $filmId || null === $dateTime) {
+                continue;
+            }
+
+            if ($dateTime < $weekStart || !$screeningFormatter->isUpcomingOrInProgress($seance, $now)) {
                 continue;
             }
 
@@ -74,6 +82,7 @@ class ProgrammationController extends AbstractController
             $filmSchedules[$filmId]['screeningsByDay'][$dateTime->format('Y-m-d')][] = [
                 'id' => $seance->getId(),
                 'time' => $dateTime->format('H:i'),
+                'inProgress' => $screeningFormatter->isInProgress($seance, $now),
             ];
         }
 
@@ -105,13 +114,17 @@ class ProgrammationController extends AbstractController
     public function film(int $id, FilmRepository $filmRepository, ScreeningFormatter $screeningFormatter): Response
     {
         $film = $filmRepository->findInCurrentProgramById($id);
-        if (!$film instanceof Film) {
+        $now = new DateTimeImmutable();
+        $screenings = $film instanceof Film
+            ? $screeningFormatter->formatUpcoming($film->getSeances(), $now)
+            : [];
+        if (!$film instanceof Film || [] === $screenings) {
             throw $this->createNotFoundException('Ce film n’est pas actuellement programmé.');
         }
 
         return $this->render('programmation/film.html.twig', [
             'film' => $film,
-            'screenings' => $screeningFormatter->formatUpcoming($film->getSeances(), new DateTimeImmutable()),
+            'screenings' => $screenings,
         ]);
     }
 
