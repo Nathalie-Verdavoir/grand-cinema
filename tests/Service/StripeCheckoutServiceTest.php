@@ -87,6 +87,30 @@ final class StripeCheckoutServiceTest extends TestCase
         self::assertSame(ReservationStatus::PENDING, $reservation->getStatus());
     }
 
+    public function testItExpiresReservationAfterAsynchronousPaymentFailure(): void
+    {
+        $reference = new Ulid();
+        $reservation = (new Reservation())
+            ->setReference($reference)
+            ->setTotalPrice('12.50')
+            ->setStatus(ReservationStatus::PENDING)
+            ->setStripeCheckoutSessionId('cs_test_expected');
+
+        $reservationRepository = $this->createMock(ReservationRepository::class);
+        $reservationRepository
+            ->expects(self::once())
+            ->method('findOneBy')
+            ->willReturn($reservation);
+
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager->expects(self::once())->method('flush');
+
+        $service = $this->service($reservationRepository, $entityManager);
+        $service->handleWebhookPaymentFailure($this->session($reference, 'cs_test_expected', 'unpaid'));
+
+        self::assertSame(ReservationStatus::EXPIRED, $reservation->getStatus());
+    }
+
     private function service(
         ReservationRepository $reservationRepository,
         EntityManagerInterface $entityManager,

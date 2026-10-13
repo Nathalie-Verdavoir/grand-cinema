@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Reservation;
 use App\Entity\User;
 use App\Enum\ReservationStatus;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -50,6 +51,21 @@ class ReservationRepository extends ServiceEntityRepository
             ->setParameter('status', ReservationStatus::PENDING)
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    /**
+     * @return Reservation[]
+     */
+    public function findPendingBefore(DateTimeImmutable $cutoff): array
+    {
+        return $this->createQueryBuilder('reservation')
+            ->andWhere('reservation.status = :status')
+            ->andWhere('reservation.reservedAt <= :cutoff')
+            ->setParameter('status', ReservationStatus::PENDING)
+            ->setParameter('cutoff', $cutoff)
+            ->orderBy('reservation.reservedAt', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
 //    /**

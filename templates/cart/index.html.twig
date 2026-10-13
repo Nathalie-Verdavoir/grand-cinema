@@ -19,8 +19,12 @@
                             <span class="cart-reservation-status">En attente de paiement</span>
                         </div>
                         <ul class="cart-reservation-tickets">
-                            {% for billet in reservation.billets %}
-                                <li>{{ billet.tarif.name }} — {{ billet.priceApplied|number_format(2, ',', ' ') }} €</li>
+                            {% for ticketGroup in reservation_ticket_summary(reservation) %}
+                                <li>
+                                    {{ ticketGroup.tarif }} — {{ ticketGroup.quantity }}
+                                    × {{ ticketGroup.unitPrice|number_format(2, ',', ' ') }} €
+                                    = {{ ticketGroup.subtotal|number_format(2, ',', ' ') }} €
+                                </li>
                             {% endfor %}
                         </ul>
                         <div class="cart-reservation-footer">

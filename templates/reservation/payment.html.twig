@@ -47,28 +47,41 @@
                 </div>
             </dl>
 
-            <h2>Vos billets</h2>
-            <div class="reservation-tariffs-scroll">
-                <table class="reservation-tariffs-table reservation-payment-tickets">
-                    <caption class="visually-hidden">Billets inclus dans la réservation</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">Tarif</th>
-                            <th scope="col">Prix du billet</th>
-                            <th scope="col">Référence billet</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for billet in reservation.billets %}
+            {% if reservation.status.value == 'paid' %}
+                <h2>Vos billets</h2>
+                <div class="reservation-tariffs-scroll">
+                    <table class="reservation-tariffs-table reservation-payment-tickets">
+                        <caption class="visually-hidden">Billets inclus dans la réservation</caption>
+                        <thead>
                             <tr>
-                                <th scope="row">{{ billet.tarif.name }}</th>
-                                <td>{{ billet.priceApplied|number_format(2, ',', ' ') }} €</td>
-                                <td>{{ billet.reference }}</td>
+                                <th scope="col">Tarif</th>
+                                <th scope="col">Prix du billet</th>
+                                <th scope="col">Référence billet</th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {% for billet in reservation.billets %}
+                                <tr>
+                                    <th scope="row">{{ billet.tarif.name }}</th>
+                                    <td>{{ billet.priceApplied|number_format(2, ',', ' ') }} €</td>
+                                    <td>{{ billet.reference }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <h2>Places réservées</h2>
+                <ul class="cart-reservation-tickets">
+                    {% for ticketGroup in reservation_ticket_summary(reservation) %}
+                        <li>
+                            {{ ticketGroup.tarif }} — {{ ticketGroup.quantity }}
+                            × {{ ticketGroup.unitPrice|number_format(2, ',', ' ') }} €
+                            = {{ ticketGroup.subtotal|number_format(2, ',', ' ') }} €
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
 
             {% if canPay %}
                 <form method="post" action="{{ path('app_reservation_paiement_checkout', {reference: reservation.reference}) }}">

@@ -41,6 +41,11 @@ final class StripeWebhookController
             && $event->data->object instanceof Session
         ) {
             $stripeCheckoutService->handleWebhookSession($event->data->object);
+        } elseif (
+            'checkout.session.async_payment_failed' === $event->type
+            && $event->data->object instanceof Session
+        ) {
+            $stripeCheckoutService->handleWebhookPaymentFailure($event->data->object);
         }
 
         return new Response('', Response::HTTP_OK);

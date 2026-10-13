@@ -30,6 +30,8 @@ services:
         arguments:
             $config: '%env(STRIPE_SECRET_KEY)%'
 
+    App\Service\ReservationPaymentSessionManager: '@App\Service\StripeCheckoutService'
+
     App\Controller\StripeWebhookController:
         arguments:
             $webhookSecret: '%env(STRIPE_WEBHOOK_SECRET)%'

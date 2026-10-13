@@ -11,7 +11,7 @@ use Stripe\StripeClient;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Uid\Ulid;
 
-final class StripeCheckoutService
+final class StripeCheckoutService implements ReservationPaymentSessionManager
 {
     public function __construct(
         private readonly StripeClient $stripeClient,
@@ -115,15 +115,70 @@ final class StripeCheckoutService
 
     public function handleWebhookSession(Session $session): void
     {
+        $reservation = $this->findReservationForSession($session);
+        if (null === $reservation) {
+            return;
+        }
+
+        $this->markPaidIfConfirmed($session, $reservation);
+    }
+
+    public function handleWebhookPaymentFailure(Session $session): void
+    {
+        if (
+            null === ($reservation = $this->findReservationForSession($session))
+            || 'complete' !== $session->status
+            || 'unpaid' !== $session->payment_status
+            || ReservationStatus::PENDING !== $reservation->getStatus()
+        ) {
+            return;
+        }
+
+        $reservation->setStatus(ReservationStatus::EXPIRED);
+        $this->entityManager->flush();
+    }
+
+    public function expireCheckoutSession(Reservation $reservation): bool
+    {
+        $sessionId = $reservation->getStripeCheckoutSessionId();
+        if (null === $sessionId) {
+            return true;
+        }
+
+        $session = $this->stripeClient->checkout->sessions->retrieve($sessionId);
+        if (!$this->sessionMatchesReservation($session, $reservation)) {
+            throw new \LogicException('La session Stripe ne correspond pas à la réservation.');
+        }
+
+        if ($this->markPaidIfConfirmed($session, $reservation)) {
+            return false;
+        }
+
+        if ('complete' === $session->status) {
+            return false;
+        }
+
+        if ('open' === $session->status) {
+            $session = $this->stripeClient->checkout->sessions->expire($sessionId);
+            if ($this->markPaidIfConfirmed($session, $reservation)) {
+                return false;
+            }
+        }
+
+        return 'expired' === $session->status;
+    }
+
+    private function findReservationForSession(Session $session): ?Reservation
+    {
         $reference = $session->metadata?->reservation_reference;
         if (!is_string($reference) || '' === $reference) {
-            return;
+            return null;
         }
 
         try {
             $ulid = Ulid::fromString($reference);
         } catch (\InvalidArgumentException) {
-            return;
+            return null;
         }
 
         $reservation = $this->reservationRepository->findOneBy(['reference' => $ulid]);
@@ -131,10 +186,10 @@ final class StripeCheckoutService
             !$reservation instanceof Reservation
             || !$this->sessionMatchesReservation($session, $reservation)
         ) {
-            return;
+            return null;
         }
 
-        $this->markPaidIfConfirmed($session, $reservation);
+        return $reservation;
     }
 
     private function markPaidIfConfirmed(Session $session, Reservation $reservation): bool
