@@ -4,12 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Seance;
 use App\Entity\User;
-use App\Enum\SeanceStatus;
 use App\Exception\ReservationCreationException;
 use App\Repository\SeanceRepository;
 use App\Repository\TarifRepository;
 use App\Service\ScreeningAvailability;
 use App\Service\ReservationCreator;
+use App\Service\ScreeningFormatter;
 use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,14 +26,14 @@ class ReservationController extends AbstractController
         TarifRepository $tarifRepository,
         ScreeningAvailability $screeningAvailability,
         ReservationCreator $reservationCreator,
+        ScreeningFormatter $screeningFormatter,
     ): Response {
         $seance = $seanceRepository->find($id);
         $dateTime = $seance instanceof Seance ? $seance->getDateTime() : null;
         if (
             !$seance instanceof Seance
-            || SeanceStatus::PUBLISHED !== $seance->getStatus()
             || null === $dateTime
-            || DateTimeImmutable::createFromInterface($dateTime) < new DateTimeImmutable()
+            || !$screeningFormatter->isBookable($seance, new DateTimeImmutable())
         ) {
             throw $this->createNotFoundException('Cette séance n’est plus disponible à la réservation.');
         }

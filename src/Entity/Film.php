@@ -11,6 +11,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: FilmRepository::class)]
 class Film
 {
+    public const MAX_PROGRAMMABLE_DURATION_MINUTES = 600;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

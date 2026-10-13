@@ -87,9 +87,15 @@
                                         {% for day in days %}
                                             <td class="{{ day.isToday ? 'is-today' : '' }}">
                                                 {% for time in filmSchedule.screeningsByDay[day.value] ?? [] %}
-                                                    <a class="audience-screening-time audience-screening-link" href="{{ path('app_reservation', {id: time.id}) }}" aria-label="Réserver {{ filmSchedule.film.title }} le {{ day.number }} {{ day.label|lower }} à {{ time.time }}">
-                                                        {{ time.time }}
-                                                    </a>
+                                                    {% if time.inProgress %}
+                                                        <span class="audience-screening-time is-in-progress" title="En cours · réservation indisponible" aria-label="Séance de {{ filmSchedule.film.title }} à {{ time.time }} en cours, réservation indisponible">
+                                                            {{ time.time }}
+                                                        </span>
+                                                    {% else %}
+                                                        <a class="audience-screening-time audience-screening-link" href="{{ path('app_reservation', {id: time.id}) }}" aria-label="Réserver {{ filmSchedule.film.title }} le {{ day.number }} {{ day.label|lower }} à {{ time.time }}">
+                                                            {{ time.time }}
+                                                        </a>
+                                                    {% endif %}
                                                 {% else %}
                                                     <span class="audience-screening-empty" aria-label="Aucune séance">-</span>
                                                 {% endfor %}
