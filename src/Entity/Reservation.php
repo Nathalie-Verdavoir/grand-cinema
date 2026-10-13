@@ -15,6 +15,7 @@ use Symfony\Component\Uid\Ulid;
 class Reservation
 {
     public const PENDING_TIMEOUT_MINUTES = 15;
+    public const PAID_CANCELLATION_MINUTES_BEFORE_SCREENING = 60;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -102,6 +103,25 @@ class Reservation
     public function getExpiresAt(): ?\DateTimeImmutable
     {
         return $this->reservedAt?->modify(sprintf('+%d minutes', self::PENDING_TIMEOUT_MINUTES));
+    }
+
+    public function getCancellationDeadline(): ?\DateTimeImmutable
+    {
+        $dateTime = $this->seance?->getDateTime();
+
+        return null === $dateTime
+            ? null
+            : \DateTimeImmutable::createFromInterface($dateTime)
+                ->modify(sprintf('-%d minutes', self::PAID_CANCELLATION_MINUTES_BEFORE_SCREENING));
+    }
+
+    public function canBeCancelledAfterPayment(?\DateTimeImmutable $now = null): bool
+    {
+        $deadline = $this->getCancellationDeadline();
+
+        return ReservationStatus::PAID === $this->status
+            && null !== $deadline
+            && ($now ?? new \DateTimeImmutable()) <= $deadline;
     }
 
     public function getTotalPrice(): ?string

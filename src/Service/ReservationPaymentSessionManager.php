@@ -9,4 +9,7 @@ interface ReservationPaymentSessionManager
 {
     /** @throws ApiErrorException */
     public function expireCheckoutSession(Reservation $reservation): bool;
+
+    /** @throws ApiErrorException */
+    public function refundPaidReservation(Reservation $reservation): void;
 }

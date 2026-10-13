@@ -24,16 +24,27 @@
                                 · Réservée le {{ reservation.reservedAt|date('d/m/Y') }}
                                 · Total : <strong>{{ reservation.totalPrice|number_format(2, ',', ' ') }} €</strong>
                             </p>
-                            {% if reservation.status.value == 'paid' %}
-                                <a class="cart-reservation-payment" href="{{ path('app_reservation_tickets', {reference: reservation.reference}) }}">
-                                    Voir mes billets
-                                </a>
-                            {% elseif reservation.status.value == 'pending' %}
-                                <a class="cart-reservation-payment" href="{{ path('app_reservation_paiement', {reference: reservation.reference}) }}">
-                                    Reprendre le paiement
-                                </a>
-                            {% endif %}
+                            <div class="cart-reservation-actions">
+                                {% if reservation.status.value == 'paid' %}
+                                    <a class="cart-reservation-action cart-reservation-payment" href="{{ path('app_reservation_tickets', {reference: reservation.reference}) }}">
+                                        Voir mes billets
+                                    </a>
+                                    {% if reservation.canBeCancelledAfterPayment %}
+                                        <button class="cart-reservation-action cart-reservation-cancel" type="button" data-bs-toggle="modal" data-bs-target="#paid-cancel-reservation-{{ reservation.reference }}">
+                                            Annuler et être remboursé
+                                        </button>
+                                    {% endif %}
+                                {% elseif reservation.status.value == 'pending' %}
+                                    <a class="cart-reservation-action cart-reservation-payment" href="{{ path('app_reservation_paiement', {reference: reservation.reference}) }}">
+                                        Reprendre le paiement
+                                    </a>
+                                {% endif %}
+                            </div>
                         </div>
+                        {% if reservation.status.value == 'paid' and reservation.canBeCancelledAfterPayment %}
+                            <p class="cart-introduction">Annulation possible jusqu’au {{ reservation.cancellationDeadline|date('d/m/Y à H:i') }}.</p>
+                            {% include 'cart/_cancel_reservation_modal.html.twig' with {reservation: reservation, paid: true} only %}
+                        {% endif %}
                     </article>
                 {% else %}
                     <p class="cart-empty">Vous n’avez encore aucune réservation.</p>

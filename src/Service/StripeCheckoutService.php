@@ -168,6 +168,29 @@ final class StripeCheckoutService implements ReservationPaymentSessionManager
         return 'expired' === $session->status;
     }
 
+    public function refundPaidReservation(Reservation $reservation): void
+    {
+        $sessionId = $reservation->getStripeCheckoutSessionId();
+        if (null === $sessionId) {
+            throw new \LogicException('La réservation ne possède pas de session de paiement Stripe.');
+        }
+
+        $session = $this->stripeClient->checkout->sessions->retrieve($sessionId);
+        if (!$this->sessionMatchesReservation($session, $reservation) || 'paid' !== $session->payment_status) {
+            throw new \LogicException('La session Stripe ne correspond pas à une réservation payée.');
+        }
+
+        $paymentIntentId = is_string($session->payment_intent) ? $session->payment_intent : $session->payment_intent?->id;
+        if (!is_string($paymentIntentId) || '' === $paymentIntentId) {
+            throw new \LogicException('Stripe n’a pas retourné de paiement à rembourser.');
+        }
+
+        $this->stripeClient->refunds->create(
+            ['payment_intent' => $paymentIntentId],
+            ['idempotency_key' => sprintf('refund-reservation-%s', $this->reservationReference($reservation))]
+        );
+    }
+
     private function findReservationForSession(Session $session): ?Reservation
     {
         $reference = $session->metadata?->reservation_reference;

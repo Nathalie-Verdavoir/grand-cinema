@@ -1,19 +1,29 @@
-<div class="modal fade" id="cancel-reservation-{{ reservation.reference }}" tabindex="-1" aria-labelledby="cancel-reservation-title-{{ reservation.reference }}" aria-hidden="true">
+{% set isPaidCancellation = paid|default(false) %}
+{% set modalId = (isPaidCancellation ? 'paid-cancel-reservation-' : 'cancel-reservation-') ~ reservation.reference %}
+<div class="modal fade" id="{{ modalId }}" tabindex="-1" aria-labelledby="cancel-reservation-title-{{ reservation.reference }}" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title fs-5" id="cancel-reservation-title-{{ reservation.reference }}">Annuler cette réservation ?</h2>
+                <h2 class="modal-title fs-5" id="cancel-reservation-title-{{ reservation.reference }}">
+                    {{ isPaidCancellation ? 'Annuler et rembourser cette réservation ?' : 'Annuler cette réservation ?' }}
+                </h2>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <div class="modal-body">
                 Voulez-vous vraiment annuler votre réservation pour <strong>{{ reservation.seance.film.title }}</strong> ?
-                Les places seront libérées.
+                {% if isPaidCancellation %}
+                    Le remboursement sera demandé et les places seront libérées.
+                {% else %}
+                    Les places seront libérées.
+                {% endif %}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Conserver ma réservation</button>
-                <form method="post" action="{{ path('app_cart_reservation_cancel', {reference: reservation.reference}) }}">
-                    <input type="hidden" name="_token" value="{{ csrf_token('cancel-reservation-' ~ reservation.reference) }}">
-                    <button type="submit" class="btn btn-danger">Confirmer l’annulation</button>
+                <form method="post" action="{{ path(isPaidCancellation ? 'app_reservation_cancel_paid' : 'app_cart_reservation_cancel', {reference: reservation.reference}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token((isPaidCancellation ? 'cancel-paid-reservation-' : 'cancel-reservation-') ~ reservation.reference) }}">
+                    <button type="submit" class="btn btn-danger">
+                        {{ isPaidCancellation ? 'Confirmer l’annulation et le remboursement' : 'Confirmer l’annulation' }}
+                    </button>
                 </form>
             </div>
         </div>
