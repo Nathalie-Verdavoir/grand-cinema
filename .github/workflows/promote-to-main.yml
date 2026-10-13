@@ -49,3 +49,21 @@ jobs:
           git checkout -B main origin/main
           git merge --no-ff --no-edit origin/develop
           git push origin main
+
+      - name: Créer le tag de version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch --tags origin
+          latest_tag="$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1 || true)"
+
+          if [[ -z "$latest_tag" ]]; then
+            version="v1.0.0"
+          else
+            IFS=. read -r major minor patch <<< "${latest_tag#v}"
+            version="v${major}.${minor}.$((10#$patch + 1))"
+          fi
+
+          git tag -a "$version" -m "Release $version" HEAD
+          git push origin "$version"
