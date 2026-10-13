@@ -1,0 +1,10 @@
+<p>Bonjour,</p>
+
+<p>Veuillez trouver ci-joint la facture de votre réservation pour <strong>{{ reservation.seance.film.title }}</strong>.</p>
+
+<p>
+    Référence : {{ reservation.reference }}<br>
+    Total payé : {{ reservation.totalPrice|number_format(2, ',', ' ') }} €
+</p>
+
+<p>À bientôt au Grand Cinéma !</p>
