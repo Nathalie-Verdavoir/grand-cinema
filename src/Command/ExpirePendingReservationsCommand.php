@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Entity\Reservation;
 use App\Service\PendingReservationExpirer;
 use DateTimeImmutable;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -16,8 +17,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 final class ExpirePendingReservationsCommand extends Command
 {
-    private const PENDING_TIMEOUT_MINUTES = 15;
-
     public function __construct(private readonly PendingReservationExpirer $expirer)
     {
         parent::__construct();
@@ -25,7 +24,7 @@ final class ExpirePendingReservationsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $cutoff = (new DateTimeImmutable())->modify(sprintf('-%d minutes', self::PENDING_TIMEOUT_MINUTES));
+        $cutoff = (new DateTimeImmutable())->modify(sprintf('-%d minutes', Reservation::PENDING_TIMEOUT_MINUTES));
         $expiredCount = $this->expirer->expireBefore($cutoff);
 
         (new SymfonyStyle($input, $output))->success(sprintf(

@@ -18,6 +18,9 @@
                             </div>
                             <span class="cart-reservation-status">En attente de paiement</span>
                         </div>
+                        <p class="reservation-countdown" data-reservation-countdown data-expiration-timestamp="{{ reservation_expiration_timestamp(reservation) * 1000 }}">
+                            Temps restant avant expiration : <time>Calcul en cours…</time>
+                        </p>
                         <ul class="cart-reservation-tickets">
                             {% for ticketGroup in reservation_ticket_summary(reservation) %}
                                 <li>

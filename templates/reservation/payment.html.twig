@@ -20,6 +20,12 @@
                 <p class="reservation-payment-notice">Nous vérifions le paiement auprès de Stripe. La réservation restera dans votre panier tant que le paiement n’est pas confirmé.</p>
             {% endif %}
 
+            {% if canPay %}
+                <p class="reservation-countdown" data-reservation-countdown data-expiration-timestamp="{{ reservation_expiration_timestamp(reservation) * 1000 }}">
+                    Temps restant avant expiration : <time>Calcul en cours…</time>
+                </p>
+            {% endif %}
+
             <dl class="reservation-details">
                 <div class="reservation-detail">
                     <dt>Film</dt>

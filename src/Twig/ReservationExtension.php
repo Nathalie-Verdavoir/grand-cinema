@@ -20,7 +20,18 @@ class ReservationExtension extends AbstractExtension
         return [
             new TwigFunction('pending_reservation_seat_count', $this->countPendingSeats(...)),
             new TwigFunction('reservation_ticket_summary', $this->summarizeTickets(...)),
+            new TwigFunction('reservation_expiration_timestamp', $this->expirationTimestamp(...)),
         ];
+    }
+
+    public function expirationTimestamp(Reservation $reservation): int
+    {
+        $expiresAt = $reservation->getExpiresAt();
+        if (null === $expiresAt) {
+            throw new \LogicException('Une réservation doit avoir une date de réservation.');
+        }
+
+        return $expiresAt->getTimestamp();
     }
 
     public function countPendingSeats(User $user): int

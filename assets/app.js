@@ -161,12 +161,43 @@ const initializeReservationSelections = () => {
     });
 };
 
+const initializeReservationCountdowns = () => {
+    document.querySelectorAll('[data-reservation-countdown]').forEach((countdown) => {
+        const expirationTimestamp = Number(countdown.dataset.expirationTimestamp);
+        const time = countdown.querySelector('time');
+
+        if (!Number.isFinite(expirationTimestamp) || !time) {
+            return;
+        }
+
+        const update = () => {
+            const remainingSeconds = Math.max(0, Math.ceil((expirationTimestamp - Date.now()) / 1000));
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+
+            if (remainingSeconds === 0) {
+                time.textContent = 'Délai écoulé — actualisez la page pour vérifier la réservation.';
+                countdown.classList.add('is-expired');
+                window.clearInterval(intervalId);
+                return;
+            }
+
+            time.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        };
+
+        const intervalId = window.setInterval(update, 1000);
+        update();
+    });
+};
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         initializeHomeCarousels();
         initializeReservationSelections();
+        initializeReservationCountdowns();
     });
 } else {
     initializeHomeCarousels();
     initializeReservationSelections();
+    initializeReservationCountdowns();
 }

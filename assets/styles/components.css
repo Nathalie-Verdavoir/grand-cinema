@@ -123,6 +123,61 @@
     font-size: 0.9rem;
 }
 
+.reservation-countdown {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 0.75rem 0;
+    padding: 0.85rem 1rem;
+    border-left: 6px solid var(--color-global-2);
+    border-radius: 0.35rem;
+    background: var(--color-global-1);
+    color: var(--color-global-5);
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.reservation-countdown.is-expired {
+    border-left-color: var(--color-error-text);
+    background: var(--color-error-background);
+    color: var(--color-error-text);
+}
+
+.reservation-countdown time {
+    min-width: 5.5rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 0.3rem;
+    background: var(--color-global-5);
+    color: var(--color-white);
+    font-variant-numeric: tabular-nums;
+    font-size: 1.5rem;
+    letter-spacing: 0.04em;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.reservation-countdown.is-expired time {
+    max-width: 100%;
+    background: transparent;
+    color: inherit;
+    font-size: 1rem;
+    letter-spacing: normal;
+    text-align: right;
+    white-space: normal;
+}
+
+@media (max-width: 576px) {
+    .reservation-countdown {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .reservation-countdown.is-expired time {
+        text-align: left;
+    }
+}
+
 .cart-reservation-footer {
     align-items: center;
     padding-top: 0.75rem;

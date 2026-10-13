@@ -14,6 +14,8 @@ use Symfony\Component\Uid\Ulid;
 #[ORM\UniqueConstraint(name: 'UNIQ_RESERVATION_STRIPE_SESSION', columns: ['stripe_checkout_session_id'])]
 class Reservation
 {
+    public const PENDING_TIMEOUT_MINUTES = 15;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -95,6 +97,11 @@ class Reservation
         $this->reservedAt = $reservedAt;
 
         return $this;
+    }
+
+    public function getExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->reservedAt?->modify(sprintf('+%d minutes', self::PENDING_TIMEOUT_MINUTES));
     }
 
     public function getTotalPrice(): ?string
