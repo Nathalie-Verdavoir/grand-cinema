@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes billets - Grand Cinéma{% endblock %}
+
+{% block body %}
+    <div class="container home-page cart-page">
+        <section class="cart-panel" aria-labelledby="tickets-title">
+            <a class="film-program-back" href="{{ path('app_reservation_history') }}">← Retour à mes réservations</a>
+            <h1 id="tickets-title">Mes billets</h1>
+            <p class="cart-introduction">
+                {{ reservation.seance.film.title }} · {{ reservation.seance.dateTime|date('d/m/Y à H:i') }}
+                · {{ reservation.seance.salle.name }}
+            </p>
+
+            <div class="reservation-ticket-list">
+                {% for billet in reservation.billets %}
+                    <article class="reservation-ticket" aria-label="Billet {{ loop.index }}">
+                        <h2>{{ reservation.seance.film.title }}</h2>
+                        <dl>
+                            <div>
+                                <dt>Séance</dt>
+                                <dd>{{ reservation.seance.dateTime|date('d/m/Y à H:i') }}</dd>
+                            </div>
+                            <div>
+                                <dt>Salle</dt>
+                                <dd>{{ reservation.seance.salle.name }}</dd>
+                            </div>
+                            <div>
+                                <dt>Tarif</dt>
+                                <dd>{{ billet.tarif.name }} · {{ billet.priceApplied|number_format(2, ',', ' ') }} €</dd>
+                            </div>
+                            {% if billet.seatNumber %}
+                                <div>
+                                    <dt>Place</dt>
+                                    <dd>{{ billet.seatNumber }}</dd>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <dt>Référence du billet</dt>
+                                <dd>{{ billet.reference }}</dd>
+                            </div>
+                        </dl>
+                    </article>
+                {% else %}
+                    <p class="cart-empty">Aucun billet n’est associé à cette réservation.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+{% endblock %}

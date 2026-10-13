@@ -13,6 +13,17 @@
 					</span>
 				</span>
 			</a>
+			<a type="button" class="btn d-inline-flex align-items-center" href="{{ path('app_reservation_history') }}" aria-label="Mes réservations">
+				<span class="d-none d-lg-inline">Mes réservations</span>
+				<span class="header-button-icon" aria-hidden="true">
+					<span class="svg-container">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="svg-content bi bi-ticket-perforated" viewBox="0 0 16 16">
+							<path d="M4 3.5a.5.5 0 0 1 1 0v1a.5.5 0 0 1-1 0v-1Zm0 2.5a.5.5 0 0 1 1 0v1a.5.5 0 0 1-1 0V6Zm0 2.5a.5.5 0 0 1 1 0v1a.5.5 0 0 1-1 0v-1Zm0 2.5a.5.5 0 0 1 1 0v1a.5.5 0 0 1-1 0v-1Z"/>
+							<path d="M4.5 1A1.5 1.5 0 0 0 3 2.5v1.879a2 2 0 0 1 0 3.242V9.38a2 2 0 0 1 0 3.242V14.5A1.5 1.5 0 0 0 4.5 16h7a1.5 1.5 0 0 0 1.5-1.5v-1.879a2 2 0 0 1 0-3.242V7.62a2 2 0 0 1 0-3.242V2.5A1.5 1.5 0 0 0 11.5 1h-7ZM4 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v1.55a3 3 0 0 0 0 5.9v1.1a3 3 0 0 0 0 5.9v1.55a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-1.55a3 3 0 0 0 0-5.9v-1.1a3 3 0 0 0 0-5.9V2.5Z"/>
+						</svg>
+					</span>
+				</span>
+			</a>
 			<a type="button" class="btn d-inline-flex align-items-center" href="{{ path('app_cart') }}" aria-label="Mon panier{% if pendingCartSeats > 0 %}, {{ pendingCartSeats }} place{{ pendingCartSeats > 1 ? 's' : '' }} en attente de paiement{% endif %}">
 				<span class="d-none d-lg-inline">Mon panier</span>
 				<span class="header-button-icon header-cart-icon" aria-hidden="true">

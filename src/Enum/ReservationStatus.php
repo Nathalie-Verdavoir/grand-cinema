@@ -18,7 +18,7 @@ enum ReservationStatus: string
         return match ($this) {
             self::PENDING => 'En attente de paiement',
             self::PAID => 'Payée',
-            self::CANCELLED => 'Annulée',
+            self::CANCELLED => 'Annulée sans remboursement',
             self::EXPIRED => 'Expirée',
             self::REFUNDED => 'Remboursée',
         };
