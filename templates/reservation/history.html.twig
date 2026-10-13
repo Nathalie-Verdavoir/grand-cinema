@@ -29,6 +29,12 @@
                                     <a class="cart-reservation-action cart-reservation-payment" href="{{ path('app_reservation_tickets', {reference: reservation.reference}) }}">
                                         Voir mes billets
                                     </a>
+                                    <form action="{{ path('app_reservation_send_invoice', {reference: reservation.reference}) }}" method="post">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('send-invoice-' ~ reservation.reference) }}">
+                                        <button class="cart-reservation-action cart-reservation-payment" type="submit">
+                                            Envoyer la facture
+                                        </button>
+                                    </form>
                                     {% if reservation.canBeCancelledAfterPayment %}
                                         <button class="cart-reservation-action cart-reservation-cancel" type="button" data-bs-toggle="modal" data-bs-target="#paid-cancel-reservation-{{ reservation.reference }}">
                                             Annuler et être remboursé
