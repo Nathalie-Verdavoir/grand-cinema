@@ -50,19 +50,6 @@
 				</a>
 			{% endif %}
 		{% endif %}
-		{% if not app.user %}
-			<a type="button" class="btn d-inline-flex align-items-center" href="/register">
-				<span class="d-none d-lg-inline">Créer un compte</span>
-				<span class="header-button-icon">
-					<span class="svg-container">
-						<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="svg-content bi bi-person-plus-fill" viewbox="0 0 16 16">
-							<path d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-							<path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>
-						</svg>
-					</span>
-				</span>
-			</a>
-		{% endif %}
 		<a type="button" class="btn d-inline-flex align-items-center" href="{{ app.user ? path('logout') : path('login', { 'to':app.request.attributes.get('_route') }) }}">
 			<span class="d-none d-lg-inline">{{ app.user ? 'Déconnexion' : 'Connexion' }}</span>
 			<span class="header-button-icon">
@@ -88,8 +75,8 @@
 				<h1 class="title d-none">Grand Cinéma</h1>
 			</a>
 
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon  btn d-inline-flex"></span>
+			<button class="navbar-toggler btn d-inline-flex align-items-center justify-content-center" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon" aria-hidden="true"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarScroll">
 				<ul class="navbar-nav my-2 p-3 mt-lg-5 navbar-nav-scroll">

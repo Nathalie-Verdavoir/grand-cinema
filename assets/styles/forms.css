@@ -1,20 +1,179 @@
-.login-form {
-    display: block;
+.auth-page,
+.reset-password-page {
+    display: flex;
+    justify-content: center;
+    padding: clamp(2rem, 5vw, 4rem) 1rem;
+}
+
+.auth-layout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(1.5rem, 4vw, 3rem);
+    width: min(100%, 72rem);
+    align-items: start;
+}
+
+.login-card,
+.registration-card,
+.reset-password-card {
+    box-sizing: border-box;
+    width: min(100%, 32rem);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border: 1px solid rgb(54 89 125 / 20%);
+    border-radius: 0.5rem;
+    background: var(--color-white);
+    box-shadow: 0 0.5rem 1.5rem var(--color-shadow);
+}
+
+.auth-layout > .login-card,
+.auth-layout > .registration-card {
+    width: 100%;
+}
+
+.login-card h1,
+.registration-card h1,
+.reset-password-card h1 {
+    margin: 0 0 1.25rem;
+    color: var(--color-global-5);
+    font-family: var(--font-heading), serif;
     text-align: center;
 }
 
-.login-form .form-control {
-    width: min(100% - 2rem, 24rem);
-    margin: 0 auto 1rem;
-    font-family: var(--font-body);
+.login-form,
+.reset-password-form {
+    display: grid;
+    gap: 1.25rem;
 }
 
-.login-form label {
+.login-form label,
+.reset-password-form label {
     display: block;
-    margin-bottom: 0.25rem;
-    font-family: var(--font-body);
+    margin-bottom: 0.4rem;
+    color: var(--color-global-5);
+    font-weight: 600;
 }
 
-.login-form .alert {
-    margin-bottom: 1rem;
+.login-form .form-control,
+.reset-password-form .form-control {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 2.9rem;
+    margin: 0;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid rgb(54 89 125 / 35%);
+    border-radius: 0.3rem;
+    font-family: var(--font-body), sans-serif;
+}
+
+.login-form .alert,
+.reset-password-card .alert {
+    margin: 0;
+}
+
+.login-form .btn,
+.reset-password-form .btn {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.7rem 1rem;
+    border-radius: 0.3rem;
+    font-weight: 700;
+}
+
+.login-form .btn:hover,
+.reset-password-form .btn:hover {
+    background-color: var(--color-global-4);
+}
+
+.forgot-password-link,
+.reset-password-card a {
+    color: var(--color-global-2);
+    text-decoration: underline;
+}
+
+.forgot-password-link {
+    justify-self: end;
+}
+
+.reset-password-card > p {
+    color: var(--color-global-4);
+    line-height: 1.6;
+}
+
+.reset-password-card .reset-password-back-link {
+    display: inline-block;
+    margin-top: 1rem;
+}
+
+.registration-card h1 {
+    margin: 0 0 0.75rem;
+    color: var(--color-global-5);
+    font-family: var(--font-heading), serif;
+    text-align: center;
+}
+
+.registration-intro {
+    margin: 0 0 2rem;
+    color: var(--color-global-4);
+    text-align: center;
+}
+
+.registration-errors:empty {
+    display: none;
+}
+
+.registration-form {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.registration-form label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--color-global-5);
+    font-weight: 600;
+}
+
+.registration-form input[type="email"],
+.registration-form input[type="password"] {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 2.9rem;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid rgb(54 89 125 / 35%);
+    border-radius: 0.3rem;
+    font: inherit;
+}
+
+.registration-form input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    margin: 0 0.5rem 0 0;
+    accent-color: var(--color-global-5);
+    vertical-align: middle;
+}
+
+.registration-form label[for$="_agreeTerms"] {
+    display: inline;
+    margin: 0;
+    font-weight: 400;
+}
+
+.registration-form .btn {
+    width: 100%;
+    min-height: 3rem;
+    margin-top: 0.25rem;
+    padding: 0.7rem 1rem;
+    border-radius: 0.3rem;
+    font-weight: 700;
+}
+
+.registration-form .btn:hover {
+    background-color: var(--color-global-4);
+}
+
+@media (max-width: 900px) {
+    .auth-layout {
+        grid-template-columns: minmax(0, 1fr);
+        width: min(100%, 38rem);
+    }
 }

@@ -1,42 +1,65 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}Connexion et création de compte{% endblock %}
 
 {% block body %}
-    <form method="post" class="login-form">
-        {% if error %}
-            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-        {% endif %}
+    <div class="auth-page">
+        <div class="auth-layout">
+            <section class="login-card" aria-labelledby="login-title">
+                <form method="post" class="login-form">
+                    {% if error %}
+                        <div class="alert alert-danger" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                    {% endif %}
 
-        {% if app.user %}
-            <div class="mb-3">
-                You are logged in as {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}">Logout</a>
-            </div>
-        {% endif %}
+                    {% if app.user %}
+                        <div class="alert alert-info" role="status">
+                            Vous êtes connecté en tant que {{ app.user.userIdentifier }}.
+                            <a href="{{ logout_path() }}">Se déconnecter</a>
+                        </div>
+                    {% endif %}
 
-        <div class="text-center">
-            <h1 class="h3 mb-3 font-weight-normal">Veuillez vous connecter</h1>
+                    <h1 id="login-title">Connexion</h1>
 
-            <label for="username">Email</label>
-            <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" required autofocus>
-            <label for="password">Mot de passe</label>
-            <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
-            <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+                    <div>
+                        <label for="username">Adresse e-mail</label>
+                        <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" required autofocus>
+                    </div>
+                    <div>
+                        <label for="password">Mot de passe</label>
+                        <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
+                    </div>
+                    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
 
-        {#
-            Uncomment this section and add a remember_me option below your firewall to activate remember me functionality.
-            See https://symfony.com/doc/current/security/remember_me.html
+                    <a class="forgot-password-link" href="{{ path('app_forgot_password_request') }}">Mot de passe oublié&nbsp;?</a>
 
-            <div class="checkbox mb-3">
-                <input type="checkbox" name="_remember_me" id="_remember_me">
-                <label for="_remember_me">Remember me</label>
-            </div>
-        #}
+                    <button class="btn btn-lg btn-primary" type="submit">Se connecter</button>
+                </form>
+            </section>
 
-            <button class="btn btn-lg btn-primary" type="submit">
-                Sign in
-            </button>
+            <section class="registration-card" aria-labelledby="registration-title">
+                {% for flash_error in app.flashes('verify_email_error') %}
+                    <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+                {% endfor %}
+
+                <h1 id="registration-title">Créer un compte</h1>
+                <p class="registration-intro">Rejoignez le Grand Cinéma et réservez vos prochaines séances.</p>
+
+                <div class="registration-errors">{{- form_errors(registrationForm) -}}</div>
+
+                {{ form_start(registrationForm, { action: path('app_register'), attr: { class: 'registration-form' } }) }}
+                    {{ form_row(registrationForm.email, {
+                        label: 'Adresse e-mail'
+                    }) }}
+                    {{ form_row(registrationForm.plainPassword, {
+                        label: 'Mot de passe'
+                    }) }}
+                    {{ form_row(registrationForm.agreeTerms, {
+                        label: 'J’accepte les conditions générales d’utilisation'
+                    }) }}
+
+                    <button type="submit" class="btn">Créer mon compte</button>
+                {{ form_end(registrationForm) }}
+            </section>
         </div>
-    </form>
-
+    </div>
 {% endblock %}

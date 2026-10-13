@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Choisir un nouveau mot de passe{% endblock %}
+
+{% block body %}
+    <div class="reset-password-page">
+        <section class="reset-password-card" aria-labelledby="reset-password-title">
+            <h1 id="reset-password-title">Choisir un nouveau mot de passe</h1>
+            <p>Choisissez un mot de passe d’au moins huit caractères, avec une majuscule, une minuscule, un chiffre et un symbole.</p>
+
+            {{ form_start(resetForm, { attr: { class: 'reset-password-form' } }) }}
+                {{ form_row(resetForm.plainPassword.first) }}
+                {{ form_row(resetForm.plainPassword.second) }}
+                <button type="submit" class="btn">Enregistrer le nouveau mot de passe</button>
+            {{ form_end(resetForm) }}
+        </section>
+    </div>
+{% endblock %}
