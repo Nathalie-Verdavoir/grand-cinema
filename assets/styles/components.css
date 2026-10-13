@@ -161,6 +161,66 @@
     overflow-wrap: anywhere;
 }
 
+.reservation-ticket-reference {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.reservation-ticket-qr {
+    width: 10rem;
+    height: 10rem;
+    padding: 0.35rem;
+    border: 1px solid rgb(54 89 125 / 20%);
+    border-radius: 0.3rem;
+    background: var(--color-white);
+}
+
+.reservation-ticket-qr-error {
+    color: #a4262c;
+}
+
+@media (min-width: 992px) {
+    .reservation-ticket-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .reservation-ticket {
+        padding: 0.75rem;
+        border-left-width: 0.3rem;
+        font-size: 0.85rem;
+    }
+
+    .reservation-ticket h2 {
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .reservation-ticket dl {
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+    }
+
+    .reservation-ticket dt {
+        font-size: 0.75rem;
+    }
+
+    .reservation-ticket-reference {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+        font-size: 0.7rem;
+    }
+
+    .reservation-ticket-qr {
+        width: 6.5rem;
+        height: 6.5rem;
+        padding: 0.2rem;
+    }
+}
+
 .reservation-countdown {
     display: flex;
     align-items: center;

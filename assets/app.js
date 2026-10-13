@@ -9,6 +9,7 @@
 import './styles/app.css';
 import './styles/flash-messages.css';
 import './flash-messages.js';
+import QRCode from 'qrcode';
 
 const initializeHomeCarousels = () => {
     document.querySelectorAll('[data-home-carousel]').forEach((carousel) => {
@@ -190,14 +191,75 @@ const initializeReservationCountdowns = () => {
     });
 };
 
+const loadImage = (src) => new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = src;
+});
+
+const drawPosterInQrCode = async (canvas, posterUrl) => {
+    try {
+        const poster = await loadImage(posterUrl);
+        const context = canvas.getContext('2d');
+        const size = Math.round(canvas.width * 0.26);
+        const border = Math.round(size * 0.08);
+        const x = Math.round((canvas.width - size) / 2);
+        const y = Math.round((canvas.height - size) / 2);
+        const ratio = Math.max(size / poster.naturalWidth, size / poster.naturalHeight);
+        const sourceWidth = size / ratio;
+        const sourceHeight = size / ratio;
+
+        context.fillStyle = '#fff';
+        context.fillRect(x - border, y - border, size + border * 2, size + border * 2);
+        context.drawImage(
+            poster,
+            (poster.naturalWidth - sourceWidth) / 2,
+            (poster.naturalHeight - sourceHeight) / 2,
+            sourceWidth,
+            sourceHeight,
+            x,
+            y,
+            size,
+            size,
+        );
+    } catch (error) {
+        console.warn('Affiche indisponible pour le code QR du billet.', error);
+    }
+};
+
+const initializeTicketQrCodes = () => {
+    document.querySelectorAll('[data-ticket-qr]').forEach(async (canvas) => {
+        try {
+            await QRCode.toCanvas(canvas, canvas.dataset.ticketQr, {
+                width: 240,
+                margin: 2,
+                errorCorrectionLevel: 'H',
+            });
+            if (canvas.dataset.ticketPoster) {
+                await drawPosterInQrCode(canvas, canvas.dataset.ticketPoster);
+            }
+            canvas.hidden = false;
+        } catch (error) {
+            console.error('Impossible de générer le code QR du billet.', error);
+            const fallback = document.createElement('span');
+            fallback.className = 'reservation-ticket-qr-error';
+            fallback.textContent = 'Code QR indisponible. Utilisez la référence affichée.';
+            canvas.after(fallback);
+        }
+    });
+};
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         initializeHomeCarousels();
         initializeReservationSelections();
         initializeReservationCountdowns();
+        initializeTicketQrCodes();
     });
 } else {
     initializeHomeCarousels();
     initializeReservationSelections();
     initializeReservationCountdowns();
+    initializeTicketQrCodes();
 }
