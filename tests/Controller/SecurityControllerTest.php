@@ -17,6 +17,7 @@ class SecurityControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/login');
 
         self::assertResponseIsSuccessful();
+        self::assertCount(1, $crawler->filterXPath('//nav[contains(concat(" ", normalize-space(@class), " "), " navbar-expand-lg ")]'));
         self::assertCount(1, $crawler->filterXPath('//form[contains(@class, "login-form")]'));
         self::assertCount(1, $crawler->filterXPath('//form[contains(@class, "registration-form")]'));
         self::assertCount(1, $crawler->filterXPath('//button[contains(concat(" ", normalize-space(@class), " "), " navbar-toggler ") and contains(concat(" ", normalize-space(@class), " "), " btn ")]'));

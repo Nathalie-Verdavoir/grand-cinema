@@ -44,6 +44,9 @@ class Reservation
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $stripeCheckoutSessionId = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $confirmationEmailSentAt = null;
+
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Seance $seance = null;
@@ -168,6 +171,18 @@ class Reservation
     public function setStripeCheckoutSessionId(?string $stripeCheckoutSessionId): static
     {
         $this->stripeCheckoutSessionId = $stripeCheckoutSessionId;
+
+        return $this;
+    }
+
+    public function getConfirmationEmailSentAt(): ?\DateTimeImmutable
+    {
+        return $this->confirmationEmailSentAt;
+    }
+
+    public function setConfirmationEmailSentAt(?\DateTimeImmutable $confirmationEmailSentAt): static
+    {
+        $this->confirmationEmailSentAt = $confirmationEmailSentAt;
 
         return $this;
     }

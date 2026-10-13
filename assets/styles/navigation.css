@@ -13,9 +13,12 @@ header {
     z-index: 100;
 }
 
+.admin-buttons .btn {
+    display: inline-flex;
+}
+
 .admin-buttons .btn,
 .navbar-toggler.btn {
-    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.4rem;
@@ -32,7 +35,6 @@ header > nav > .container-fluid > .navbar-toggler {
     right: 1rem;
     z-index: 100;
     width: var(--header-control-size);
-    padding: 0.45rem 0.75rem;
 }
 
 .navbar {
@@ -56,6 +58,25 @@ header > nav > .container-fluid > .navbar-toggler {
     height: 1.25rem;
     margin: 0;
     background-size: 100%;
+}
+
+@media (max-width: 991.98px) {
+    header {
+        --header-control-size: 2.25rem;
+    }
+
+    .admin-buttons .btn,
+    .navbar-toggler.btn {
+        display: inline-flex;
+        min-height: 2rem;
+        padding: 0.3rem 0.55rem;
+    }
+
+    .header-button-icon .svg-container,
+    .navbar-toggler-icon {
+        width: 1.1rem;
+        height: 1.1rem;
+    }
 }
 
 .logo {
@@ -131,6 +152,10 @@ header > nav > .container-fluid > .navbar-toggler {
     display: block;
     width: 100%;
     height: 100%;
+}
+
+.header-button-icon .bi-sticky {
+    transform: scale(1.2);
 }
 
 .announcement {
