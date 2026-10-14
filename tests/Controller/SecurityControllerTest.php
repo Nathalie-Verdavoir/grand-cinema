@@ -25,6 +25,14 @@ class SecurityControllerTest extends WebTestCase
         self::assertSame('password', $crawler->filterXPath('//*[@id="password"]')->attr('type'));
         self::assertSame('/reset-password', $crawler->filterXPath('//a[contains(@class, "forgot-password-link")]')->attr('href'));
         self::assertCount(1, $crawler->filterXPath('//button[@type="submit" and normalize-space()="Se connecter"]'));
+
+        $registrationEmail = $crawler->filterXPath('//form[contains(@class, "registration-form")]//input[@type="email"]');
+        self::assertCount(1, $registrationEmail);
+        self::assertStringContainsString('form-control', (string) $registrationEmail->attr('class'));
+
+        $registrationPassword = $crawler->filterXPath('//form[contains(@class, "registration-form")]//input[@type="password"]');
+        self::assertCount(1, $registrationPassword);
+        self::assertStringContainsString('form-control', (string) $registrationPassword->attr('class'));
     }
 
     public function testRegistrationPageUsesTheCombinedAuthenticationPage(): void
