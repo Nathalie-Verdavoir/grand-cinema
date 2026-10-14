@@ -12,8 +12,10 @@ use Symfony\Component\Mime\Address;
 
 final class RefundConfirmationMailer implements RefundConfirmationSender
 {
-    public function __construct(private readonly MailerInterface $mailer)
-    {
+    public function __construct(
+        private readonly MailerInterface $mailer,
+        private readonly string $mailerFrom,
+    ) {
     }
 
     /** @throws TransportExceptionInterface When the confirmation email cannot be delivered. */
@@ -31,7 +33,7 @@ final class RefundConfirmationMailer implements RefundConfirmationSender
         }
 
         $email = (new TemplatedEmail())
-            ->from(new Address('mailer@grand-cinema.com', 'Grand Cinéma'))
+            ->from(new Address($this->mailerFrom, 'Grand Cinéma'))
             ->to($recipient)
             ->subject('Confirmation de remboursement — Grand Cinéma')
             ->htmlTemplate('emails/refund_confirmation.html.twig')

@@ -12,6 +12,7 @@ final class ReservationConfirmationMailer implements ReservationConfirmationSend
     public function __construct(
         private readonly MailerInterface $mailer,
         private readonly TicketPdfGenerator $ticketPdfGenerator,
+        private readonly string $mailerFrom,
     ) {
     }
 
@@ -24,7 +25,7 @@ final class ReservationConfirmationMailer implements ReservationConfirmationSend
         }
 
         $email = (new TemplatedEmail())
-            ->from(new Address('mailer@grand-cinema.com', 'Grand Cinéma'))
+            ->from(new Address($this->mailerFrom, 'Grand Cinéma'))
             ->to($recipient)
             ->subject('Confirmation de votre réservation — Grand Cinéma')
             ->htmlTemplate('emails/reservation_confirmation.html.twig')
