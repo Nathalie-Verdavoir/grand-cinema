@@ -76,6 +76,15 @@
     "stripe/stripe-php": {
         "version": "v22.0.0"
     },
+    "symfony/brevo-mailer": {
+        "version": "6.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "6.4",
+            "ref": "7c1038ceb733175f610a913a885a7c8b552b703a"
+        }
+    },
     "symfony/console": {
         "version": "6.4",
         "recipe": {
@@ -131,15 +140,6 @@
         "files": [
             "./config/packages/mailer.yaml"
         ]
-    },
-    "symfony/mailgun-mailer": {
-        "version": "6.4",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "4.4",
-            "ref": "808e7052971863a6b94df61807f41a71d480885b"
-        }
     },
     "symfony/maker-bundle": {
         "version": "1.67",

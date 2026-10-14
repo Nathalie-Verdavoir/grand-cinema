@@ -89,6 +89,7 @@ Le projet est piloté sur **Trello** à travers un découpage thématique par **
    ```bash
    cp .env .env.local
    ```
+   Configurez également `MAILER_DSN` dans `.env.local` avec la clé API de votre compte Brevo (`brevo+api://VOTRE_CLE_API@default`).
 
 4. **Initialisation de la base de données :**
    ```bash

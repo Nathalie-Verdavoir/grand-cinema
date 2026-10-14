@@ -11,19 +11,28 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Psr\Log\LoggerInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 
 class RegistrationController extends AbstractController
 {
-    public function __construct(private readonly EmailVerifier $emailVerifier)
-    {
+    public function __construct(
+        private readonly EmailVerifier $emailVerifier,
+    ) {
     }
 
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager): Response
+    public function register(
+        Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        Security $security,
+        EntityManagerInterface $entityManager,
+        LoggerInterface $logger,
+    ): Response
     {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -39,17 +48,22 @@ class RegistrationController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // generate a signed url and email it to the user
-            $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
-                (new TemplatedEmail())
-                    ->from(new Address('mailer@grand-cinema.com', 'Grand Cinéma'))
-                    ->to((string) $user->getEmail())
-                    ->subject('Confirmez votre adresse e-mail — Grand Cinéma')
-                    ->htmlTemplate('registration/confirmation_email.html.twig')
-                    ->textTemplate('registration/confirmation_email.txt.twig')
-            );
-
-            // do anything else you need here, like send an email
+            try {
+                $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
+                    (new TemplatedEmail())
+                        ->from(new Address('mailer@grand-cinema.com', 'Grand Cinéma'))
+                        ->to((string) $user->getEmail())
+                        ->subject('Confirmez votre adresse e-mail — Grand Cinéma')
+                        ->htmlTemplate('registration/confirmation_email.html.twig')
+                        ->textTemplate('registration/confirmation_email.txt.twig')
+                );
+            } catch (TransportExceptionInterface $exception) {
+                $logger->error('Unable to send the registration confirmation email.', [
+                    'userId' => (string) $user->getId(),
+                    'exception' => $exception,
+                ]);
+                $this->addFlash('danger', 'Votre compte a été créé, mais le courriel de confirmation n’a pas pu être envoyé.');
+            }
 
             return $security->login($user, 'form_login', 'main');
         }

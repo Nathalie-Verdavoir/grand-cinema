@@ -6,8 +6,10 @@ use App\Entity\Reservation;
 use App\Enum\ReservationStatus;
 use App\Repository\ReservationRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Stripe\Checkout\Session;
 use Stripe\StripeClient;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Uid\Ulid;
 
@@ -19,6 +21,7 @@ final class StripeCheckoutService implements ReservationPaymentSessionManager
         private readonly EntityManagerInterface $entityManager,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly ReservationConfirmationSender $reservationConfirmationSender,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -230,9 +233,16 @@ final class StripeCheckoutService implements ReservationPaymentSessionManager
         }
 
         if (null === $reservation->getConfirmationEmailSentAt()) {
-            $this->reservationConfirmationSender->send($reservation);
-            $reservation->setConfirmationEmailSentAt(new \DateTimeImmutable());
-            $this->entityManager->flush();
+            try {
+                $this->reservationConfirmationSender->send($reservation);
+                $reservation->setConfirmationEmailSentAt(new \DateTimeImmutable());
+                $this->entityManager->flush();
+            } catch (TransportExceptionInterface $exception) {
+                $this->logger->error('Unable to send the reservation confirmation email.', [
+                    'reservationReference' => (string) $reservation->getReference(),
+                    'exception' => $exception,
+                ]);
+            }
         }
 
         return true;
