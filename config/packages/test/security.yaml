@@ -6,6 +6,9 @@ security:
                     regular@example.test:
                         password: '$2y$04$Gg3.f2Onhgy3Pmz/cyhvV.ByIJQ2x0eW1.FBzso4QUA4oajsgAOaW'
                         roles: ['ROLE_USER']
+                    admin@example.test:
+                        password: '$2y$04$Gg3.f2Onhgy3Pmz/cyhvV.ByIJQ2x0eW1.FBzso4QUA4oajsgAOaW'
+                        roles: ['ROLE_ADMIN']
     firewalls:
         main:
             provider: test_user_provider

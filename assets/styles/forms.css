@@ -33,10 +33,15 @@
 .login-card h1,
 .registration-card h1,
 .reset-password-card h1 {
-    margin: 0 0 1.25rem;
+    margin: 0;
     color: var(--color-global-5);
     font-family: var(--font-heading), serif;
     text-align: center;
+}
+
+.registration-card {
+    display: grid;
+    gap: 1.25rem;
 }
 
 .login-form,
@@ -54,6 +59,7 @@
 }
 
 .login-form .form-control,
+.registration-form .form-control,
 .reset-password-form .form-control {
     box-sizing: border-box;
     width: 100%;
@@ -62,7 +68,14 @@
     padding: 0.65rem 0.8rem;
     border: 1px solid rgb(54 89 125 / 35%);
     border-radius: 0.3rem;
+    background-color: var(--color-white);
+    color: var(--color-global-5);
     font-family: var(--font-body), sans-serif;
+}
+
+.auth-page .form-control:-webkit-autofill {
+    -webkit-text-fill-color: var(--color-global-5);
+    -webkit-box-shadow: 0 0 0 1000px var(--color-white) inset;
 }
 
 .login-form .alert,
@@ -71,6 +84,7 @@
 }
 
 .login-form .btn,
+.registration-form .btn,
 .reset-password-form .btn {
     width: 100%;
     min-height: 3rem;
@@ -80,6 +94,7 @@
 }
 
 .login-form .btn:hover,
+.registration-form .btn:hover,
 .reset-password-form .btn:hover {
     background-color: var(--color-global-4);
 }
@@ -105,7 +120,7 @@
 }
 
 .registration-card h1 {
-    margin: 0 0 0.75rem;
+    margin: 0;
     color: var(--color-global-5);
     font-family: var(--font-heading), serif;
     text-align: center;
@@ -133,17 +148,6 @@
     font-weight: 600;
 }
 
-.registration-form input[type="email"],
-.registration-form input[type="password"] {
-    box-sizing: border-box;
-    width: 100%;
-    min-height: 2.9rem;
-    padding: 0.65rem 0.8rem;
-    border: 1px solid rgb(54 89 125 / 35%);
-    border-radius: 0.3rem;
-    font: inherit;
-}
-
 .registration-form input[type="checkbox"] {
     width: 1rem;
     height: 1rem;
@@ -156,19 +160,6 @@
     display: inline;
     margin: 0;
     font-weight: 400;
-}
-
-.registration-form .btn {
-    width: 100%;
-    min-height: 3rem;
-    margin-top: 0.25rem;
-    padding: 0.7rem 1rem;
-    border-radius: 0.3rem;
-    font-weight: 700;
-}
-
-.registration-form .btn:hover {
-    background-color: var(--color-global-4);
 }
 
 @media (max-width: 900px) {
