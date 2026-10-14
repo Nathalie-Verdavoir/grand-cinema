@@ -27,6 +27,7 @@ final class InvoiceMailerTest extends TestCase
     public function testItSendsTheInvoicePdfToTheReservationOwner(): void
     {
         $reference = new Ulid();
+        $mailerFrom = 'mailer@example.com';
         $reservation = (new Reservation())
             ->setReference($reference)
             ->setUser((new User())->setEmail('spectateur@example.com'))
@@ -47,11 +48,12 @@ final class InvoiceMailerTest extends TestCase
         $mailer
             ->expects(self::once())
             ->method('send')
-            ->with(self::callback(static function (TemplatedEmail $email) use ($reference): bool {
+            ->with(self::callback(static function (TemplatedEmail $email) use ($reference, $mailerFrom): bool {
                 self::assertSame(['spectateur@example.com'], array_map(
                     static fn (Address $address): string => $address->getAddress(),
                     $email->getTo()
                 ));
+                self::assertSame($mailerFrom, $email->getFrom()[0]->getAddress());
                 self::assertCount(1, $email->getAttachments());
                 self::assertSame(sprintf('facture-reservation-%s.pdf', $reference), $email->getAttachments()[0]->getFilename());
                 self::assertSame('application/pdf', $email->getAttachments()[0]->getContentType());
@@ -61,7 +63,7 @@ final class InvoiceMailerTest extends TestCase
             }));
 
         $twig = new Environment(new FilesystemLoader(dirname(__DIR__, 2).'/templates'));
-        $invoiceMailer = new InvoiceMailer($mailer, new InvoicePdfGenerator($twig));
+        $invoiceMailer = new InvoiceMailer($mailer, new InvoicePdfGenerator($twig), $mailerFrom);
 
         $invoiceMailer->send($reservation);
     }

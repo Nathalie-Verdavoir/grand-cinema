@@ -9,8 +9,10 @@ use App\Service\ReservationConfirmationSender;
 use App\Service\StripeCheckoutService;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Stripe\Checkout\Session;
 use Stripe\StripeClient;
+use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Uid\Ulid;
 
@@ -41,6 +43,48 @@ final class StripeCheckoutServiceTest extends TestCase
 
         self::assertSame(ReservationStatus::PAID, $reservation->getStatus());
         self::assertNotNull($reservation->getConfirmationEmailSentAt());
+    }
+
+    public function testItLogsConfirmationEmailTransportFailuresWithoutFailingPaymentConfirmation(): void
+    {
+        $reference = new Ulid();
+        $reservation = (new Reservation())
+            ->setReference($reference)
+            ->setTotalPrice('12.50')
+            ->setStatus(ReservationStatus::PENDING)
+            ->setStripeCheckoutSessionId('cs_test_expected');
+
+        $reservationRepository = $this->createMock(ReservationRepository::class);
+        $reservationRepository
+            ->expects(self::once())
+            ->method('findOneBy')
+            ->willReturn($reservation);
+
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager->expects(self::once())->method('flush');
+
+        $confirmationSender = $this->createMock(ReservationConfirmationSender::class);
+        $confirmationSender
+            ->expects(self::once())
+            ->method('send')
+            ->with($reservation)
+            ->willThrowException(new TransportException('SMTP unavailable'));
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                'Unable to send the reservation confirmation email.',
+                self::callback(static fn (array $context): bool => $context['reservationReference'] === (string) $reference)
+            );
+
+        $service = $this->service($reservationRepository, $entityManager, $confirmationSender, $logger);
+
+        $service->handleWebhookSession($this->session($reference, 'cs_test_expected', 'paid'));
+
+        self::assertSame(ReservationStatus::PAID, $reservation->getStatus());
+        self::assertNull($reservation->getConfirmationEmailSentAt());
     }
 
     public function testItIgnoresSessionsThatDoNotMatchTheReservation(): void
@@ -190,6 +234,7 @@ final class StripeCheckoutServiceTest extends TestCase
         ReservationRepository $reservationRepository,
         EntityManagerInterface $entityManager,
         ?ReservationConfirmationSender $confirmationSender = null,
+        ?LoggerInterface $logger = null,
     ): StripeCheckoutService {
         if (null === $confirmationSender) {
             $confirmationSender = $this->createMock(ReservationConfirmationSender::class);
@@ -202,6 +247,7 @@ final class StripeCheckoutServiceTest extends TestCase
             $entityManager,
             $this->createMock(UrlGeneratorInterface::class),
             $confirmationSender,
+            $logger ?? $this->createMock(LoggerInterface::class),
         );
     }
 

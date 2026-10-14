@@ -23,6 +23,7 @@ final class ReservationConfirmationMailerTest extends TestCase
     public function testItSendsAConfirmationEmailWithTheTicketPdfAttached(): void
     {
         $reference = new Ulid();
+        $mailerFrom = 'mailer@example.com';
         $billet = (new Billet())
             ->setReference(new Ulid())
             ->setTarif((new Tarif())->setName('Plein tarif')->setPrice('8.50')->setCode('PLEIN'))
@@ -43,7 +44,8 @@ final class ReservationConfirmationMailerTest extends TestCase
         $mailer
             ->expects(self::once())
             ->method('send')
-            ->with(self::callback(static function (TemplatedEmail $email) use ($reference): bool {
+            ->with(self::callback(static function (TemplatedEmail $email) use ($reference, $mailerFrom): bool {
+                self::assertSame($mailerFrom, $email->getFrom()[0]->getAddress());
                 $attachments = $email->getAttachments();
                 self::assertCount(1, $attachments);
                 self::assertSame(sprintf('billets-reservation-%s.pdf', $reference), $attachments[0]->getFilename());
@@ -55,7 +57,7 @@ final class ReservationConfirmationMailerTest extends TestCase
 
         $loader = new FilesystemLoader(dirname(__DIR__, 2).'/templates');
         $pdfGenerator = new TicketPdfGenerator(new Environment($loader));
-        $confirmationMailer = new ReservationConfirmationMailer($mailer, $pdfGenerator);
+        $confirmationMailer = new ReservationConfirmationMailer($mailer, $pdfGenerator, $mailerFrom);
 
         $confirmationMailer->send($reservation);
     }

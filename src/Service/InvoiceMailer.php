@@ -14,6 +14,7 @@ final class InvoiceMailer implements InvoiceSender
     public function __construct(
         private readonly MailerInterface $mailer,
         private readonly InvoicePdfGenerator $invoicePdfGenerator,
+        private readonly string $mailerFrom,
     ) {
     }
 
@@ -27,7 +28,7 @@ final class InvoiceMailer implements InvoiceSender
         }
 
         $email = (new TemplatedEmail())
-            ->from(new Address('mailer@grand-cinema.com', 'Grand Cinéma'))
+            ->from(new Address($this->mailerFrom, 'Grand Cinéma'))
             ->to($recipient)
             ->subject('Votre facture — Grand Cinéma')
             ->htmlTemplate('emails/reservation_invoice.html.twig')
