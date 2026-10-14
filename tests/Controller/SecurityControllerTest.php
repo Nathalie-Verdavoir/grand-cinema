@@ -108,6 +108,16 @@ class SecurityControllerTest extends WebTestCase
         self::assertResponseRedirects('/');
     }
 
+    public function testAdminLoginRedirectsToAdminDashboard(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/login');
+
+        $this->submitLogin($client, $crawler, 'admin@example.test', self::PASSWORD);
+
+        self::assertResponseRedirects('/admin');
+    }
+
     public function testLogoutEndsTheAuthenticatedSession(): void
     {
         $client = static::createClient();

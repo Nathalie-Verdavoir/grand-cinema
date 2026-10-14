@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Service\AdminKpiCalculator;
+use App\Service\HighOccupancyScreeningFinder;
 use DateTimeImmutable;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,9 +17,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class KpiController extends AbstractController
 {
     #[AdminRoute(path: '', name: 'index', options: ['methods' => ['GET']])]
-    public function index(Request $request, AdminKpiCalculator $calculator): Response
+    public function index(
+        Request $request,
+        AdminKpiCalculator $calculator,
+        HighOccupancyScreeningFinder $highOccupancyScreeningFinder,
+    ): Response
     {
-        $today = new DateTimeImmutable('today');
+        $now = new DateTimeImmutable();
+        $today = $now->setTime(0, 0);
         $from = $this->parseDate($request->query->get('from'), $today->modify('first day of this month'));
         $to = $this->parseDate($request->query->get('to'), $today);
         if ($from > $to) {
@@ -41,6 +47,7 @@ final class KpiController extends AbstractController
             'previousMonthKpis' => $calculator->calculate($previousFrom, $previousTo->modify('+1 day')),
             'annualYear' => $annualYear,
             'annualKpis' => $calculator->calculate($annualFrom, $annualUntil),
+            'highOccupancyScreenings' => $highOccupancyScreeningFinder->findBetween($now, $now->modify('+2 days')),
         ]);
     }
 
