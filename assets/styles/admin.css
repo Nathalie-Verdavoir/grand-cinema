@@ -758,3 +758,287 @@
         max-height: 40vh;
     }
 }
+.admin-kpi-period,
+.admin-cash-screening-form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.admin-cash-screening-form [role="status"] {
+    flex-basis: 100%;
+    margin: 0;
+}
+
+.admin-cash-screening-form [role="status"]:empty {
+    display: none;
+}
+
+.admin-cash-ticket-preview {
+    margin-top: 1.5rem;
+}
+
+.admin-cash-ticket-preview iframe {
+    width: 100%;
+    min-height: 70vh;
+    border: 1px solid var(--color-global-2);
+}
+
+.admin-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.admin-kpi-card,
+.admin-kpi-section,
+.admin-cash-register {
+    padding: 1rem;
+    border: 1px solid var(--color-global-2);
+    border-radius: 0.35rem;
+    background: var(--color-global-5);
+}
+
+.admin-kpi-card h2,
+.admin-kpi-section h2,
+.admin-cash-register h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+}
+
+.admin-kpi-card p {
+    margin: 0 0 0.25rem;
+    font-size: 1.65rem;
+    font-weight: 700;
+}
+
+.admin-kpi-card-primary {
+    padding: 1.25rem;
+}
+
+.admin-kpi-card-primary p {
+    font-size: 1.9rem;
+}
+
+.admin-kpi-card small {
+    display: block;
+    opacity: 0.8;
+}
+
+.admin-kpi-annual,
+.admin-kpi-comparison-note {
+    border-left: 3px solid #3182ce;
+    border-radius: 0.2rem;
+    background: rgba(99, 179, 237, 0.14);
+}
+
+.admin-kpi-card .admin-kpi-annual {
+    margin-top: 0.4rem;
+    padding: 0.35rem 0.5rem;
+    font-weight: 600;
+    opacity: 1;
+}
+
+.admin-kpi-card .admin-kpi-previous-month {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+    padding: 0.35rem 0.5rem;
+    border-left: 3px solid #dd6b20;
+    border-radius: 0.2rem;
+    background: rgba(237, 137, 54, 0.14);
+    font-weight: 600;
+    opacity: 1;
+}
+
+.admin-kpi-comparison-note {
+    margin: 0 0 1rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.admin-kpi-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+    gap: 1rem;
+}
+
+.admin-kpi-bar-row + .admin-kpi-bar-row {
+    margin-top: 1rem;
+}
+
+.admin-kpi-bar-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.35rem;
+}
+
+.admin-kpi-bar-heading span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-kpi-bar-heading strong {
+    flex: 0 0 auto;
+}
+
+.admin-kpi-bar-track,
+.admin-kpi-column-track {
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--color-global-2);
+}
+
+.admin-kpi-bar-track {
+    height: 0.65rem;
+}
+
+.admin-kpi-bar-track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #68d391;
+}
+
+.admin-kpi-column-chart {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    align-items: end;
+    gap: 0.5rem;
+    min-height: 12rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.admin-kpi-column-chart li {
+    display: flex;
+    min-width: 0;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.4rem;
+}
+
+.admin-kpi-column-chart li > strong,
+.admin-kpi-column-chart li > span {
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+.admin-kpi-column-track {
+    display: flex;
+    width: min(100%, 2.5rem);
+    height: 8rem;
+    align-items: flex-end;
+    border-radius: 0.25rem;
+}
+
+.admin-kpi-column-track span {
+    display: block;
+    width: 100%;
+    min-height: 0;
+    border-radius: inherit;
+    background: #68d391;
+}
+
+.admin-kpi-donut-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 1.25rem;
+}
+
+.admin-kpi-donut-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.admin-kpi-donut {
+    position: relative;
+    display: grid;
+    width: 9rem;
+    aspect-ratio: 1;
+    place-items: center;
+    border-radius: 50%;
+    background: conic-gradient(#68d391 var(--chart-value), var(--color-global-2) 0);
+}
+
+.admin-kpi-donut > span {
+    z-index: 1;
+    display: flex;
+    width: 6.5rem;
+    aspect-ratio: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--color-global-5);
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.admin-kpi-donut small {
+    font-size: 0.75rem;
+    font-weight: 400;
+}
+
+.admin-kpi-donut-occupancy {
+    background: conic-gradient(#63b3ed var(--chart-value), var(--color-global-2) 0);
+}
+
+.admin-kpi-donut-item p {
+    max-width: 15rem;
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+}
+
+.admin-cash-sale-form .table {
+    margin-bottom: 0;
+}
+
+.admin-cash-register {
+    max-width: 60rem;
+}
+
+.admin-cash-screening-form select {
+    min-width: min(100%, 24rem);
+}
+
+.admin-cash-sale-form input[type="number"] {
+    width: 6rem;
+}
+
+@media (max-width: 600px) {
+    .admin-kpi-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .admin-kpi-charts {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .admin-cash-screening-form {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .admin-cash-screening-form select {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+    .admin-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

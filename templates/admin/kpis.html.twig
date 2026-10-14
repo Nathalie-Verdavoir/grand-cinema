@@ -1,0 +1,132 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Indicateurs de performance{% endblock %}
+
+{% block page_actions %}{% endblock %}
+
+{% block main %}
+    <form class="admin-kpi-period" method="get" action="{{ path('admin_kpis_index') }}">
+        <label for="kpi-from">Du</label>
+        <input id="kpi-from" type="date" name="from" value="{{ from|date('Y-m-d') }}" required>
+        <label for="kpi-to">Au</label>
+        <input id="kpi-to" type="date" name="to" value="{{ to|date('Y-m-d') }}" required>
+        <button class="btn btn-primary" type="submit">Appliquer</button>
+    </form>
+
+    <p class="admin-kpi-comparison-note">
+        Valeur principale : période sélectionnée · Comparaison orange : période équivalente du mois précédent · Comparaison bleue : année civile {{ annualYear }}.
+    </p>
+
+    <div class="admin-kpi-grid">
+        <article class="admin-kpi-card admin-kpi-card-primary">
+            <h2>Occupation</h2>
+            <p>{{ kpis.occupancyPercent|number_format(1, ',', ' ') }} %</p>
+            <small>Billets vendus / capacité des séances publiées</small>
+            <small class="admin-kpi-previous-month">
+                <span>M-1 ({{ previousFrom|date('d/m') }} au {{ previousTo|date('d/m') }}) : {{ previousMonthKpis.occupancyPercent|number_format(1, ',', ' ') }} %</span>
+                {% include 'admin/_kpi_trend.html.twig' with {current: kpis.occupancyPercent, previous: previousMonthKpis.occupancyPercent} only %}
+            </small>
+            <small class="admin-kpi-annual">Année {{ annualYear }} : {{ annualKpis.occupancyPercent|number_format(1, ',', ' ') }} %</small>
+        </article>
+        <article class="admin-kpi-card admin-kpi-card-primary">
+            <h2>Entrées</h2>
+            <p>{{ kpis.entries|number_format(0, ',', ' ') }}</p>
+            <small>Billets payés sur la période</small>
+            <small class="admin-kpi-previous-month">
+                <span>M-1 ({{ previousFrom|date('d/m') }} au {{ previousTo|date('d/m') }}) : {{ previousMonthKpis.entries|number_format(0, ',', ' ') }}</span>
+                {% include 'admin/_kpi_trend.html.twig' with {current: kpis.entries, previous: previousMonthKpis.entries} only %}
+            </small>
+            <small class="admin-kpi-annual">Année {{ annualYear }} : {{ annualKpis.entries|number_format(0, ',', ' ') }}</small>
+        </article>
+        <article class="admin-kpi-card admin-kpi-card-primary">
+            <h2>Réservations en ligne</h2>
+            <p>{{ kpis.onlinePercent|number_format(1, ',', ' ') }} %</p>
+            <small>{{ kpis.onlineReservations }} réservation(s) en ligne · Guichet : {{ kpis.counterReservations }} réservation(s)</small>
+            <small class="admin-kpi-previous-month">
+                <span>M-1 ({{ previousFrom|date('d/m') }} au {{ previousTo|date('d/m') }}) : {{ previousMonthKpis.onlinePercent|number_format(1, ',', ' ') }} % en ligne · {{ previousMonthKpis.counterPercent|number_format(1, ',', ' ') }} % au guichet</span>
+                {% include 'admin/_kpi_trend.html.twig' with {current: kpis.onlinePercent, previous: previousMonthKpis.onlinePercent} only %}
+            </small>
+            <small class="admin-kpi-annual">Année {{ annualYear }} : {{ annualKpis.onlinePercent|number_format(1, ',', ' ') }} % en ligne · {{ annualKpis.counterPercent|number_format(1, ',', ' ') }} % au guichet</small>
+        </article>
+        <article class="admin-kpi-card">
+            <h2>Recette billetterie</h2>
+            <p>{{ kpis.revenue|number_format(2, ',', ' ') }} €</p>
+            <small>Billets en ligne et ventes caisse</small>
+            <small class="admin-kpi-previous-month">
+                <span>M-1 ({{ previousFrom|date('d/m') }} au {{ previousTo|date('d/m') }}) : {{ previousMonthKpis.revenue|number_format(2, ',', ' ') }} €</span>
+                {% include 'admin/_kpi_trend.html.twig' with {current: kpis.revenue, previous: previousMonthKpis.revenue} only %}
+            </small>
+            <small class="admin-kpi-annual">Année {{ annualYear }} : {{ annualKpis.revenue|number_format(2, ',', ' ') }} €</small>
+        </article>
+        <article class="admin-kpi-card">
+            <h2>Recette moyenne par entrée</h2>
+            <p>{{ kpis.averageRevenuePerEntry|number_format(2, ',', ' ') }} €</p>
+            <small>Recette / nombre d’entrées</small>
+            <small class="admin-kpi-previous-month">
+                <span>M-1 ({{ previousFrom|date('d/m') }} au {{ previousTo|date('d/m') }}) : {{ previousMonthKpis.averageRevenuePerEntry|number_format(2, ',', ' ') }} €</span>
+                {% include 'admin/_kpi_trend.html.twig' with {current: kpis.averageRevenuePerEntry, previous: previousMonthKpis.averageRevenuePerEntry} only %}
+            </small>
+            <small class="admin-kpi-annual">Année {{ annualYear }} : {{ annualKpis.averageRevenuePerEntry|number_format(2, ',', ' ') }} €</small>
+        </article>
+        <article class="admin-kpi-card">
+            <h2>Recette par écran</h2>
+            <p>{{ kpis.revenuePerScreen|number_format(2, ',', ' ') }} €</p>
+            <small>Sur {{ kpis.activeScreens }} salle(s) active(s)</small>
+            <small class="admin-kpi-previous-month">
+                <span>M-1 ({{ previousFrom|date('d/m') }} au {{ previousTo|date('d/m') }}) : {{ previousMonthKpis.revenuePerScreen|number_format(2, ',', ' ') }} €</span>
+                {% include 'admin/_kpi_trend.html.twig' with {current: kpis.revenuePerScreen, previous: previousMonthKpis.revenuePerScreen} only %}
+            </small>
+            <small class="admin-kpi-annual">Année {{ annualYear }} : {{ annualKpis.revenuePerScreen|number_format(2, ',', ' ') }} €</small>
+        </article>
+    </div>
+
+    <div class="admin-kpi-charts">
+        <section class="admin-kpi-section">
+            <h2>Entrées par film</h2>
+            {% for row in kpis.salesByFilm %}
+                <div class="admin-kpi-bar-row">
+                    <div class="admin-kpi-bar-heading"><span>{{ row.title }}</span><strong>{{ row.entries }} entrée(s) · {{ row.revenue|number_format(2, ',', ' ') }} €</strong></div>
+                    <div class="admin-kpi-bar-track" aria-hidden="true"><span style="width: {{ row.barPercent }}%"></span></div>
+                </div>
+            {% else %}<p>Aucune vente sur cette période.</p>{% endfor %}
+        </section>
+        <section class="admin-kpi-section">
+            <h2>Entrées par jour de la semaine</h2>
+            <ol class="admin-kpi-column-chart" aria-label="Nombre d’entrées par jour de la semaine">
+                {% for row in kpis.salesByWeekday %}
+                    <li>
+                        <strong>{{ row.entries }}</strong>
+                        <div class="admin-kpi-column-track" aria-hidden="true"><span style="height: {{ row.barPercent }}%"></span></div>
+                        <span>{{ row.label|slice(0, 3) }}</span>
+                    </li>
+                {% endfor %}
+            </ol>
+        </section>
+        <section class="admin-kpi-section">
+            <h2>Entrées par tranche horaire</h2>
+            {% for row in kpis.salesByTimeOfDay %}
+                <div class="admin-kpi-bar-row">
+                    <div class="admin-kpi-bar-heading"><span>{{ row.label }}</span><strong>{{ row.entries }}</strong></div>
+                    <div class="admin-kpi-bar-track" aria-hidden="true"><span style="width: {{ row.barPercent }}%"></span></div>
+                </div>
+            {% endfor %}
+        </section>
+        <section class="admin-kpi-section">
+            <h2>Répartition et occupation</h2>
+            <div class="admin-kpi-donut-group">
+                <div class="admin-kpi-donut-item">
+                    <div class="admin-kpi-donut" style="--chart-value: {{ kpis.onlinePercent }}%" role="img" aria-label="{{ kpis.onlinePercent|number_format(1, ',', ' ') }} % des réservations faites en ligne">
+                        <span>{{ kpis.onlinePercent|number_format(1, ',', ' ') }} %<small>En ligne</small></span>
+                    </div>
+                    <p>{{ kpis.onlineReservations }} réservation(s) en ligne · {{ kpis.counterReservations }} au guichet</p>
+                </div>
+                <div class="admin-kpi-donut-item">
+                    <div class="admin-kpi-donut admin-kpi-donut-occupancy" style="--chart-value: {{ kpis.occupancyChartPercent }}%" role="img" aria-label="{{ kpis.occupancyPercent|number_format(1, ',', ' ') }} % d’occupation des salles">
+                        <span>{{ kpis.occupancyPercent|number_format(1, ',', ' ') }} %<small>Occupation</small></span>
+                    </div>
+                    <p>Entrées vendues sur la capacité des séances</p>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

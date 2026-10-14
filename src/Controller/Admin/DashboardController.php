@@ -8,7 +8,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -18,12 +17,7 @@ class DashboardController extends AbstractDashboardController
 {
     public function index(): Response
     {
-        //return parent::index();
-
-        $adminUrlGenerator = $this->container->get(AdminUrlGenerator::class);
-        $url = $adminUrlGenerator->setController(FilmCrudController::class)->generateUrl();
-
-        return $this->redirect($url);
+        return $this->redirectToRoute('admin_kpis_index');
     }
 
     public function configureDashboard(): Dashboard
@@ -41,6 +35,9 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard('Tableau de bord', 'fa fa-home');
+        yield MenuItem::linkToRoute('Indicateurs', 'fas fa-chart-line', 'admin_kpis_index');
+        yield MenuItem::linkToRoute('Caisse', 'fas fa-cash-register', 'admin_caisse_index');
+        yield MenuItem::linkToRoute('Réservations guichet', 'fas fa-receipt', 'admin_reservations_guichet_index');
         // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);
         yield MenuItem::linkTo(FilmCrudController::class, 'Films', 'fas fa-film')->setAction(Action::INDEX);
         yield MenuItem::linkTo(TarifCrudController::class, 'Tarifs', 'fas fa-euro-sign')->setAction(Action::INDEX);

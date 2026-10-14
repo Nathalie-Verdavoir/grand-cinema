@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Reservation;
+use App\Entity\Seance;
 use App\Entity\User;
+use App\Enum\ReservationChannel;
 use App\Enum\ReservationStatus;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -56,7 +58,9 @@ class ReservationRepository extends ServiceEntityRepository
             ->leftJoin('reservation.billets', 'billet')
             ->leftJoin('billet.tarif', 'tarif')
             ->andWhere('IDENTITY(reservation.user) = :userId')
+            ->andWhere('reservation.channel != :counterChannel')
             ->setParameter('userId', $user->getId(), UuidType::NAME)
+            ->setParameter('counterChannel', ReservationChannel::COUNTER)
             ->orderBy('reservation.reservedAt', 'DESC')
             ->getQuery()
             ->getResult();
@@ -73,8 +77,39 @@ class ReservationRepository extends ServiceEntityRepository
             ->leftJoin('billet.tarif', 'tarif')
             ->andWhere('reservation.reference = :reference')
             ->andWhere('IDENTITY(reservation.user) = :userId')
+            ->andWhere('reservation.channel != :counterChannel')
             ->setParameter('reference', $reference, UlidType::NAME)
             ->setParameter('userId', $user->getId(), UuidType::NAME)
+            ->setParameter('counterChannel', ReservationChannel::COUNTER)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * @return Reservation[]
+     */
+    public function findCounterReservations(): array
+    {
+        return $this->createQueryBuilder('reservation')
+            ->addSelect('user', 'seance', 'film', 'salle')
+            ->join('reservation.user', 'user')
+            ->join('reservation.seance', 'seance')
+            ->join('seance.film', 'film')
+            ->join('seance.salle', 'salle')
+            ->andWhere('reservation.channel = :channel')
+            ->setParameter('channel', ReservationChannel::COUNTER)
+            ->orderBy('reservation.reservedAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findCounterReservation(int $id): ?Reservation
+    {
+        return $this->createQueryBuilder('reservation')
+            ->andWhere('reservation.id = :id')
+            ->andWhere('reservation.channel = :channel')
+            ->setParameter('id', $id)
+            ->setParameter('channel', ReservationChannel::COUNTER)
             ->getQuery()
             ->getOneOrNullResult();
     }
@@ -87,6 +122,24 @@ class ReservationRepository extends ServiceEntityRepository
             ->andWhere('reservation.status = :status')
             ->setParameter('userId', $user->getId(), UuidType::NAME)
             ->setParameter('status', ReservationStatus::PENDING)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countReservedSeatsForSeance(Seance $seance): int
+    {
+        return (int) $this->createQueryBuilder('reservation')
+            ->select('COALESCE(SUM(reservation.nbPlaces), 0)')
+            ->andWhere('IDENTITY(reservation.seance) = :seanceId')
+            ->andWhere('reservation.status IN (:statuses)')
+            ->setParameter('seanceId', $seance->getId())
+            ->setParameter('statuses', array_map(
+                static fn (ReservationStatus $status): string => $status->value,
+                array_filter(
+                    ReservationStatus::cases(),
+                    static fn (ReservationStatus $status): bool => $status->reservesSeats()
+                )
+            ))
             ->getQuery()
             ->getSingleScalarResult();
     }

@@ -1,0 +1,50 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Caisse — vente directe{% endblock %}
+
+{% block page_actions %}{% endblock %}
+
+{% block main %}
+    {% include '_flash_messages.html.twig' %}
+    <section class="admin-cash-register" data-controller="cash-register" data-cash-register-screenings-url-value="{{ path('admin_caisse_screenings') }}" data-cash-register-sale-details-url-value="{{ path('admin_caisse_sale_details') }}">
+        <h2>1. Choisir un film</h2>
+        <div class="admin-cash-screening-form">
+            <label for="cash-film">Film</label>
+            <select id="cash-film" required data-cash-register-target="film" data-action="change->cash-register#loadScreenings">
+                <option value="">Sélectionner un film</option>
+                {% for film in films %}
+                    <option value="{{ film.id }}" {% if selectedFilmId == film.id %}selected{% endif %}>
+                        {{ film.title }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <h2>2. Choisir une séance</h2>
+        <form method="get" action="{{ path('admin_caisse_index') }}" class="admin-cash-screening-form">
+            <input type="hidden" name="film" value="{{ selectedFilmId ?? '' }}" data-cash-register-target="selectedFilm">
+            <label for="cash-seance">Séance</label>
+            <select id="cash-seance" name="seance" required data-cash-register-target="screening" data-action="change->cash-register#loadSaleDetails" {% if selectedFilmId is null %}disabled{% endif %}>
+                <option value="">{% if selectedFilmId is null %}Choisissez d’abord un film{% else %}Sélectionner une séance{% endif %}</option>
+                {% for seance in filmScreenings %}
+                    <option value="{{ seance.id }}" {% if selectedScreening and selectedScreening.id == seance.id %}selected{% endif %}>
+                        {{ seance.dateTime|date('d/m/Y H:i') }} — {{ seance.salle.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            <p data-cash-register-target="feedback" role="status" aria-live="polite"></p>
+        </form>
+
+        <div data-cash-register-target="saleDetails" {% if not selectedScreening or not availability %}hidden{% endif %}>
+        {% if selectedScreening and availability %}
+            {% include 'admin/_cash_sale_details.html.twig' with {selectedScreening: selectedScreening, availability: availability, tarifs: tarifs} only %}
+        {% endif %}
+        </div>
+
+        <div class="admin-cash-ticket-preview" data-cash-register-target="ticketPreview" hidden>
+        <h2>Billets</h2>
+        <p data-cash-register-target="ticketFeedback" role="status" aria-live="polite"></p>
+        <iframe title="Billets de la vente" data-cash-register-target="ticketFrame"></iframe>
+        </div>
+    </section>
+{% endblock %}

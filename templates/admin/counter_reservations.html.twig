@@ -1,0 +1,57 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Réservations guichet{% endblock %}
+
+{% block page_actions %}{% endblock %}
+
+{% block main %}
+    {% include '_flash_messages.html.twig' %}
+    <p>Cette liste contient les réservations créées à la caisse, quel que soit leur statut. Passer une réservation au statut « Remboursée » ne déclenche pas de remboursement automatique.</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Référence</th>
+                <th>Film et séance</th>
+                <th>Réservée le</th>
+                <th>Places</th>
+                <th>Montant</th>
+                <th>Saisie par</th>
+                <th>Statut</th>
+                <th>Modifier</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reservation in reservations %}
+                <tr>
+                    <td>{{ reservation.reference }}</td>
+                    <td>
+                        {{ reservation.seance.film.title }}<br>
+                        {{ reservation.seance.dateTime|date('d/m/Y H:i') }} — {{ reservation.seance.salle.name }}
+                    </td>
+                    <td>{{ reservation.reservedAt|date('d/m/Y H:i') }}</td>
+                    <td>{{ reservation.nbPlaces }}</td>
+                    <td>{{ reservation.totalPrice|number_format(2, ',', ' ') }} €</td>
+                    <td>{{ reservation.user.email }}</td>
+                    <td>{{ reservation.status.label }}</td>
+                    <td>
+                        <form method="post" action="{{ path('admin_reservations_guichet_update_status', {id: reservation.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('counter-reservation-status-' ~ reservation.id) }}">
+                            <select name="status" aria-label="Statut de la réservation {{ reservation.reference }}">
+                                {% for status in statuses %}
+                                    <option value="{{ status.value }}" {% if status == reservation.status %}selected{% endif %}>
+                                        {{ status.label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <button class="btn btn-secondary btn-sm" type="submit">Enregistrer</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="8">Aucune réservation faite au guichet.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

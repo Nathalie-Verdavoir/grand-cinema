@@ -1,0 +1,7 @@
+{% if current > previous %}
+    <span style="color: #00e676;">▲ {% if previous > 0 %}{{ (((current - previous) / previous) * 100)|number_format(1, ',', ' ') }}%{% else %}100%{% endif %}</span>
+{% elseif current < previous %}
+    <span style="color: #ff5252;">▼ {{ (((previous - current) / previous) * 100)|number_format(1, ',', ' ') }}%</span>
+{% else %}
+    <span style="color: #e2e2e2;">→ 0%</span>
+{% endif %}

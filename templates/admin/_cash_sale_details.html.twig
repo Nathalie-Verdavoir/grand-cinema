@@ -1,0 +1,25 @@
+<h2>3. Sélectionner les billets</h2>
+<p>{{ selectedScreening.film.title }} · {{ selectedScreening.dateTime|date('d/m/Y à H:i') }} · {{ selectedScreening.salle.name }} · {{ availability.availableSeats }} place(s) disponible(s)</p>
+{% if tarifs is empty %}
+    <p>Aucun tarif n’est configuré.</p>
+{% elseif availability.availableSeats < 1 %}
+    <p>Cette séance est complète.</p>
+{% else %}
+    <form method="post" action="{{ path('admin_caisse_sell') }}" class="admin-cash-sale-form" data-action="submit->cash-register#sell">
+        <input type="hidden" name="_token" value="{{ csrf_token('admin-cash-sale-' ~ selectedScreening.id) }}">
+        <input type="hidden" name="seance" value="{{ selectedScreening.id }}">
+        <table class="table">
+            <thead><tr><th>Tarif</th><th>Prix</th><th>Quantité</th></tr></thead>
+            <tbody>
+                {% for tarif in tarifs %}
+                    <tr>
+                        <td>{{ tarif.name }}</td>
+                        <td>{{ tarif.price|number_format(2, ',', ' ') }} €</td>
+                        <td><input type="number" name="quantities[{{ tarif.id }}]" min="0" max="{{ availability.availableSeats }}" value="0" aria-label="Quantité — {{ tarif.name }}"></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button class="btn btn-primary" type="submit">Encaisser et imprimer les billets</button>
+    </form>
+{% endif %}
