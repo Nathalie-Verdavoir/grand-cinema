@@ -32,7 +32,7 @@
                                     <form action="{{ path('app_reservation_send_invoice', {reference: reservation.reference}) }}" method="post">
                                         <input type="hidden" name="_token" value="{{ csrf_token('send-invoice-' ~ reservation.reference) }}">
                                         <button class="cart-reservation-action cart-reservation-payment" type="submit">
-                                            Envoyer la facture
+                                            Obtenir la facture
                                         </button>
                                     </form>
                                     <a class="cart-reservation-action cart-reservation-payment" href="{{ path('app_reservation_tickets', {reference: reservation.reference}) }}?download=all">
@@ -51,7 +51,7 @@
                             </div>
                         </div>
                         {% if reservation.status.value == 'paid' and reservation.canBeCancelledAfterPayment %}
-                            <p class="cart-introduction">Annulation possible jusqu’au {{ reservation.cancellationDeadline|date('d/m/Y à H:i') }}.</p>
+                            <p class="cart-introduction cart-reservation-cancellation-note">Annulation possible jusqu’au {{ reservation.cancellationDeadline|date('d/m/Y à H:i') }}.</p>
                             {% include 'cart/_cancel_reservation_modal.html.twig' with {reservation: reservation, paid: true} only %}
                         {% endif %}
                     </article>
