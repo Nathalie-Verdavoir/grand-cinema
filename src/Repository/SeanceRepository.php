@@ -39,6 +39,44 @@ class SeanceRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return Seance[]
+     */
+    public function findPublishedFrom(DateTimeImmutable $from): array
+    {
+        return $this->createQueryBuilder('seance')
+            ->addSelect('film', 'salle')
+            ->join('seance.film', 'film')
+            ->join('seance.salle', 'salle')
+            ->andWhere('seance.dateTime >= :from')
+            ->andWhere('seance.status = :status')
+            ->setParameter('from', $from)
+            ->setParameter('status', SeanceStatus::PUBLISHED)
+            ->orderBy('seance.dateTime', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Seance[]
+     */
+    public function findPublishedForFilmFrom(int $filmId, DateTimeImmutable $from): array
+    {
+        return $this->createQueryBuilder('seance')
+            ->addSelect('film', 'salle')
+            ->join('seance.film', 'film')
+            ->join('seance.salle', 'salle')
+            ->andWhere('film.id = :filmId')
+            ->andWhere('seance.dateTime >= :from')
+            ->andWhere('seance.status = :status')
+            ->setParameter('filmId', $filmId)
+            ->setParameter('from', $from)
+            ->setParameter('status', SeanceStatus::PUBLISHED)
+            ->orderBy('seance.dateTime', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * @return list<DateTimeImmutable>
      */
     public function findPublishedDateTimesFrom(DateTimeImmutable $from): array

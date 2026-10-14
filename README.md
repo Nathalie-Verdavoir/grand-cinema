@@ -63,6 +63,12 @@ Le projet est piloté sur **Trello** à travers un découpage thématique par **
 
 ---
 
+## 📊 Pilotage et caisse
+
+Le menu d'administration donne accès aux indicateurs de billetterie (`/admin/kpis`) et à la vente directe (`/admin/caisse`). Les KPIs sont filtrables par dates et incluent l'occupation des séances publiées, les entrées et recettes par film, jour et tranche horaire, la recette moyenne par entrée, la recette par salle active et la répartition des billets payés en ligne ou à la caisse. Les graphiques en barres et en anneaux visualisent ces répartitions. La période initiale couvre le mois en cours jusqu'à aujourd'hui.
+
+Les ventes caisse sont enregistrées avec le statut `paid_at_counter`, attribuées au compte administrateur qui les saisit et les billets PDF s'ouvrent à la validation pour impression. L'occupation et les recettes comptabilisent les réservations payées en ligne et à la caisse; les réservations annulées ou remboursées ne sont pas comptées.
+
 ## 🚀 Installation et Lancement en Local
 
 ### Prérequis

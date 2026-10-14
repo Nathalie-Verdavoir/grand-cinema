@@ -153,7 +153,10 @@ class ReservationHistoryController extends AbstractController
         }
 
         $reservation = $reservationRepository->findOneForUserByReference(Ulid::fromString($reference), $user);
-        if (!$reservation instanceof Reservation || ReservationStatus::PAID !== $reservation->getStatus()) {
+        if (
+            !$reservation instanceof Reservation
+            || ReservationStatus::PAID !== $reservation->getStatus()
+        ) {
             throw $this->createNotFoundException('Ces billets ne sont pas disponibles.');
         }
 

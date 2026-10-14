@@ -6,6 +6,7 @@ enum ReservationStatus: string
 {
     case PENDING = 'pending';
     case PAID = 'paid';
+    case PAID_AT_COUNTER = 'paid_at_counter';
     case CANCELLED = 'cancelled';
     case EXPIRED = 'expired';
     case REFUNDED = 'refunded';
@@ -18,6 +19,7 @@ enum ReservationStatus: string
         return match ($this) {
             self::PENDING => 'En attente de paiement',
             self::PAID => 'Payée',
+            self::PAID_AT_COUNTER => 'Payée à la caisse',
             self::CANCELLED => 'Annulée sans remboursement',
             self::EXPIRED => 'Expirée',
             self::REFUNDED => 'Remboursée',
@@ -32,6 +34,7 @@ enum ReservationStatus: string
         return match ($this) {
             self::PENDING => 'warning',   // Jaune
             self::PAID => 'success',       // Vert
+            self::PAID_AT_COUNTER => 'primary',
             self::CANCELLED => 'danger',   // Rouge
             self::EXPIRED => 'secondary',  // Gris
             self::REFUNDED => 'info',      // Bleu

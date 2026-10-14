@@ -8,6 +8,7 @@ use App\Entity\Seance;
 use App\Entity\Tarif;
 use App\Entity\User;
 use App\Enum\ReservationStatus;
+use App\Enum\ReservationChannel;
 use App\Enum\SeanceStatus;
 use App\Exception\ReservationCreationException;
 use App\Repository\TarifRepository;
@@ -30,7 +31,41 @@ final class ReservationCreator
      */
     public function create(Seance $seance, User $user, array $submittedQuantities): Reservation
     {
-        return $this->entityManager->wrapInTransaction(function (EntityManagerInterface $entityManager) use ($seance, $user, $submittedQuantities): Reservation {
+        return $this->createWithStatus(
+            $seance,
+            $user,
+            $submittedQuantities,
+            ReservationStatus::PENDING,
+            ReservationChannel::ONLINE
+        );
+    }
+
+    /**
+     * @param array<string|int, mixed> $submittedQuantities
+     */
+    public function createAtCounter(Seance $seance, User $user, array $submittedQuantities): Reservation
+    {
+        return $this->createWithStatus(
+            $seance,
+            $user,
+            $submittedQuantities,
+            ReservationStatus::PAID_AT_COUNTER,
+            ReservationChannel::COUNTER
+        );
+    }
+
+    /**
+     * @param array<string|int, mixed> $submittedQuantities
+     */
+    private function createWithStatus(
+        Seance $seance,
+        User $user,
+        array $submittedQuantities,
+        ReservationStatus $status,
+        ReservationChannel $channel,
+    ): Reservation
+    {
+        return $this->entityManager->wrapInTransaction(function (EntityManagerInterface $entityManager) use ($seance, $user, $submittedQuantities, $status, $channel): Reservation {
             $entityManager->lock($seance, LockMode::PESSIMISTIC_WRITE);
             $dateTime = $seance->getDateTime();
             if (
@@ -90,7 +125,8 @@ final class ReservationCreator
                 ->setReservedAt(new DateTimeImmutable())
                 ->setTotalPrice($this->formatPrice($totalPriceCents))
                 ->setNbPlaces($totalSeats)
-                ->setStatus(ReservationStatus::PENDING)
+                ->setStatus($status)
+                ->setChannel($channel)
                 ->setSeance($seance);
             $entityManager->persist($reservation);
 

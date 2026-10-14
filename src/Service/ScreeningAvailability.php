@@ -14,7 +14,7 @@ final class ScreeningAvailability
     {
         $reservedSeats = 0;
         foreach ($seance->getReservations() as $reservation) {
-            if (in_array($reservation->getStatus(), [ReservationStatus::PENDING, ReservationStatus::PAID], true)) {
+            if (in_array($reservation->getStatus(), [ReservationStatus::PENDING, ReservationStatus::PAID, ReservationStatus::PAID_AT_COUNTER], true)) {
                 $reservedSeats += $reservation->getNbPlaces() ?? 0;
             }
         }
