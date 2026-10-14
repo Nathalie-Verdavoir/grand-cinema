@@ -25,19 +25,21 @@
                                 · Total : <strong>{{ reservation.totalPrice|number_format(2, ',', ' ') }} €</strong>
                             </p>
                             <div class="cart-reservation-actions">
-                                {% if reservation.status.value == 'paid' %}
+                                {% if reservation.status.value in ['paid', 'paid_at_counter'] %}
                                     <a class="cart-reservation-action cart-reservation-payment" href="{{ path('app_reservation_tickets', {reference: reservation.reference}) }}">
                                         Voir mes billets
                                     </a>
+                                    <a class="cart-reservation-action cart-reservation-payment" href="{{ path('app_reservation_tickets', {reference: reservation.reference}) }}?download=all">
+                                        Télécharger les billets (PDF)
+                                    </a>
+                                {% endif %}
+                                {% if reservation.status.value == 'paid' %}
                                     <form action="{{ path('app_reservation_send_invoice', {reference: reservation.reference}) }}" method="post">
                                         <input type="hidden" name="_token" value="{{ csrf_token('send-invoice-' ~ reservation.reference) }}">
                                         <button class="cart-reservation-action cart-reservation-payment" type="submit">
                                             Obtenir la facture
                                         </button>
                                     </form>
-                                    <a class="cart-reservation-action cart-reservation-payment" href="{{ path('app_reservation_tickets', {reference: reservation.reference}) }}?download=all">
-                                        Télécharger les billets (PDF)
-                                    </a>
                                     {% if reservation.canBeCancelledAfterPayment %}
                                         <button class="cart-reservation-action cart-reservation-cancel" type="button" data-bs-toggle="modal" data-bs-target="#paid-cancel-reservation-{{ reservation.reference }}">
                                             Annuler et être remboursé

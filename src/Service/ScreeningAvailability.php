@@ -3,20 +3,23 @@
 namespace App\Service;
 
 use App\Entity\Seance;
-use App\Enum\ReservationStatus;
 
 final class ScreeningAvailability
 {
     /**
      * @return array{reservedSeats: int, capacity: int, availableSeats: int, occupancyPercent: int}
      */
-    public function calculate(Seance $seance): array
+    public function calculate(Seance $seance, ?int $reservedSeatsOverride = null): array
     {
-        $reservedSeats = 0;
-        foreach ($seance->getReservations() as $reservation) {
-            if (in_array($reservation->getStatus(), [ReservationStatus::PENDING, ReservationStatus::PAID], true)) {
-                $reservedSeats += $reservation->getNbPlaces() ?? 0;
+        if (null === $reservedSeatsOverride) {
+            $reservedSeats = 0;
+            foreach ($seance->getReservations() as $reservation) {
+                if ($reservation->getStatus()?->reservesSeats()) {
+                    $reservedSeats += $reservation->getNbPlaces() ?? 0;
+                }
             }
+        } else {
+            $reservedSeats = $reservedSeatsOverride;
         }
 
         $capacity = max(0, $seance->getSalle()?->getCapacity() ?? 0);

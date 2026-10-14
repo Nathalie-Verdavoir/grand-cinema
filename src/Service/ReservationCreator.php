@@ -8,8 +8,10 @@ use App\Entity\Seance;
 use App\Entity\Tarif;
 use App\Entity\User;
 use App\Enum\ReservationStatus;
+use App\Enum\ReservationChannel;
 use App\Enum\SeanceStatus;
 use App\Exception\ReservationCreationException;
+use App\Repository\ReservationRepository;
 use App\Repository\TarifRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\LockMode;
@@ -22,6 +24,7 @@ final class ReservationCreator
         private readonly EntityManagerInterface $entityManager,
         private readonly TarifRepository $tarifRepository,
         private readonly ScreeningAvailability $screeningAvailability,
+        private readonly ReservationRepository $reservationRepository,
     ) {
     }
 
@@ -30,7 +33,41 @@ final class ReservationCreator
      */
     public function create(Seance $seance, User $user, array $submittedQuantities): Reservation
     {
-        return $this->entityManager->wrapInTransaction(function (EntityManagerInterface $entityManager) use ($seance, $user, $submittedQuantities): Reservation {
+        return $this->createWithStatus(
+            $seance,
+            $user,
+            $submittedQuantities,
+            ReservationStatus::PENDING,
+            ReservationChannel::ONLINE
+        );
+    }
+
+    /**
+     * @param array<string|int, mixed> $submittedQuantities
+     */
+    public function createAtCounter(Seance $seance, User $user, array $submittedQuantities): Reservation
+    {
+        return $this->createWithStatus(
+            $seance,
+            $user,
+            $submittedQuantities,
+            ReservationStatus::PAID_AT_COUNTER,
+            ReservationChannel::COUNTER
+        );
+    }
+
+    /**
+     * @param array<string|int, mixed> $submittedQuantities
+     */
+    private function createWithStatus(
+        Seance $seance,
+        User $user,
+        array $submittedQuantities,
+        ReservationStatus $status,
+        ReservationChannel $channel,
+    ): Reservation
+    {
+        return $this->entityManager->wrapInTransaction(function (EntityManagerInterface $entityManager) use ($seance, $user, $submittedQuantities, $status, $channel): Reservation {
             $entityManager->lock($seance, LockMode::PESSIMISTIC_WRITE);
             $dateTime = $seance->getDateTime();
             if (
@@ -80,7 +117,8 @@ final class ReservationCreator
                 throw new ReservationCreationException('Sélectionnez au moins une place pour réserver.');
             }
 
-            if ($totalSeats > $this->screeningAvailability->calculate($seance)['availableSeats']) {
+            $reservedSeats = $this->reservationRepository->countReservedSeatsForSeance($seance);
+            if ($totalSeats > $this->screeningAvailability->calculate($seance, $reservedSeats)['availableSeats']) {
                 throw new ReservationCreationException('Il ne reste pas assez de places pour cette sélection.');
             }
 
@@ -90,7 +128,8 @@ final class ReservationCreator
                 ->setReservedAt(new DateTimeImmutable())
                 ->setTotalPrice($this->formatPrice($totalPriceCents))
                 ->setNbPlaces($totalSeats)
-                ->setStatus(ReservationStatus::PENDING)
+                ->setStatus($status)
+                ->setChannel($channel)
                 ->setSeance($seance);
             $entityManager->persist($reservation);
 

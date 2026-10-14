@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Enum\ReservationStatus;
+use App\Enum\ReservationChannel;
 use App\Repository\ReservationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -40,6 +41,9 @@ class Reservation
 
     #[ORM\Column(enumType: ReservationStatus::class)]
     private ?ReservationStatus $status = null;
+
+    #[ORM\Column(length: 7, enumType: ReservationChannel::class, options: ['default' => 'online'])]
+    private ?ReservationChannel $channel = ReservationChannel::ONLINE;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $stripeCheckoutSessionId = null;
@@ -159,6 +163,18 @@ class Reservation
     public function setStatus(ReservationStatus $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getChannel(): ?ReservationChannel
+    {
+        return $this->channel;
+    }
+
+    public function setChannel(ReservationChannel $channel): static
+    {
+        $this->channel = $channel;
 
         return $this;
     }
