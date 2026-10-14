@@ -36,6 +36,7 @@ class DashboardController extends AbstractDashboardController
     {
         yield MenuItem::linkToDashboard('Tableau de bord', 'fa fa-home');
         yield MenuItem::linkToRoute('Indicateurs', 'fas fa-chart-line', 'admin_kpis_index');
+        yield MenuItem::linkToRoute('Séances à forte occupation', 'fas fa-exclamation-triangle', 'admin_high_occupancy_index');
         yield MenuItem::linkToRoute('Caisse', 'fas fa-cash-register', 'admin_caisse_index');
         yield MenuItem::linkToRoute('Réservations guichet', 'fas fa-receipt', 'admin_reservations_guichet_index');
         // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);

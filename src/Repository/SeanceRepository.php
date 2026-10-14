@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Salle;
 use App\Entity\Seance;
+use App\Enum\ReservationStatus;
 use App\Enum\SeanceStatus;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -54,6 +55,44 @@ class SeanceRepository extends ServiceEntityRepository
             ->orderBy('seance.dateTime', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @return list<array{screeningId: int|string, screeningDateTime: \DateTimeInterface|string, filmTitle: string, roomName: string, capacity: int|string, reservedSeats: int|string}>
+     */
+    public function findPublishedOccupanciesBetween(DateTimeImmutable $from, DateTimeImmutable $to): array
+    {
+        $reservedStatuses = array_map(
+            static fn (ReservationStatus $status): string => $status->value,
+            array_filter(
+                ReservationStatus::cases(),
+                static fn (ReservationStatus $status): bool => $status->reservesSeats()
+            )
+        );
+
+        return $this->createQueryBuilder('seance')
+            ->select(
+                'seance.id AS screeningId',
+                'seance.dateTime AS screeningDateTime',
+                'film.title AS filmTitle',
+                'salle.name AS roomName',
+                'salle.capacity AS capacity',
+                'COALESCE(SUM(CASE WHEN reservation.status IN (:reservedStatuses) THEN reservation.nbPlaces ELSE 0 END), 0) AS reservedSeats'
+            )
+            ->join('seance.film', 'film')
+            ->join('seance.salle', 'salle')
+            ->leftJoin('seance.reservations', 'reservation')
+            ->andWhere('seance.dateTime >= :from')
+            ->andWhere('seance.dateTime < :to')
+            ->andWhere('seance.status = :status')
+            ->groupBy('seance.id, seance.dateTime, film.id, film.title, salle.id, salle.name, salle.capacity')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->setParameter('status', SeanceStatus::PUBLISHED)
+            ->setParameter('reservedStatuses', $reservedStatuses)
+            ->orderBy('seance.dateTime', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
     }
 
     /**

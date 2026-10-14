@@ -26,6 +26,7 @@ security:
                 login_path: login
                 check_path: login
                 enable_csrf: true
+                success_handler: App\Security\LoginSuccessHandler
             logout:
                 path: logout
                 # where to redirect after logout

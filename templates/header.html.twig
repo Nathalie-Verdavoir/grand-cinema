@@ -84,7 +84,7 @@
 						</a>
 					</li>
 					<li class="nav-item ms-2">
-						<a class="nav-link {% if app.request.attributes.get('_route') == 'app_programmation' or app.request.attributes.get('_route') == 'app_programmation_film' %}active{% endif %} ms-5" href="{{ path('app_programmation') }}" {% if app.request.attributes.get('_route') == 'app_programmation' or app.request.attributes.get('_route') == 'app_programmation_film' %}aria-current="page"{% endif %}>Nos&nbsp;Séances</a>
+						<a class="nav-link {% if app.request.attributes.get('_route') == 'app_programmation' or app.request.attributes.get('_route') == 'app_programmation_film' %}active{% endif %} ms-5" href="{{ path('app_programmation') }}" {% if app.request.attributes.get('_route') == 'app_programmation' or app.request.attributes.get('_route') == 'app_programmation_film' %}aria-current="page"{% endif %}>Séances</a>
 					</li>
 					{% if app.user and "ROLE_CLIENT" in app.user.roles  %}
 					{% endif %}
