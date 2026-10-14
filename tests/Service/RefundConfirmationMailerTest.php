@@ -20,12 +20,14 @@ final class RefundConfirmationMailerTest extends TestCase
     public function testItSendsARefundConfirmationEmailToTheReservationOwner(): void
     {
         $reservation = $this->refundedReservation();
+        $mailerFrom = 'mailer@example.com';
         $mailer = $this->createMock(MailerInterface::class);
         $mailer
             ->expects(self::once())
             ->method('send')
-            ->with(self::callback(static function (TemplatedEmail $email): bool {
+            ->with(self::callback(static function (TemplatedEmail $email) use ($mailerFrom): bool {
                 self::assertSame('Confirmation de remboursement — Grand Cinéma', $email->getSubject());
+                self::assertSame($mailerFrom, $email->getFrom()[0]->getAddress());
                 self::assertSame(['spectateur@example.com'], array_map(
                     static fn ($address): string => $address->getAddress(),
                     $email->getTo()
@@ -34,7 +36,7 @@ final class RefundConfirmationMailerTest extends TestCase
                 return true;
             }));
 
-        (new RefundConfirmationMailer($mailer))->send($reservation);
+        (new RefundConfirmationMailer($mailer, $mailerFrom))->send($reservation);
     }
 
     public function testItRejectsReservationsThatHaveNotBeenRefunded(): void
@@ -44,7 +46,7 @@ final class RefundConfirmationMailerTest extends TestCase
         $mailer->expects(self::never())->method('send');
 
         $this->expectException(LogicException::class);
-        (new RefundConfirmationMailer($mailer))->send($reservation);
+        (new RefundConfirmationMailer($mailer, 'mailer@example.com'))->send($reservation);
     }
 
     private function refundedReservation(): Reservation

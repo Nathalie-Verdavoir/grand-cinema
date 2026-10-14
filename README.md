@@ -89,7 +89,11 @@ Le projet est piloté sur **Trello** à travers un découpage thématique par **
    ```bash
    cp .env .env.local
    ```
-   Configurez également `MAILER_DSN` dans `.env.local` avec la clé API de votre compte Brevo (`brevo+api://VOTRE_CLE_API@default`).
+   Configurez `MAILER_DSN` dans `.env.local` pour utiliser Gmail (`smtp://VOTRE_ADRESSE%40gmail.com:MOT_DE_PASSE_APPLICATION@smtp.gmail.com:587`) et définissez `MAILER_FROM` sur l'adresse expéditeur. Créez un mot de passe d'application dans votre compte Google (la validation en deux étapes doit être activée) et encodez les caractères spéciaux des identifiants dans l'URL. L'adresse `MAILER_FROM` doit correspondre au compte Gmail ou être configurée comme alias d'envoi dans Gmail.
+   Si `.env.local.php` existe, régénérez la configuration compilée après cette modification :
+   ```bash
+   composer dump-env dev
+   ```
 
 4. **Initialisation de la base de données :**
    ```bash

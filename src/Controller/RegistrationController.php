@@ -22,6 +22,7 @@ class RegistrationController extends AbstractController
 {
     public function __construct(
         private readonly EmailVerifier $emailVerifier,
+        private readonly string $mailerFrom,
     ) {
     }
 
@@ -51,7 +52,7 @@ class RegistrationController extends AbstractController
             try {
                 $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
                     (new TemplatedEmail())
-                        ->from(new Address('mailer@grand-cinema.com', 'Grand Cinéma'))
+                        ->from(new Address($this->mailerFrom, 'Grand Cinéma'))
                         ->to((string) $user->getEmail())
                         ->subject('Confirmez votre adresse e-mail — Grand Cinéma')
                         ->htmlTemplate('registration/confirmation_email.html.twig')
