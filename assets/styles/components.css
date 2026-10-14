@@ -299,6 +299,7 @@
 
 .cart-reservation-footer {
     align-items: center;
+    flex-wrap: wrap;
     padding-top: 0.75rem;
     border-top: 1px solid rgb(54 89 125 / 16%);
 }
@@ -307,9 +308,17 @@
     margin: 0;
 }
 
+.cart-reservation-cancellation-note {
+    margin: 0.75rem 0 0;
+    text-align: right;
+}
+
 .cart-reservation-actions {
     display: flex;
-    flex: 0 0 auto;
+    flex: 1 1 35rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
     gap: 0.6rem;
 }
 
@@ -359,14 +368,38 @@
 }
 
 @media (max-width: 576px) {
+    .cart-reservation {
+        padding: 1rem;
+    }
+
     .cart-reservation-heading,
     .cart-reservation-footer {
         align-items: stretch;
         flex-direction: column;
     }
 
+    .cart-reservation-heading h2,
+    .cart-reservation-heading p,
+    .cart-reservation-footer p {
+        overflow-wrap: anywhere;
+    }
+
     .cart-reservation-status {
         align-self: flex-start;
+    }
+
+    .cart-reservation-actions {
+        display: grid;
+        flex: 0 0 auto;
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
+    }
+
+    .cart-reservation-actions form,
+    .cart-reservation-action {
+        width: 100%;
+        min-width: 0;
+        white-space: normal;
     }
 
     .cart-reservation-payment {

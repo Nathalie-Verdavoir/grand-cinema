@@ -180,6 +180,10 @@ header > nav > .container-fluid > .navbar-toggler {
 }
 
 @media (min-width: 992px) {
+    header > nav > .container-fluid > .navbar-toggler {
+        display: none;
+    }
+
     .admin-buttons {
         right: 1rem;
     }
