@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Service\AdminKpiCalculator;
 use App\Service\HighOccupancyScreeningFinder;
+use App\Service\KpiPdfGenerator;
 use DateTimeImmutable;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,8 +24,40 @@ final class KpiController extends AbstractController
         HighOccupancyScreeningFinder $highOccupancyScreeningFinder,
     ): Response
     {
+        $data = $this->reportData($request, $calculator);
         $now = new DateTimeImmutable();
-        $today = $now->setTime(0, 0);
+        $data['highOccupancyScreenings'] = $highOccupancyScreeningFinder->findBetween($now, $now->modify('+2 days'));
+
+        return $this->render('admin/kpis.html.twig', $data);
+    }
+
+    #[AdminRoute(path: '/export-pdf', name: 'export_pdf', options: ['methods' => ['GET']])]
+    public function exportPdf(Request $request, AdminKpiCalculator $calculator, KpiPdfGenerator $pdfGenerator): Response
+    {
+        $report = $this->reportData($request, $calculator);
+        $filename = sprintf('kpis-%s-%s.pdf', $report['from']->format('Y-m-d'), $report['to']->format('Y-m-d'));
+
+        return new Response($pdfGenerator->generate($report), Response::HTTP_OK, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => sprintf('attachment; filename="%s"', $filename),
+        ]);
+    }
+
+    /**
+     * @return array{
+     *     from: DateTimeImmutable,
+     *     to: DateTimeImmutable,
+     *     kpis: array<string, mixed>,
+     *     previousFrom: DateTimeImmutable,
+     *     previousTo: DateTimeImmutable,
+     *     previousMonthKpis: array<string, mixed>,
+     *     annualYear: int,
+     *     annualKpis: array<string, mixed>
+     * }
+     */
+    private function reportData(Request $request, AdminKpiCalculator $calculator): array
+    {
+        $today = new DateTimeImmutable('today');
         $from = $this->parseDate($request->query->get('from'), $today->modify('first day of this month'));
         $to = $this->parseDate($request->query->get('to'), $today);
         if ($from > $to) {
@@ -38,7 +71,7 @@ final class KpiController extends AbstractController
         $previousFrom = $this->sameDayPreviousMonth($from);
         $previousTo = $this->sameDayPreviousMonth($to);
 
-        return $this->render('admin/kpis.html.twig', [
+        return [
             'from' => $from,
             'to' => $to,
             'kpis' => $calculator->calculate($from, $until),
@@ -47,8 +80,7 @@ final class KpiController extends AbstractController
             'previousMonthKpis' => $calculator->calculate($previousFrom, $previousTo->modify('+1 day')),
             'annualYear' => $annualYear,
             'annualKpis' => $calculator->calculate($annualFrom, $annualUntil),
-            'highOccupancyScreenings' => $highOccupancyScreeningFinder->findBetween($now, $now->modify('+2 days')),
-        ]);
+        ];
     }
 
     private function sameDayPreviousMonth(DateTimeImmutable $date): DateTimeImmutable

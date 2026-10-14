@@ -2,7 +2,12 @@
 
 {% block content_title %}Indicateurs de performance{% endblock %}
 
-{% block page_actions %}{% endblock %}
+{% block page_actions %}
+    <a class="btn btn-primary" href="{{ path('admin_kpis_export_pdf', {from: from|date('Y-m-d'), to: to|date('Y-m-d')}) }}">
+        <i class="fa fa-file-pdf" aria-hidden="true"></i>
+        Exporter en PDF
+    </a>
+{% endblock %}
 
 {% block main %}
     {% if highOccupancyScreenings is not empty %}
