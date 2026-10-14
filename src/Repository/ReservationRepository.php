@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Reservation;
+use App\Entity\Seance;
 use App\Entity\User;
 use App\Enum\ReservationChannel;
 use App\Enum\ReservationStatus;
@@ -121,6 +122,24 @@ class ReservationRepository extends ServiceEntityRepository
             ->andWhere('reservation.status = :status')
             ->setParameter('userId', $user->getId(), UuidType::NAME)
             ->setParameter('status', ReservationStatus::PENDING)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countReservedSeatsForSeance(Seance $seance): int
+    {
+        return (int) $this->createQueryBuilder('reservation')
+            ->select('COALESCE(SUM(reservation.nbPlaces), 0)')
+            ->andWhere('IDENTITY(reservation.seance) = :seanceId')
+            ->andWhere('reservation.status IN (:statuses)')
+            ->setParameter('seanceId', $seance->getId())
+            ->setParameter('statuses', array_map(
+                static fn (ReservationStatus $status): string => $status->value,
+                array_filter(
+                    ReservationStatus::cases(),
+                    static fn (ReservationStatus $status): bool => $status->reservesSeats()
+                )
+            ))
             ->getQuery()
             ->getSingleScalarResult();
     }

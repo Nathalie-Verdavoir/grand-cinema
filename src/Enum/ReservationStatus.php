@@ -11,6 +11,11 @@ enum ReservationStatus: string
     case EXPIRED = 'expired';
     case REFUNDED = 'refunded';
 
+    public function reservesSeats(): bool
+    {
+        return in_array($this, [self::PENDING, self::PAID, self::PAID_AT_COUNTER], true);
+    }
+
     /**
      * label for the status in the back-office OR for the status badge in the front-office.
      */

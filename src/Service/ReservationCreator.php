@@ -11,6 +11,7 @@ use App\Enum\ReservationStatus;
 use App\Enum\ReservationChannel;
 use App\Enum\SeanceStatus;
 use App\Exception\ReservationCreationException;
+use App\Repository\ReservationRepository;
 use App\Repository\TarifRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\LockMode;
@@ -23,6 +24,7 @@ final class ReservationCreator
         private readonly EntityManagerInterface $entityManager,
         private readonly TarifRepository $tarifRepository,
         private readonly ScreeningAvailability $screeningAvailability,
+        private readonly ReservationRepository $reservationRepository,
     ) {
     }
 
@@ -115,7 +117,8 @@ final class ReservationCreator
                 throw new ReservationCreationException('Sélectionnez au moins une place pour réserver.');
             }
 
-            if ($totalSeats > $this->screeningAvailability->calculate($seance)['availableSeats']) {
+            $reservedSeats = $this->reservationRepository->countReservedSeatsForSeance($seance);
+            if ($totalSeats > $this->screeningAvailability->calculate($seance, $reservedSeats)['availableSeats']) {
                 throw new ReservationCreationException('Il ne reste pas assez de places pour cette sélection.');
             }
 
