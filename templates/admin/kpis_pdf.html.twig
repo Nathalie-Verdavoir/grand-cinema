@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Indicateurs de performance — Grand Cinéma</title>
+    <style>
+        @page { margin: 24px; }
+        body { color: #202a36; font-family: DejaVu Sans, sans-serif; font-size: 10px; }
+        h1 { color: #172b4d; font-size: 22px; margin: 0 0 4px; }
+        h2 { border-bottom: 1px solid #ccd4df; color: #172b4d; font-size: 14px; margin: 22px 0 8px; padding-bottom: 5px; }
+        p { margin: 4px 0 12px; }
+        table { border-collapse: collapse; margin: 8px 0 16px; width: 100%; }
+        thead { display: table-header-group; }
+        th, td { border: 1px solid #d7dde5; padding: 6px 8px; text-align: left; }
+        th { background: #eef2f7; }
+        tr { page-break-inside: avoid; }
+        .subtitle { color: #586577; font-size: 12px; }
+        .numeric { text-align: right; white-space: nowrap; }
+    </style>
+</head>
+<body>
+    <h1>Grand Cinéma — Indicateurs de performance</h1>
+    <p class="subtitle">Période du {{ from|date('d/m/Y') }} au {{ to|date('d/m/Y') }}</p>
+
+    <h2>Synthèse</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Indicateur</th>
+                <th>Période sélectionnée</th>
+                <th>M-1 ({{ previousFrom|date('d/m/Y') }} au {{ previousTo|date('d/m/Y') }})</th>
+                <th>Année {{ annualYear }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Occupation</th>
+                <td>{{ kpis.occupancyPercent|number_format(1, ',', ' ') }} %</td>
+                <td>{{ previousMonthKpis.occupancyPercent|number_format(1, ',', ' ') }} %</td>
+                <td>{{ annualKpis.occupancyPercent|number_format(1, ',', ' ') }} %</td>
+            </tr>
+            <tr>
+                <th>Entrées</th>
+                <td>{{ kpis.entries|number_format(0, ',', ' ') }}</td>
+                <td>{{ previousMonthKpis.entries|number_format(0, ',', ' ') }}</td>
+                <td>{{ annualKpis.entries|number_format(0, ',', ' ') }}</td>
+            </tr>
+            <tr>
+                <th>Réservations en ligne</th>
+                <td>{{ kpis.onlinePercent|number_format(1, ',', ' ') }} % ({{ kpis.onlineReservations }})</td>
+                <td>{{ previousMonthKpis.onlinePercent|number_format(1, ',', ' ') }} %</td>
+                <td>{{ annualKpis.onlinePercent|number_format(1, ',', ' ') }} %</td>
+            </tr>
+            <tr>
+                <th>Réservations au guichet</th>
+                <td>{{ kpis.counterPercent|number_format(1, ',', ' ') }} % ({{ kpis.counterReservations }})</td>
+                <td>{{ previousMonthKpis.counterPercent|number_format(1, ',', ' ') }} %</td>
+                <td>{{ annualKpis.counterPercent|number_format(1, ',', ' ') }} %</td>
+            </tr>
+            <tr>
+                <th>Recette billetterie</th>
+                <td>{{ kpis.revenue|number_format(2, ',', ' ') }} €</td>
+                <td>{{ previousMonthKpis.revenue|number_format(2, ',', ' ') }} €</td>
+                <td>{{ annualKpis.revenue|number_format(2, ',', ' ') }} €</td>
+            </tr>
+            <tr>
+                <th>Recette moyenne par entrée</th>
+                <td>{{ kpis.averageRevenuePerEntry|number_format(2, ',', ' ') }} €</td>
+                <td>{{ previousMonthKpis.averageRevenuePerEntry|number_format(2, ',', ' ') }} €</td>
+                <td>{{ annualKpis.averageRevenuePerEntry|number_format(2, ',', ' ') }} €</td>
+            </tr>
+            <tr>
+                <th>Recette par salle active</th>
+                <td>{{ kpis.revenuePerScreen|number_format(2, ',', ' ') }} € ({{ kpis.activeScreens }})</td>
+                <td>{{ previousMonthKpis.revenuePerScreen|number_format(2, ',', ' ') }} €</td>
+                <td>{{ annualKpis.revenuePerScreen|number_format(2, ',', ' ') }} €</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Entrées par film</h2>
+    <table>
+        <thead><tr><th>Film</th><th class="numeric">Entrées</th><th class="numeric">Recette</th></tr></thead>
+        <tbody>
+            {% for row in kpis.salesByFilm %}
+                <tr><td>{{ row.title }}</td><td class="numeric">{{ row.entries|number_format(0, ',', ' ') }}</td><td class="numeric">{{ row.revenue|number_format(2, ',', ' ') }} €</td></tr>
+            {% else %}
+                <tr><td colspan="3">Aucune vente sur cette période.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Entrées par jour de la semaine</h2>
+    <table>
+        <thead><tr><th>Jour</th><th class="numeric">Entrées</th></tr></thead>
+        <tbody>
+            {% for row in kpis.salesByWeekday %}
+                <tr><td>{{ row.label }}</td><td class="numeric">{{ row.entries|number_format(0, ',', ' ') }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Entrées par tranche horaire</h2>
+    <table>
+        <thead><tr><th>Tranche horaire</th><th class="numeric">Entrées</th></tr></thead>
+        <tbody>
+            {% for row in kpis.salesByTimeOfDay %}
+                <tr><td>{{ row.label }}</td><td class="numeric">{{ row.entries|number_format(0, ',', ' ') }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

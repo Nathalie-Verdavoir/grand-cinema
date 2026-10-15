@@ -1,0 +1,38 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Séances à forte occupation{% endblock %}
+
+{% block page_actions %}{% endblock %}
+
+{% block main %}
+    <p>Liste des séances publiées prévues du {{ from|date('d/m/Y à H:i') }} au {{ to|date('d/m/Y à H:i') }} avec plus de 90 % des places réservées.</p>
+
+    {% if screenings is not empty %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Séance</th>
+                        <th scope="col">Film</th>
+                        <th scope="col">Salle</th>
+                        <th scope="col">Places réservées</th>
+                        <th scope="col">Remplissage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for screening in screenings %}
+                        <tr>
+                            <td>{{ screening.dateTime|date('d/m/Y à H:i') }}</td>
+                            <td>{{ screening.filmTitle }}</td>
+                            <td>{{ screening.roomName }}</td>
+                            <td>{{ screening.reservedSeats }} / {{ screening.capacity }}</td>
+                            <td>{{ screening.occupancyPercent|number_format(2, ',', ' ') }} %</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-success" role="status">Aucune séance des deux prochains jours ne dépasse 90 % de remplissage.</div>
+    {% endif %}
+{% endblock %}

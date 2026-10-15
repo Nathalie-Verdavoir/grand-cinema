@@ -2,9 +2,26 @@
 
 {% block content_title %}Indicateurs de performance{% endblock %}
 
-{% block page_actions %}{% endblock %}
+{% block page_actions %}
+    <a class="btn btn-primary" href="{{ path('admin_kpis_export_pdf', {from: from|date('Y-m-d'), to: to|date('Y-m-d')}) }}">
+        <i class="fa fa-file-pdf" aria-hidden="true"></i>
+        Exporter en PDF
+    </a>
+{% endblock %}
 
 {% block main %}
+    {% if highOccupancyScreenings is not empty %}
+        <div class="alert alert-warning" role="alert">
+            <strong>Bienvenue dans l’administration.</strong>
+            {% if highOccupancyScreenings|length == 1 %}
+                Une séance programmée dans les prochaines 48 heures dépasse 90 % de remplissage.
+            {% else %}
+                {{ highOccupancyScreenings|length }} séances programmées dans les prochaines 48 heures dépassent 90 % de remplissage.
+            {% endif %}
+            <a class="alert-link" href="{{ path('admin_high_occupancy_index') }}">Consulter les séances concernées</a>
+        </div>
+    {% endif %}
+
     <form class="admin-kpi-period" method="get" action="{{ path('admin_kpis_index') }}">
         <label for="kpi-from">Du</label>
         <input id="kpi-from" type="date" name="from" value="{{ from|date('Y-m-d') }}" required>
