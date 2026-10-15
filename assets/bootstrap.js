@@ -5,6 +5,7 @@ import SeancePlannerController from './controllers/seance-planner_controller.js'
 import './flash-messages.js';
 import './styles/tokens.css';
 import './styles/admin.css';
+import './styles/theme.css';
 import './styles/flash-messages.css';
 
 const app = Application.start();

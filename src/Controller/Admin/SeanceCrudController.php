@@ -86,11 +86,12 @@ class SeanceCrudController extends AbstractCrudController
         }
 
         $request = $this->requestStack->getCurrentRequest();
-        $isDailyView = 'day' === $request?->query->get('view');
+        $isDailyView = 'week' !== $request?->query->get('view');
         $now = new DateTimeImmutable('now');
         $weekStart = $this->getWeekStart($request?->query->get('week'));
         $weekEnd = $weekStart->modify('+7 days');
-        $rooms = $this->salleRepository->findBy([], ['name' => 'ASC']);
+        $rooms = $this->salleRepository->findAll();
+        usort($rooms, static fn (Salle $left, Salle $right): int => strnatcasecmp($left->getName() ?? '', $right->getName() ?? ''));
         $roomId = filter_var($request?->query->get('salle'), FILTER_VALIDATE_INT);
         $selectedRoom = null;
         if (false !== $roomId) {

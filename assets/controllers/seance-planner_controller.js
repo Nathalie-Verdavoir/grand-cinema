@@ -231,7 +231,8 @@ export default class extends Controller {
         const eventRect = focusedEvent.getBoundingClientRect();
         const scrollRect = this.dailyScrollTarget.getBoundingClientRect();
         const eventLeft = eventRect.left - scrollRect.left + this.dailyScrollTarget.scrollLeft;
-        const left = eventLeft - ((this.dailyScrollTarget.clientWidth - focusedEvent.offsetWidth) / 2);
+        const focusOffset = this.dailyScrollTarget.clientWidth * 0.35;
+        const left = eventLeft + focusedEvent.offsetWidth / 2 - focusOffset;
         this.dailyScrollTarget.scrollLeft = Math.max(0, left);
     }
 

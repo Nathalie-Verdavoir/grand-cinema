@@ -3,8 +3,8 @@
 }
 
 footer {
-    background-color: var(--color-global-5);
-    color: var(--color-beige-1);
+    background-color: var(--color-surface-strong);
+    color: var(--color-text-primary);
 }
 
 footer.row {

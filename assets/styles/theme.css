@@ -1,0 +1,1072 @@
+:root {
+    --bs-body-bg: var(--color-beige-1);
+    --bs-body-color: var(--color-text-primary);
+    --bs-border-color: var(--color-border);
+    --bs-secondary-color: var(--color-text-muted);
+    --bs-tertiary-bg: var(--color-surface-raised);
+    --bs-card-bg: var(--color-surface);
+    --bs-link-color: var(--color-global-2);
+    --bs-link-hover-color: #6be0a4;
+    --bs-table-color: var(--color-text-primary);
+    --bs-table-bg: var(--color-surface);
+}
+
+html {
+    color-scheme: dark;
+    background: var(--color-beige-1);
+}
+
+body {
+    background:
+        radial-gradient(ellipse at 78% -18%, rgb(60 201 130 / 8%), transparent 34rem),
+        var(--color-beige-1);
+    color: var(--color-text-primary);
+}
+
+main {
+    min-height: 70vh;
+    padding-top: clamp(1rem, 2.5vw, 2.5rem);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--color-dark-grey);
+    letter-spacing: -0.025em;
+}
+
+a {
+    transition: color 160ms ease;
+}
+
+header {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+}
+
+.navbar {
+    min-height: 5rem;
+    background: var(--color-surface) !important;
+    color: var(--color-text-primary);
+}
+
+.navbar-brand .logo {
+    max-height: 3rem;
+    object-fit: contain;
+}
+
+.navbar-nav {
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-link {
+    margin-top: 0;
+    padding: 0.55rem 0.9rem !important;
+    border-radius: 0.65rem;
+    color: var(--color-text-muted) !important;
+    font-weight: 600;
+    transition: color 160ms ease, background-color 160ms ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: rgb(60 201 130 / 12%) !important;
+    color: var(--color-global-2) !important;
+}
+
+.admin-buttons .btn,
+.navbar-toggler.btn {
+    border: 1px solid var(--color-border);
+    border-radius: 0.7rem;
+    background: var(--color-surface-raised);
+    box-shadow: none;
+    color: var(--color-text-primary);
+}
+
+.admin-buttons .btn:hover,
+.navbar-toggler.btn:hover {
+    border-color: rgb(60 201 130 / 45%);
+    background: var(--color-surface-raised);
+    color: var(--color-global-2);
+}
+
+.fond-gris {
+    /*padding: 0.45rem 1rem;*/
+    background: var(--color-surface-strong);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+@media (min-width: 992px) {
+    .navbar {
+        min-height: 2.5rem;
+        padding-block: 0.2rem;
+    }
+
+    .navbar > .container-fluid {
+        min-height: 2.5rem;
+    }
+
+    .navbar-brand {
+        padding-block: 0;
+    }
+
+    .navbar-brand .logo {
+        max-height: 1.5rem;
+    }
+
+    .navbar-collapse {
+        display: none !important;
+    }
+
+    header .fond-gris {
+        padding: 0.18rem 1rem;
+        font-size: 1rem;
+        line-height: 1.1;
+    }
+
+    header .admin-buttons {
+        top: 0.35rem;
+    }
+
+    header .admin-buttons .btn {
+        min-height: 1.75rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+.btn,
+button.btn {
+    border: 1px solid transparent;
+    border-radius: 0.7rem;
+    background: var(--color-global-2);
+    box-shadow: none;
+    color: #101a14;
+    font-weight: 700;
+    transition: background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.btn:hover,
+button.btn:hover {
+    border-color: transparent;
+    background: #55d995;
+    color: #101a14;
+    transform: translateY(-1px);
+}
+
+.btn:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline-color: var(--color-global-2);
+    box-shadow: 0 0 0 0.2rem rgb(60 201 130 / 24%);
+}
+
+input,
+select,
+textarea,
+.form-control,
+.form-select {
+    border-color: var(--color-border);
+    background-color: var(--color-surface-raised);
+    color: var(--color-text-primary);
+}
+
+input::placeholder,
+textarea::placeholder,
+.form-control::placeholder {
+    color: var(--color-text-muted);
+    opacity: 1;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-global-2);
+    background-color: var(--color-surface-raised);
+    color: var(--color-text-primary);
+    box-shadow: 0 0 0 0.2rem rgb(60 201 130 / 18%);
+}
+
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-text-primary);
+    -webkit-box-shadow: 0 0 0 1000px var(--color-surface-raised) inset;
+}
+
+.login-form .form-control,
+.registration-form .form-control,
+.reset-password-form .form-control,
+.reservation-tariffs-table input,
+.admin-cash-screening-form select,
+.admin-cash-sale-form input,
+.admin-cash-sale-form select {
+    border-color: var(--color-border);
+    background-color: var(--color-surface-raised);
+    color: var(--color-text-primary);
+}
+
+.login-form .form-control:focus,
+.registration-form .form-control:focus,
+.reset-password-form .form-control:focus,
+.reservation-tariffs-table input:focus,
+.admin-cash-screening-form select:focus,
+.admin-cash-sale-form input:focus,
+.admin-cash-sale-form select:focus {
+    border-color: var(--color-global-2);
+    background-color: var(--color-surface-raised);
+    color: var(--color-text-primary);
+    box-shadow: 0 0 0 0.2rem rgb(60 201 130 / 18%);
+}
+
+.auth-page .form-control:-webkit-autofill,
+.auth-page .form-control:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-text-primary);
+    -webkit-box-shadow: 0 0 0 1000px var(--color-surface-raised) inset;
+}
+
+.card,
+.account-panel,
+.cart-panel,
+.film-program-page,
+.login-card,
+.registration-card,
+.reset-password-card,
+.home-carousel,
+.audience-film-card,
+.reservation-panel,
+.reservation-ticket,
+.admin-kpi-card,
+.admin-cash-register {
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    box-shadow: 0 1rem 2.5rem var(--color-shadow);
+}
+
+.account-panel,
+.cart-panel,
+.film-program-page,
+.login-card,
+.registration-card,
+.reset-password-card {
+    color: var(--color-text-primary);
+}
+
+.cart-panel h1,
+.cart-reservation h2,
+.film-program-page h1,
+.film-program-page h2,
+.login-card h1,
+.registration-card h1,
+.reset-password-card h1 {
+    color: var(--color-dark-grey);
+}
+
+.cart-reservation,
+.reservation-panel,
+.reservation-ticket,
+.home-film-slide,
+.home-film-screenings-scroll,
+.home-program-empty,
+.audience-film-card,
+.audience-film-content,
+.audience-film-info,
+.audience-film-details,
+.account-future-column {
+    border-color: var(--color-border);
+    background: var(--color-surface-raised);
+    color: var(--color-text-primary);
+}
+
+.home-film-screenings-table,
+.audience-film-content table,
+.reservation-details,
+.table {
+    --bs-table-color: var(--color-text-primary);
+    --bs-table-bg: var(--color-surface);
+    --bs-table-border-color: var(--color-border);
+    color: var(--color-text-primary);
+}
+
+.home-film-screenings-table th,
+.audience-film-content th,
+.table > :not(caption) > * > * {
+    border-color: var(--color-border);
+    background-color: var(--color-surface-raised);
+    color: var(--color-text-primary);
+}
+
+.home-film-screenings-table td,
+.audience-film-content td {
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
+}
+
+.home-film-screening-link,
+.home-screening-link,
+.audience-screening-time,
+.film-program-back,
+.forgot-password-link,
+.reset-password-card a {
+    color: var(--color-global-2);
+}
+
+.home-carousel-navigation,
+.home-film-screenings-upcoming-title,
+.audience-week-toolbar,
+.audience-film-content th {
+    border-color: var(--color-border);
+}
+
+.home-carousel-nav-button,
+.home-carousel-toggle,
+.audience-week-button,
+.audience-film-details-link {
+    border: 1px solid var(--color-border);
+    border-radius: 0.7rem;
+    background: var(--color-surface-raised);
+    color: var(--color-text-primary);
+}
+
+.home-carousel-nav-button:hover,
+.home-carousel-toggle:hover,
+.audience-week-button:hover,
+.audience-film-details-link:hover {
+    border-color: rgb(60 201 130 / 45%);
+    background: rgb(60 201 130 / 12%);
+    color: var(--color-global-2);
+}
+
+.audience-week-toolbar select {
+    border-color: var(--color-border);
+    background: var(--color-surface-raised);
+    color: var(--color-text-primary);
+}
+
+.audience-program-notice {
+    border-color: var(--color-global-3);
+    background: var(--color-surface-raised);
+    color: var(--color-text-primary);
+}
+
+.audience-screening-time {
+    border-color: var(--color-border);
+    background: var(--color-surface-raised);
+    color: var(--color-global-2);
+}
+
+.audience-screening-time.is-in-progress {
+    border-color: var(--color-global-3);
+    background: var(--color-surface-strong);
+    color: var(--color-global-3);
+}
+
+.home-carousel-navigation {
+    border-color: var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+}
+
+.home-film-eyebrow,
+.home-film-duration {
+    border-color: var(--color-border);
+    background: rgb(255 255 255 / 6%);
+}
+
+.home-film-eyebrow {
+    color: var(--color-global-2);
+}
+
+.home-film-duration {
+    color: var(--color-text-muted);
+}
+
+.reservation-submit {
+    border-color: var(--color-global-2);
+    background: var(--color-global-2);
+    color: #101a14;
+}
+
+.reservation-submit:hover:not(:disabled) {
+    background: #55d995;
+    color: #101a14;
+}
+
+.audience-screening-link:hover,
+.audience-screening-link:focus-visible {
+    border-color: var(--color-global-2);
+    background: rgb(60 201 130 / 14%);
+    color: var(--color-global-2);
+}
+
+.reservation-ticket {
+    border-left-color: var(--color-global-2);
+}
+
+.reservation-ticket-qr {
+    border-color: var(--color-border);
+    background: #fff;
+}
+
+.cart-reservation,
+.reservation-panel,
+.reservation-ticket,
+.audience-film-card,
+.home-film-slide {
+    background-image: none;
+}
+
+.alert-success {
+    border-color: rgb(134 228 173 / 28%);
+    background: var(--color-success-background);
+    color: var(--color-success-text);
+}
+
+.alert-danger,
+.alert-warning,
+.alert-info {
+    border-color: var(--color-border);
+    background: var(--color-surface-raised);
+    color: var(--color-text-primary);
+}
+
+.flash-messages .flash-message {
+    border-color: var(--color-border);
+    border-left-color: var(--color-global-2);
+    border-radius: 0.85rem;
+    background: var(--color-surface-raised);
+    color: var(--color-text-primary);
+}
+
+footer {
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface-strong);
+    color: var(--color-text-primary);
+}
+
+.title-footer,
+.plan-link {
+    color: var(--color-text-primary);
+}
+
+.modal-content,
+.dropdown-menu,
+.list-group-item,
+.popover,
+.tooltip-inner {
+    border-color: var(--color-border);
+    background: var(--color-surface-raised);
+    color: var(--color-text-primary);
+}
+
+.modal-header,
+.modal-footer {
+    border-color: var(--color-border);
+}
+
+.admin-kpi-grid > *,
+.admin-kpi-charts > *,
+.admin-kpi-panel,
+.admin-kpi-chart,
+.admin-cash-sale-form,
+.admin-screening-card,
+.admin-reservation-panel {
+    border-color: var(--color-border);
+    border-radius: 0.9rem;
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+}
+
+.admin-kpi-donut > span {
+    background: var(--color-surface-strong);
+    color: var(--color-text-primary);
+}
+
+.reservation-countdown time {
+    background: var(--color-surface-strong);
+    color: var(--color-text-primary);
+}
+
+.reservation-quantity-control button,
+.cart-reservation-payment {
+    border-color: var(--color-border);
+    border-radius: 0.7rem;
+    background: var(--color-global-2);
+    color: #101a14;
+}
+
+.reservation-quantity-control button:hover:not(:disabled),
+.cart-reservation-payment:hover {
+    background: #55d995;
+    color: #101a14;
+}
+
+.reservation-quantity-control button:focus-visible {
+    outline: 2px solid var(--color-global-2);
+    outline-offset: 2px;
+}
+
+.schedule-event-film-edit,
+.schedule-event-delete,
+.seance-update-dialog-panel,
+.seance-delete-dialog-panel,
+.seance-film-card-edit {
+    background: var(--color-surface-strong);
+    color: var(--color-text-primary);
+}
+
+.schedule-event-film-edit:hover,
+.schedule-event-delete:hover,
+.schedule-event-delete:focus-visible,
+.seance-film-card-edit:hover,
+.seance-film-card-edit:focus-visible {
+    background: var(--color-global-2);
+    color: #101a14;
+}
+
+.film-image-preview-card {
+    border-color: var(--color-border);
+    border-radius: 0.9rem;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+}
+
+.admin-kpi-grid > .admin-kpi-card,
+.admin-kpi-grid > .admin-kpi-section,
+.admin-kpi-grid > .admin-cash-register {
+    border-color: var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+}
+
+.ea,
+.ea-content,
+.content-wrapper {
+    color: var(--color-text-primary);
+}
+
+.bg-white,
+.text-bg-light {
+    background-color: var(--color-surface-raised) !important;
+    color: var(--color-text-primary) !important;
+}
+
+.discovery-page {
+    max-width: 92rem;
+}
+
+.discovery-layout {
+    display: grid;
+    grid-template-columns: minmax(17rem, 0.78fr) minmax(0, 1.75fr);
+    align-items: start;
+    gap: clamp(1.5rem, 3vw, 3rem);
+}
+
+.discovery-featured {
+    position: sticky;
+    top: 1rem;
+    min-width: 0;
+}
+
+.discovery-eyebrow,
+.featured-film-label {
+    margin: 0 0 0.35rem;
+    color: var(--color-global-2);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.discovery-featured > h1 {
+    margin: 0 0 1rem;
+    font-size: clamp(1.5rem, 2vw, 2rem);
+}
+
+.discovery-carousel {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 1.1rem;
+    background: var(--color-surface);
+    box-shadow: 0 1.25rem 3rem var(--color-shadow);
+}
+
+.discovery-carousel-slides .carousel-item {
+    display: none;
+}
+
+.discovery-carousel-slides .carousel-item.active {
+    display: block;
+}
+
+.featured-film-slide {
+    position: relative;
+    min-height: min(68vh, 52rem);
+    overflow: hidden;
+    background: var(--color-surface-raised);
+}
+
+.featured-film-poster,
+.featured-film-poster-placeholder {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.featured-film-poster-placeholder {
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    background: radial-gradient(ellipse at top, rgb(60 201 130 / 17%), transparent 65%), var(--color-surface-raised);
+    color: var(--color-text-muted);
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.featured-film-slide::after {
+    position: absolute;
+    inset: 25% 0 0;
+    background: linear-gradient(180deg, transparent 0%, rgb(13 14 18 / 70%) 48%, #0d0e12 100%);
+    content: '';
+}
+
+.featured-film-copy {
+    position: absolute;
+    z-index: 1;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+    color: var(--color-text-primary);
+}
+
+.featured-film-copy h2 {
+    margin: 0;
+    font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+}
+
+.featured-film-duration {
+    margin: 0.5rem 0;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.featured-film-description {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0.65rem 0 1rem;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 5;
+    color: #e0e1e5;
+    font-size: 0.9rem;
+}
+
+.featured-film-link,
+.screening-card-more {
+    display: inline-flex;
+    min-height: 2.6rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 0.95rem;
+    border-radius: 0.7rem;
+    background: var(--color-global-2);
+    color: #101a14;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.featured-film-link:hover,
+.screening-card-more:hover {
+    background: #55d995;
+    color: #101a14;
+}
+
+.discovery-carousel-indicators {
+    position: absolute;
+    z-index: 2;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.4rem;
+}
+
+.discovery-carousel-indicators button {
+    width: 0.55rem;
+    height: 0.55rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 45%);
+    cursor: pointer;
+}
+
+.discovery-carousel-indicators button.active {
+    background: var(--color-global-2);
+    box-shadow: 0 0 0 0.2rem rgb(60 201 130 / 20%);
+}
+
+.discovery-carousel-controls {
+    display: flex;
+    min-height: 3.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.discovery-carousel-button,
+.discovery-carousel-toggle {
+    display: inline-grid;
+    width: 2.3rem;
+    height: 2.3rem;
+    place-items: center;
+    padding: 0.45rem;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-surface-raised);
+    color: var(--color-text-primary);
+    cursor: pointer;
+}
+
+.discovery-carousel-button:hover,
+.discovery-carousel-toggle:hover {
+    border-color: rgb(60 201 130 / 45%);
+    color: var(--color-global-2);
+}
+
+.discovery-carousel-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.discovery-carousel-button svg,
+.discovery-carousel-toggle svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+}
+
+.discovery-featured-empty {
+    padding: 2rem;
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+}
+
+.discovery-section-heading {
+    margin-bottom: 1rem;
+}
+
+.discovery-section-heading h2 {
+    margin: 0;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+}
+
+.discovery-section-heading > p:last-child {
+    margin: 0.4rem 0 0;
+    color: var(--color-text-muted);
+}
+
+.discovery-screenings .audience-week-toolbar {
+    margin-bottom: 1.25rem;
+}
+
+.discovery-screenings-content {
+    display: contents;
+}
+
+.screening-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.screening-card {
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+    aspect-ratio: 2 / 3;
+    border: 1px solid var(--color-border);
+    border-radius: 0.9rem;
+    background: var(--color-surface-raised);
+    box-shadow: 0 0.8rem 1.8rem var(--color-shadow);
+}
+
+.screening-card:focus-within {
+    outline: 2px solid var(--color-global-2);
+    outline-offset: 3px;
+}
+
+.screening-card-poster-link {
+    position: absolute;
+    inset: 0;
+    display: block;
+    color: var(--color-text-primary);
+}
+
+.screening-card-poster-link img,
+.screening-card-poster-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.screening-card-poster-placeholder {
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: radial-gradient(ellipse at top, rgb(60 201 130 / 17%), transparent 65%), var(--color-surface-raised);
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.screening-card-poster-link::after {
+    position: absolute;
+    inset: 45% 0 0;
+    background: linear-gradient(180deg, transparent, rgb(10 11 14 / 93%));
+    content: '';
+}
+
+.screening-card-poster-title {
+    position: absolute;
+    z-index: 1;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.screening-card-overlay {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    display: flex;
+    overflow-y: auto;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1rem;
+    background: rgb(22 23 29 / 97%);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(0.5rem);
+    transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.screening-card:hover .screening-card-overlay,
+.screening-card:focus-within .screening-card-overlay {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.screening-card-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.screening-card-heading h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    text-align: left;
+}
+
+.screening-card-heading > span {
+    flex: 0 0 auto;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+}
+
+.screening-card-description {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+.screening-card-overlay h4 {
+    margin: 0.2rem 0 0;
+    color: var(--color-text-primary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.screening-card-times {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.screening-card-times li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.74rem;
+}
+
+.screening-card-date,
+.screening-card-in-progress {
+    color: var(--color-text-muted);
+}
+
+.screening-card-times li a {
+    color: var(--color-global-2);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.screening-card-more {
+    min-height: 2.2rem;
+    align-self: flex-start;
+    margin-top: auto;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.76rem;
+}
+
+.audience-program-empty {
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.9rem;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+}
+
+@media (max-width: 1100px) {
+    .discovery-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .discovery-featured {
+        position: static;
+    }
+
+    .featured-film-slide {
+        min-height: min(72vh, 46rem);
+    }
+
+    .screening-card-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+    .screening-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.7rem;
+    }
+
+    .screening-card-overlay {
+        gap: 0.45rem;
+        padding: 0.7rem;
+    }
+
+    .screening-card-description {
+        -webkit-line-clamp: 3;
+        font-size: 0.72rem;
+    }
+
+    .screening-card-times li {
+        font-size: 0.67rem;
+    }
+
+    .screening-card-poster-title {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .discovery-screenings .audience-week-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .discovery-screenings .audience-week-toolbar form,
+    .discovery-screenings .audience-week-toolbar select {
+        width: 100%;
+    }
+
+    .discovery-screenings .audience-week-navigation {
+        justify-content: space-between;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .screening-card {
+        display: flex;
+        height: auto;
+        aspect-ratio: auto;
+        flex-direction: column;
+    }
+
+    .screening-card-poster-link {
+        position: relative;
+        inset: auto;
+        display: block;
+        aspect-ratio: 2 / 3;
+    }
+
+    .screening-card-overlay {
+        position: relative;
+        inset: auto;
+        flex: 1;
+        opacity: 1;
+        pointer-events: auto;
+        transform: none;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        padding: 0.75rem 0;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .navbar-nav {
+        align-items: stretch;
+    }
+
+    .nav-link {
+        margin-left: 0 !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}

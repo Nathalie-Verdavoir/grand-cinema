@@ -2,6 +2,7 @@
     {% if not isDailyView %}
         <form method="get" action="{{ path('admin_seance_index') }}" class="seance-room-selector">
             <label for="schedule-room">Salle</label>
+            <input type="hidden" name="view" value="week">
             <input type="hidden" name="week" value="{{ weekStart|date('Y-m-d') }}">
             <select id="schedule-room" name="salle" class="form-select" {% if rooms is empty %}disabled{% endif %} onchange="this.form.submit()">
                 {% for room in rooms %}
@@ -43,14 +44,14 @@
             <a class="btn btn-secondary" href="{{ ea_url().setController('App\\Controller\\Admin\\SeanceCrudController').setAction('index').set('view', 'day').set('day', nextDay).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Jour suivant"><span class="seance-navigation-arrow" aria-hidden="true">&rsaquo;</span></a>
             {% if not isToday %}<a class="btn btn-link" href="{{ ea_url().setController('App\\Controller\\Admin\\SeanceCrudController').setAction('index').set('view', 'day').set('day', 'now'|date('Y-m-d')).set('salle', selectedRoom ? selectedRoom.id : '') }}">Aujourd’hui</a>{% endif %}
         {% else %}
-            <a class="btn btn-secondary" href="{{ ea_url().setController('App\\Controller\\Admin\\SeanceCrudController').setAction('index').set('week', previousWeek).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Semaine précédente" title="Semaine précédente"><span class="seance-navigation-arrow" aria-hidden="true">&lsaquo;</span></a>
+            <a class="btn btn-secondary" href="{{ ea_url().setController('App\\Controller\\Admin\\SeanceCrudController').setAction('index').set('view', 'week').set('week', previousWeek).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Semaine précédente" title="Semaine précédente"><span class="seance-navigation-arrow" aria-hidden="true">&lsaquo;</span></a>
             <strong>
                 {{ weekStart|date('d/m/Y') }} – {{ weekEnd|date('d/m/Y') }}
                 {% if isCurrentWeek %}<span class="badge badge-success">Cette semaine</span>{% endif %}
             </strong>
-            <a class="btn btn-secondary" href="{{ ea_url().setController('App\\Controller\\Admin\\SeanceCrudController').setAction('index').set('week', nextWeek).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Semaine suivante" title="Semaine suivante"><span class="seance-navigation-arrow" aria-hidden="true">&rsaquo;</span></a>
+            <a class="btn btn-secondary" href="{{ ea_url().setController('App\\Controller\\Admin\\SeanceCrudController').setAction('index').set('view', 'week').set('week', nextWeek).set('salle', selectedRoom ? selectedRoom.id : '') }}" aria-label="Semaine suivante" title="Semaine suivante"><span class="seance-navigation-arrow" aria-hidden="true">&rsaquo;</span></a>
             {% if not isCurrentWeek %}
-                <a class="btn btn-link" href="{{ ea_url().setController('App\\Controller\\Admin\\SeanceCrudController').setAction('index').set('salle', selectedRoom ? selectedRoom.id : '') }}">Aujourd’hui</a>
+                <a class="btn btn-link" href="{{ ea_url().setController('App\\Controller\\Admin\\SeanceCrudController').setAction('index').set('view', 'week').set('salle', selectedRoom ? selectedRoom.id : '') }}">Aujourd’hui</a>
             {% endif %}
         {% endif %}
     </nav>
