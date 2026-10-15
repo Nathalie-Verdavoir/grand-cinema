@@ -92,8 +92,8 @@ header > nav > .container-fluid > .navbar-toggler {
 
 .fond-gris {
     width: auto;
-    background-color: var(--color-global-5);
-    color: var(--color-global-1);
+    background-color: var(--color-surface-strong);
+    color: var(--color-text-primary);
     font-size: 1.125rem;
 }
 

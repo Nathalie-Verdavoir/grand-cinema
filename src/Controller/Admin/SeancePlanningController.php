@@ -42,7 +42,7 @@ class SeancePlanningController extends AbstractController
         if (!$this->isCsrfTokenValid('admin_generate_week', (string) $request->request->get('_token'))) {
             $this->addFlash('danger', 'Votre session a expiré. Rechargez la page puis réessayez.');
 
-            return $this->redirectToRoute('admin_seance_index');
+            return $this->redirectToRoute('admin_seance_index', ['view' => 'week']);
         }
 
         $week = $request->request->get('week');
@@ -51,7 +51,7 @@ class SeancePlanningController extends AbstractController
         if (false === $weekStart || (false !== $errors && (0 !== $errors['warning_count'] || 0 !== $errors['error_count'])) || $weekStart->format('Y-m-d') !== $week) {
             $this->addFlash('danger', 'La semaine sélectionnée est invalide.');
 
-            return $this->redirectToRoute('admin_seance_index');
+            return $this->redirectToRoute('admin_seance_index', ['view' => 'week']);
         }
 
         $weekStart = $weekStart->modify('monday this week');
@@ -60,13 +60,17 @@ class SeancePlanningController extends AbstractController
         if (!$room instanceof Salle) {
             $this->addFlash('danger', 'La salle sélectionnée est invalide.');
 
-            return $this->redirectToRoute('admin_seance_index', ['week' => $weekStart->format('Y-m-d')]);
+            return $this->redirectToRoute('admin_seance_index', [
+                'view' => 'week',
+                'week' => $weekStart->format('Y-m-d'),
+            ]);
         }
 
         $result = $this->weeklySeanceDraftGenerator->generate($weekStart, $room);
         $this->addFlash('success', sprintf('%d séance(s) brouillon(s) générée(s) pour la semaine du %s.%s', $result['created'], $weekStart->format('d/m/Y'), $result['skipped'] > 0 ? sprintf(' %d film(s) n’ont pas trouvé de créneau disponible.', $result['skipped']) : ''));
 
         return $this->redirectToRoute('admin_seance_index', [
+            'view' => 'week',
             'week' => $weekStart->format('Y-m-d'),
             'salle' => $room->getId(),
         ]);
@@ -137,7 +141,7 @@ class SeancePlanningController extends AbstractController
         if (!$this->isCsrfTokenValid('admin_publish_week', (string) $request->request->get('_token'))) {
             $this->addFlash('danger', 'Votre session a expiré. Rechargez la page puis réessayez.');
 
-            return $this->redirectToRoute('admin_seance_index');
+            return $this->redirectToRoute('admin_seance_index', ['view' => 'week']);
         }
 
         $week = $request->request->get('week');
@@ -146,7 +150,7 @@ class SeancePlanningController extends AbstractController
         if (false === $weekStart || (false !== $errors && (0 !== $errors['warning_count'] || 0 !== $errors['error_count'])) || $weekStart->format('Y-m-d') !== $week) {
             $this->addFlash('danger', 'La semaine sélectionnée est invalide.');
 
-            return $this->redirectToRoute('admin_seance_index');
+            return $this->redirectToRoute('admin_seance_index', ['view' => 'week']);
         }
 
         $weekStart = $weekStart->modify('monday this week')->setTime(0, 0);
@@ -155,7 +159,10 @@ class SeancePlanningController extends AbstractController
         if (!$room instanceof Salle) {
             $this->addFlash('danger', 'La salle sélectionnée est invalide.');
 
-            return $this->redirectToRoute('admin_seance_index', ['week' => $weekStart->format('Y-m-d')]);
+            return $this->redirectToRoute('admin_seance_index', [
+                'view' => 'week',
+                'week' => $weekStart->format('Y-m-d'),
+            ]);
         }
 
         $published = 0;
@@ -172,6 +179,7 @@ class SeancePlanningController extends AbstractController
         $this->addFlash('success', sprintf('%d séance(s) brouillon(s) publiée(s) pour la semaine du %s.', $published, $weekStart->format('d/m/Y')));
 
         return $this->redirectToRoute('admin_seance_index', [
+            'view' => 'week',
             'week' => $weekStart->format('Y-m-d'),
             'salle' => $room->getId(),
         ]);

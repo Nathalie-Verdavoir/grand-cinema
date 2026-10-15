@@ -42,10 +42,10 @@
     width: 100%;
     min-height: 2.5rem;
     padding: 0.45rem 0.75rem;
-    border: 1px solid var(--color-global-2);
+    border: 1px solid var(--color-global-5);
     border-radius: 0.35rem;
     background: var(--color-global-1);
-    color: var(--color-global-5);
+    color: var(--color-global-2);
     font: inherit;
 }
 
@@ -78,7 +78,7 @@
 }
 
 .audience-week-button:focus-visible {
-    outline: 2px solid var(--color-global-2);
+    outline: 2px solid var(--color-global-5);
     outline-offset: 2px;
 }
 
@@ -287,8 +287,8 @@
     padding: 0;
     border-radius: 0.2rem;
     border: 1px solid rgb(54 89 125 / 25%);
-    background: var(--color-white);
-    color: var(--color-global-4);
+    background: var(--color-surface-raised);
+    color: var(--color-text-primary);
     white-space: nowrap;
 }
 
@@ -337,7 +337,7 @@
     padding: clamp(1.25rem, 4vw, 2.5rem);
     border: 1px solid rgb(54 89 125 / 18%);
     border-radius: 0.5rem;
-    background: linear-gradient(115deg, #edf3f8 0%, var(--color-white) 65%, #e5eef6 100%);
+    /*background: linear-gradient(115deg, #edf3f8 0%, var(--color-white) 65%, #e5eef6 100%);*/
     box-shadow: 0 0.5rem 1.5rem var(--color-shadow);
 }
 
@@ -366,7 +366,7 @@
 .reservation-detail {
     padding: 1rem;
     border-radius: 0.35rem;
-    background: var(--color-white);
+    background: var(--color-surface-raised);
 }
 
 .reservation-detail dt {
@@ -396,7 +396,7 @@
     overflow-x: auto;
     border: 1px solid rgb(54 89 125 / 20%);
     border-radius: 0.35rem;
-    background: var(--color-white);
+    background: var(--color-surface-raised);
 }
 
 .reservation-tariffs-table {
@@ -432,8 +432,8 @@
     padding: 0.4rem 0.6rem;
     border: 1px solid var(--color-global-2);
     border-radius: 0.35rem;
-    background: var(--color-white);
-    color: var(--color-global-5);
+    background: var(--color-surface-raised);
+    color: var(--color-text-primary);
     appearance: textfield;
     font: inherit;
     text-align: center;
@@ -626,7 +626,7 @@
         padding: 0.5rem 0.75rem;
         border: 1px solid rgb(54 89 125 / 20%);
         border-radius: 0.35rem;
-        background: var(--color-white);
+        background: var(--color-surface-raised);
     }
 
     .reservation-tariffs-table.reservation-payment-tickets tbody th[scope='row'],

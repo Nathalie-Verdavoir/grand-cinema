@@ -1,0 +1,81 @@
+<header class="discovery-section-heading">
+    <p class="discovery-eyebrow">Réservez votre prochaine séance</p>
+    <h2 id="screenings-title">Les séances</h2>
+    <p>Du {{ weekStart|date('d/m') }} au {{ weekEnd|date('d/m/Y') }}</p>
+</header>
+
+<div class="audience-week-toolbar">
+    <form method="get" action="{{ path('app_programmation') }}">
+        <label class="visually-hidden" for="audience-week">Choisir une semaine</label>
+        <select id="audience-week" name="week">
+            {% for option in weekOptions %}
+                <option value="{{ option.value }}" {% if option.value == weekStart|date('Y-m-d') %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    <nav class="audience-week-navigation" aria-label="Navigation entre les semaines">
+        {% if previousWeek is not null %}
+            <a class="audience-week-button" href="{{ path('app_programmation', {week: previousWeek|date('Y-m-d')}) }}#seances" aria-label="Semaine précédente">
+                <span class="audience-week-button-label">Précédente</span>
+                <span class="audience-week-button-icon" aria-hidden="true">‹</span>
+            </a>
+        {% else %}
+            <span class="audience-week-button is-disabled" aria-disabled="true" aria-label="Semaine précédente indisponible">
+                <span class="audience-week-button-label">Précédente</span>
+                <span class="audience-week-button-icon" aria-hidden="true">‹</span>
+            </span>
+        {% endif %}
+        {% if nextWeek is not null %}
+            <a class="audience-week-button" href="{{ path('app_programmation', {week: nextWeek|date('Y-m-d')}) }}#seances" aria-label="Semaine suivante">
+                <span class="audience-week-button-label">Suivante</span>
+                <span class="audience-week-button-icon" aria-hidden="true">›</span>
+            </a>
+        {% endif %}
+    </nav>
+</div>
+
+{% if filmSchedules is not empty %}
+    <div class="screening-card-grid">
+        {% for filmSchedule in filmSchedules %}
+            <article class="screening-card">
+                <a class="screening-card-poster-link" href="{{ path('app_programmation_film', {id: filmSchedule.film.id}) }}" aria-label="Voir la fiche de {{ filmSchedule.film.title }}">
+                    {% if filmSchedule.film.img %}
+                        <img src="{{ filmSchedule.film.img }}" alt="Affiche du film {{ filmSchedule.film.title }}" loading="lazy">
+                    {% else %}
+                        <span class="screening-card-poster-placeholder" role="img" aria-label="Affiche indisponible">{{ filmSchedule.film.title }}</span>
+                    {% endif %}
+                    <span class="screening-card-poster-title">{{ filmSchedule.film.title }}</span>
+                </a>
+                <div class="screening-card-overlay">
+                    <div class="screening-card-heading">
+                        <h3>{{ filmSchedule.film.title }}</h3>
+                        {% if filmSchedule.film.duration %}
+                            <span>{{ '%02d'|format(filmSchedule.film.duration // 60) }}h{{ '%02d'|format(filmSchedule.film.duration % 60) }}</span>
+                        {% endif %}
+                    </div>
+                    {% if filmSchedule.film.description %}
+                        <p class="screening-card-description">{{ filmSchedule.film.description }}</p>
+                    {% endif %}
+                    <h4>Cette semaine</h4>
+                    <ul class="screening-card-times">
+                        {% for day in days %}
+                            {% for time in filmSchedule.screeningsByDay[day.value] ?? [] %}
+                                <li>
+                                    <span class="screening-card-date">{{ day.label|capitalize }} {{ day.number }}</span>
+                                    {% if time.inProgress %}
+                                        <span class="screening-card-in-progress" title="En cours, réservation indisponible">{{ time.time }} · En cours</span>
+                                    {% else %}
+                                        <a href="{{ path('app_reservation', {id: time.id}) }}" aria-label="Réserver {{ filmSchedule.film.title }} le {{ day.number }} {{ day.label|lower }} à {{ time.time }}">{{ time.time }} · Réserver</a>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                    <a class="screening-card-more" href="{{ path('app_programmation_film', {id: filmSchedule.film.id}) }}">Toutes les séances</a>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="audience-program-empty">Aucun film n'est programmé pour cette semaine.</p>
+{% endif %}
