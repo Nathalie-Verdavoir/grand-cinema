@@ -68,9 +68,9 @@
                         <tbody>
                             {% for billet in reservation.billets %}
                                 <tr>
-                                    <th scope="row">{{ billet.tarif.name }}</th>
-                                    <td>{{ billet.priceApplied|number_format(2, ',', ' ') }} €</td>
-                                    <td>{{ billet.reference }}</td>
+                                    <th scope="row" data-label="Tarif">{{ billet.tarif.name }}</th>
+                                    <td data-label="Prix du billet">{{ billet.priceApplied|number_format(2, ',', ' ') }} €</td>
+                                    <td data-label="Référence billet">{{ billet.reference }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -92,7 +92,7 @@
             {% if canPay %}
                 <form method="post" action="{{ path('app_reservation_paiement_checkout', {reference: reservation.reference}) }}">
                     <input type="hidden" name="_token" value="{{ csrf_token('reservation-payment-' ~ reservation.reference) }}">
-                    <button class="cart-reservation-payment" type="submit">Payer avec Stripe</button>
+                    <button class="cart-reservation-action cart-reservation-payment" type="submit">Payer avec Stripe</button>
                 </form>
             {% endif %}
             <a class="film-program-back" href="{{ path('app_reservation_history') }}">← Retour à mes réservations</a>
