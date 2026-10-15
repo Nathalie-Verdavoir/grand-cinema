@@ -405,6 +405,17 @@
     .cart-reservation-payment {
         text-align: center;
     }
+
+    .cart-reservation-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .cart-reservation-action {
+        box-sizing: border-box;
+        width: 100%;
+        text-align: center;
+    }
 }
 
 .account-panel h1,
