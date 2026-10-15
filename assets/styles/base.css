@@ -1,5 +1,5 @@
 * {
-    scrollbar-color: var(--color-global-2) var(--color-global-5);
+    scrollbar-color: var(--color-global-2) var(--color-surface-strong);
     scrollbar-width: thin;
 }
 
@@ -25,7 +25,7 @@ body {
 
 body {
     background-color: var(--color-beige-1);
-    color: var(--color-global-5);
+    color: var(--color-text-primary);
     font-family: var(--font-body);
     font-weight: 400;
     line-height: 1.6;

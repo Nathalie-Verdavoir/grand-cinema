@@ -14,6 +14,100 @@ import { jsPDF } from 'jspdf';
 
 const ticketQrInitialization = new WeakMap();
 
+const initializeProgrammingWeekNavigation = () => {
+    const section = document.querySelector('[data-programming-week]');
+    const content = section?.querySelector('[data-programming-week-content]');
+    const status = section?.querySelector('[data-programming-week-status]');
+    const errorMessage = section?.querySelector('[data-programming-week-error]');
+    if (!section || !content || !status || !errorMessage) {
+        return;
+    }
+
+    let activeRequest = null;
+    const loadWeek = async (url, updateHistory = true) => {
+        activeRequest?.abort();
+        const request = new AbortController();
+        activeRequest = request;
+        section.setAttribute('aria-busy', 'true');
+        status.textContent = 'Chargement des séances…';
+        errorMessage.classList.add('d-none');
+
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    Accept: 'text/html',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                signal: request.signal,
+            });
+            if (!response.ok) {
+                errorMessage.textContent = `Impossible de charger les séances (erreur ${response.status}).`;
+                errorMessage.classList.remove('d-none');
+                status.textContent = '';
+                return;
+            }
+
+            content.innerHTML = await response.text();
+            if (updateHistory) {
+                window.history.pushState(null, '', url);
+            }
+            status.textContent = 'Les séances ont été mises à jour.';
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                errorMessage.textContent = `Impossible de charger les séances : ${error.message}`;
+                errorMessage.classList.remove('d-none');
+                status.textContent = '';
+            }
+        } finally {
+            if (activeRequest === request) {
+                activeRequest = null;
+                section.setAttribute('aria-busy', 'false');
+            }
+        }
+    };
+
+    const loadFormWeek = (form) => {
+        const url = new URL(form.action, window.location.href);
+        const formData = new FormData(form);
+        formData.forEach((value, name) => {
+            if (typeof value === 'string') {
+                url.searchParams.set(name, value);
+            }
+        });
+        url.hash = 'seances';
+        loadWeek(url);
+    };
+
+    section.addEventListener('change', (event) => {
+        const select = event.target.closest('#audience-week');
+        if (select?.form) {
+            loadFormWeek(select.form);
+        }
+    });
+
+    section.addEventListener('submit', (event) => {
+        const form = event.target.closest('.audience-week-toolbar form');
+        if (!form) {
+            return;
+        }
+
+        event.preventDefault();
+        loadFormWeek(form);
+    });
+
+    section.addEventListener('click', (event) => {
+        const link = event.target.closest('.audience-week-navigation a[href]');
+        if (!link) {
+            return;
+        }
+
+        event.preventDefault();
+        loadWeek(link.href);
+    });
+
+    window.addEventListener('popstate', () => loadWeek(window.location.href, false));
+};
+
 const initializeHomeCarousels = () => {
     document.querySelectorAll('[data-home-carousel]').forEach((carousel) => {
         const slides = Array.from(carousel.querySelectorAll('.carousel-item'));
@@ -468,6 +562,7 @@ const initializeTicketDownloads = () => {
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
+        initializeProgrammingWeekNavigation();
         initializeHomeCarousels();
         initializeReservationSelections();
         initializeReservationCountdowns();
@@ -475,6 +570,7 @@ if (document.readyState === 'loading') {
         initializeTicketDownloads();
     });
 } else {
+    initializeProgrammingWeekNavigation();
     initializeHomeCarousels();
     initializeReservationSelections();
     initializeReservationCountdowns();

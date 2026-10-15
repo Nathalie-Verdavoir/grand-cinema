@@ -2,8 +2,8 @@
     <a
         class="seance-view-switch {{ isDailyView ? 'is-daily' : 'is-weekly' }}"
         href="{{ isDailyView
-            ? ea_url().setController('App\\Controller\\Admin\\SeanceCrudController').setAction('index').unset('view').unset('day').set('week', selectedDate|date('Y-m-d')).set('salle', selectedRoom ? selectedRoom.id : '')
-            : ea_url().setController('App\\Controller\\Admin\\SeanceCrudController').setAction('index').set('view', 'day').set('day', weekStart|date('Y-m-d')).set('salle', selectedRoom ? selectedRoom.id : '') }}"
+            ? ea_url().setController('App\\Controller\\Admin\\SeanceCrudController').setAction('index').set('view', 'week').unset('day').set('week', selectedDate|date('Y-m-d')).set('salle', selectedRoom ? selectedRoom.id : '')
+            : ea_url().setController('App\\Controller\\Admin\\SeanceCrudController').setAction('index').set('view', 'day').unset('week').set('day', (isCurrentWeek ? selectedDate : weekStart)|date('Y-m-d')).set('salle', selectedRoom ? selectedRoom.id : '') }}"
         role="switch"
         aria-checked="{{ isDailyView ? 'true' : 'false' }}"
         aria-label="{{ isDailyView ? 'Passer à la vue semaine' : 'Passer à la vue journée' }}"

@@ -1,5 +1,16 @@
 <header>
 	<div class="admin-buttons">
+		<a type="button" class="btn d-inline-flex align-items-center" href="{{ path('app_accueil') }}" aria-label="Accueil" title="Accueil">
+			<span class="d-none d-lg-inline">Accueil</span>
+			<span class="header-button-icon" aria-hidden="true">
+				<span class="svg-container">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="svg-content bi bi-house-fill" viewBox="0 0 16 16">
+						<path d="m8 3.293 6 6V13.5a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0v2.5a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5V9.293l6-6z"/>
+						<path d="m7.293 1.5.707.707 6.646 6.647a.5.5 0 0 1-.707.707L8 3.621 2.06 9.56a.5.5 0 1 1-.707-.707L8 2.207l-.707-.707a.5.5 0 0 1 0-.707z"/>
+					</svg>
+				</span>
+			</span>
+		</a>
 		{% if app.user %}
 			{% set pendingCartSeats = pending_reservation_seat_count(app.user) %}
 			<a type="button" class="btn d-inline-flex align-items-center" href="{{ path('app_account') }}" aria-label="Mon compte">
@@ -69,22 +80,17 @@
 	</div>
 	<nav class="navbar navbar-expand-lg navbar-dark">
 		<div class="container-fluid">
-			<a class="navbar-brand" href="{{ path('app_accueil') }}">
-				<img class="logo" src="{{ asset('images/logo.PNG') }}" alt="Logo Grand Cinéma"/>
-				<h1 class="title d-none">Grand Cinéma</h1>
-			</a>
-
 			<button class="navbar-toggler btn" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon" aria-hidden="true"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarScroll">
 				<ul class="navbar-nav my-2 p-3 mt-lg-5 navbar-nav-scroll">
-					<li class="nav-item ms-2">
-						<a class="nav-link {% if app.request.attributes.get('_route') ==  'app_accueil' or app.request.get('routeName') ==  'app_accueil' %}active{% endif %} ms-5" aria-current="page" id="/hotel/" href="{{ path('app_accueil') }}">Accueil
+					<li class="nav-item ms-2 d-lg-none">
+						<a class="nav-link {% if app.request.attributes.get('_route') ==  'app_accueil' or app.request.get('routeName') ==  'app_accueil' %}active{% endif %} ms-5" aria-current="page" id="/cinema/" href="{{ path('app_accueil') }}">Accueil
 						</a>
 					</li>
-					<li class="nav-item ms-2">
-						<a class="nav-link {% if app.request.attributes.get('_route') == 'app_programmation' or app.request.attributes.get('_route') == 'app_programmation_film' %}active{% endif %} ms-5" href="{{ path('app_programmation') }}" {% if app.request.attributes.get('_route') == 'app_programmation' or app.request.attributes.get('_route') == 'app_programmation_film' %}aria-current="page"{% endif %}>Séances</a>
+					<li class="nav-item ms-2 d-lg-none">
+						<a class="nav-link {% if app.request.attributes.get('_route') == 'app_programmation' or app.request.attributes.get('_route') == 'app_programmation_film' %}active{% endif %} ms-5" href="{{ path('app_programmation') }}#seances" {% if app.request.attributes.get('_route') == 'app_programmation' or app.request.attributes.get('_route') == 'app_programmation_film' %}aria-current="page"{% endif %}>Séances</a>
 					</li>
 					{% if app.user and "ROLE_CLIENT" in app.user.roles  %}
 					{% endif %}

@@ -13,7 +13,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use App\Service\CloudinaryImageUploader;
-use App\Controller\Admin\SeanceCrudController;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -21,7 +20,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 class FilmCrudController extends AbstractCrudController
 {
-    private $httpClient;
     private CloudinaryImageUploader $imageUploader;
 
     public function __construct(CloudinaryImageUploader $imageUploader)

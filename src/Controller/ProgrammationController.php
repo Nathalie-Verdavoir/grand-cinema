@@ -26,25 +26,21 @@ class ProgrammationController extends AbstractController
         $now = new DateTimeImmutable();
         $today = $now->setTime(0, 0);
         $currentWeekStart = $this->wednesdayStart($today);
-        $weekStart = $this->requestedWeekStart($request->query->get('week'), $currentWeekStart);
-
         $weekStarts = [$currentWeekStart->format('Y-m-d') => $currentWeekStart];
-        $lastAvailableWeek = $currentWeekStart;
         foreach ($seanceRepository->findPublishedDateTimesFrom($currentWeekStart) as $dateTime) {
             $scheduledWeek = $this->wednesdayStart($dateTime);
             $weekStarts[$scheduledWeek->format('Y-m-d')] = $scheduledWeek;
-            if ($scheduledWeek > $lastAvailableWeek) {
-                $lastAvailableWeek = $scheduledWeek;
-            }
         }
-        if ($weekStart > $lastAvailableWeek) {
-            $lastAvailableWeek = $weekStart;
-        }
-        $weekStarts[$weekStart->format('Y-m-d')] = $weekStart;
-        $nextWeek = $weekStart->modify('+7 days');
-        $weekStarts[$nextWeek->format('Y-m-d')] = $nextWeek;
         ksort($weekStarts);
 
+        $weekStart = $this->requestedWeekStart($request->query->get('week'), $currentWeekStart, $weekStarts);
+        $weekStartValues = array_values($weekStarts);
+        $weekStartIndex = array_search($weekStart->format('Y-m-d'), array_keys($weekStarts), true);
+        if (false === $weekStartIndex) {
+            throw new \LogicException('The selected week must be present in the available weeks.');
+        }
+        $previousWeek = $weekStartIndex > 0 ? $weekStartValues[$weekStartIndex - 1] : null;
+        $nextWeek = $weekStartIndex < count($weekStartValues) - 1 ? $weekStartValues[$weekStartIndex + 1] : null;
         $weekEnd = $weekStart->modify('+7 days');
         $days = [];
         for ($dayOffset = 0; $dayOffset < 7; ++$dayOffset) {
@@ -98,15 +94,40 @@ class ProgrammationController extends AbstractController
             ];
         }
 
-        return $this->render('programmation/index.html.twig', [
+        $screeningsContext = [
             'filmSchedules' => array_values($filmSchedules),
             'days' => $days,
             'weekStart' => $weekStart,
             'weekEnd' => $weekEnd->modify('-1 day'),
             'weekOptions' => $weekOptions,
             'nextWeek' => $nextWeek,
-            'previousWeek' => $weekStart->modify('-7 days'),
+            'previousWeek' => $previousWeek,
             'currentWeekStart' => $currentWeekStart,
+        ];
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('programmation/_screenings.html.twig', $screeningsContext);
+        }
+
+        $featuredFilms = [];
+        $featuredFilmIds = [];
+        foreach ($filmRepository->findInCurrentProgram() as $film) {
+            $filmId = $film->getId();
+            if (null === $filmId || isset($featuredFilmIds[$filmId])) {
+                continue;
+            }
+
+            if ([] === $screeningFormatter->formatUpcoming($film->getSeances(), $now)) {
+                continue;
+            }
+
+            $featuredFilmIds[$filmId] = true;
+            $featuredFilms[] = $film;
+        }
+
+        return $this->render('programmation/index.html.twig', [
+            ...$screeningsContext,
+            'featuredFilms' => $featuredFilms,
         ]);
     }
 
@@ -135,7 +156,14 @@ class ProgrammationController extends AbstractController
         return $date->setTime(0, 0)->modify(sprintf('-%d days', $daysSinceWednesday));
     }
 
-    private function requestedWeekStart(mixed $requestedWeek, DateTimeImmutable $currentWeekStart): DateTimeImmutable
+    /**
+     * @param array<string, DateTimeImmutable> $availableWeekStarts
+     */
+    private function requestedWeekStart(
+        mixed $requestedWeek,
+        DateTimeImmutable $currentWeekStart,
+        array $availableWeekStarts
+    ): DateTimeImmutable
     {
         if (!is_string($requestedWeek) || !preg_match('/^\d{4}-\d{2}-\d{2}$/D', $requestedWeek)) {
             return $currentWeekStart;
@@ -149,6 +177,7 @@ class ProgrammationController extends AbstractController
             || $weekStart->format('Y-m-d') !== $requestedWeek
             || '3' !== $weekStart->format('N')
             || $weekStart < $currentWeekStart
+            || !isset($availableWeekStarts[$requestedWeek])
         ) {
             return $currentWeekStart;
         }

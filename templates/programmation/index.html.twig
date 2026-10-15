@@ -1,115 +1,75 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Séances - Grand Cinéma{% endblock %}
+{% block title %}Accueil et séances - Grand Cinéma{% endblock %}
 
 {% block body %}
-    <div class="container home-page audience-program-page">
-        <h1>Séances</h1>
-        <div class="audience-week-toolbar">
-            <form method="get" action="{{ path('app_programmation') }}">
-                <label class="visually-hidden" for="audience-week">Choisir une semaine</label>
-                <select id="audience-week" name="week" onchange="this.form.submit()">
-                    {% for option in weekOptions %}
-                        <option value="{{ option.value }}" {% if option.value == weekStart|date('Y-m-d') %}selected{% endif %}>{{ option.label }}</option>
-                    {% endfor %}
-                </select>
-            </form>
-            <nav class="audience-week-navigation" aria-label="Navigation entre les semaines">
-                {% if weekStart > currentWeekStart %}
-                    <a class="audience-week-button" href="{{ path('app_programmation', {week: previousWeek|date('Y-m-d')}) }}" aria-label="Semaine précédente">
-                        <span class="audience-week-button-label">Semaine précédente</span>
-                        <span class="audience-week-button-icon" aria-hidden="true">‹</span>
-                    </a>
-                {% else %}
-                    <span class="audience-week-button is-disabled" aria-disabled="true" aria-label="Semaine précédente indisponible">
-                        <span class="audience-week-button-label">Semaine précédente</span>
-                        <span class="audience-week-button-icon" aria-hidden="true">‹</span>
-                    </span>
-                {% endif %}
-                <a class="audience-week-button" href="{{ path('app_programmation', {week: nextWeek|date('Y-m-d')}) }}" aria-label="Semaine suivante">
-                    <span class="audience-week-button-label">Semaine suivante</span>
-                    <span class="audience-week-button-icon" aria-hidden="true">›</span>
-                </a>
-            </nav>
-        </div>
-
-        {% if filmSchedules is not empty %}
-            <div class="audience-film-list">
-                {% for filmSchedule in filmSchedules %}
-                    <article class="audience-film-card">
-                        <div class="audience-film-identification">
-                            {% if filmSchedule.film.img %}
-                                <img
-                                    class="audience-film-poster"
-                                    src="{{ filmSchedule.film.img }}"
-                                    alt="Affiche du film {{ filmSchedule.film.title }}"
-                                    loading="lazy"
-                                >
-                            {% else %}
-                                <div class="audience-film-poster audience-film-poster-placeholder" role="img" aria-label="Affiche indisponible pour {{ filmSchedule.film.title }}">
-                                    {{ filmSchedule.film.title }}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="audience-film-content">
-                            <div class="audience-film-heading">
-                                <div class="audience-film-info">
-                                    <h2>{{ filmSchedule.film.title }}</h2>
-                                    {% if filmSchedule.film.duration %}
-                                        <p>{{ '%02d'|format(filmSchedule.film.duration // 60) }}h{{ '%02d'|format(filmSchedule.film.duration % 60) }}</p>
-                                    {% endif %}
-                                </div>
-                                <a class="audience-film-details-link" href="{{ path('app_programmation_film', {id: filmSchedule.film.id}) }}" aria-label="Voir la fiche complète de {{ filmSchedule.film.title }}">
-                                    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
-                                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                    <span class="audience-film-details-label">Fiche complète</span>
-                                </a>
+    <div class="container discovery-page">
+        <div class="discovery-layout">
+            <aside class="discovery-featured" aria-label="Films à l'affiche">
+                <p class="discovery-eyebrow">Grand Cinéma</p>
+                <h1>À l'affiche</h1>
+                {% if featuredFilms is not empty %}
+                    <div class="discovery-carousel" data-home-carousel role="region" aria-roledescription="carrousel" aria-label="Films à l'affiche">
+                        {% if featuredFilms|length > 1 %}
+                            <div class="discovery-carousel-indicators">
+                                {% for film in featuredFilms %}
+                                    <button type="button" data-home-slide-to="{{ loop.index0 }}" class="{{ loop.first ? 'active' : '' }}" {% if loop.first %}aria-current="true"{% endif %} aria-label="Afficher {{ film.title }}"></button>
+                                {% endfor %}
                             </div>
-                            <table>
-                                <caption class="visually-hidden">
-                                    Séances de {{ filmSchedule.film.title }} du {{ weekStart|date('d/m/Y') }} au {{ weekEnd|date('d/m/Y') }}
-                                </caption>
-                                <thead>
-                                    <tr>
-                                        {% for day in days %}
-                                            <th scope="col" class="{{ day.isToday ? 'is-today' : '' }}">
-                                                <span>{{ day.label }}</span>
-                                                <strong>{{ day.number }}</strong>
-                                            </th>
-                                        {% endfor %}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        {% for day in days %}
-                                            <td class="{{ day.isToday ? 'is-today' : '' }}">
-                                                {% for time in filmSchedule.screeningsByDay[day.value] ?? [] %}
-                                                    {% if time.inProgress %}
-                                                        <span class="audience-screening-time is-in-progress" title="En cours · réservation indisponible" aria-label="Séance de {{ filmSchedule.film.title }} à {{ time.time }} en cours, réservation indisponible">
-                                                            {{ time.time }}
-                                                        </span>
-                                                    {% else %}
-                                                        <a class="audience-screening-time audience-screening-link" href="{{ path('app_reservation', {id: time.id}) }}" aria-label="Réserver {{ filmSchedule.film.title }} le {{ day.number }} {{ day.label|lower }} à {{ time.time }}">
-                                                            {{ time.time }}
-                                                        </a>
-                                                    {% endif %}
-                                                {% else %}
-                                                    <span class="audience-screening-empty" aria-label="Aucune séance">-</span>
-                                                {% endfor %}
-                                            </td>
-                                        {% endfor %}
-                                    </tr>
-                                </tbody>
-                            </table>
+                        {% endif %}
+
+                        <div class="discovery-carousel-slides">
+                            {% for film in featuredFilms %}
+                                <article class="carousel-item {{ loop.first ? 'active' : '' }}" aria-roledescription="diapositive" aria-label="{{ loop.index }} sur {{ featuredFilms|length }}" aria-hidden="{{ loop.first ? 'false' : 'true' }}">
+                                    <div class="featured-film-slide">
+                                        {% if film.img %}
+                                            <img class="featured-film-poster" src="{{ film.img }}" alt="Affiche du film {{ film.title }}" {% if not loop.first %}loading="lazy"{% endif %}>
+                                        {% else %}
+                                            <div class="featured-film-poster featured-film-poster-placeholder" role="img" aria-label="Affiche indisponible pour {{ film.title }}">{{ film.title }}</div>
+                                        {% endif %}
+                                        <div class="featured-film-copy">
+                                            <p class="featured-film-label">À découvrir</p>
+                                            <h2>{{ film.title }}</h2>
+                                            {% if film.duration %}
+                                                <p class="featured-film-duration">{{ '%02d'|format(film.duration // 60) }}h{{ '%02d'|format(film.duration % 60) }}</p>
+                                            {% endif %}
+                                            {% if film.description %}
+                                                <p class="featured-film-description">{{ film.description }}</p>
+                                            {% endif %}
+                                            <a class="featured-film-link" href="{{ path('app_programmation_film', {id: film.id}) }}">Découvrir le film</a>
+                                        </div>
+                                    </div>
+                                </article>
+                            {% endfor %}
                         </div>
-                    </article>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="audience-program-empty">Aucun film n’est programmé pour cette semaine.</p>
-        {% endif %}
+
+                        <nav class="discovery-carousel-controls" aria-label="Navigation des films à l'affiche">
+                            <button class="discovery-carousel-button" type="button" data-carousel-direction="-1" aria-label="Film précédent" {% if featuredFilms|length < 2 %}disabled{% endif %}>
+                                <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M19 12H5m0 0 7 7m-7-7 7-7"/></svg>
+                            </button>
+                            {% if featuredFilms|length > 1 %}
+                                <button class="discovery-carousel-toggle" type="button" data-carousel-toggle aria-label="Mettre en pause le défilement" title="Mettre en pause le défilement" aria-pressed="false">
+                                    <svg data-carousel-pause-icon aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M9 5v14m6-14v14"/></svg>
+                                    <svg data-carousel-play-icon aria-hidden="true" viewBox="0 0 24 24" focusable="false" hidden><path d="m8 5 12 7-12 7z"/></svg>
+                                </button>
+                            {% endif %}
+                            <button class="discovery-carousel-button" type="button" data-carousel-direction="1" aria-label="Film suivant" {% if featuredFilms|length < 2 %}disabled{% endif %}>
+                                <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14m0 0-7-7m7 7-7 7"/></svg>
+                            </button>
+                        </nav>
+                    </div>
+                {% else %}
+                    <p class="discovery-featured-empty">Aucun film n'est actuellement programmé. Revenez bientôt découvrir notre prochaine sélection.</p>
+                {% endif %}
+            </aside>
+
+            <section class="discovery-screenings" id="seances" aria-labelledby="screenings-title" data-programming-week aria-busy="false">
+                <div class="discovery-screenings-content" data-programming-week-content>
+                    {% include 'programmation/_screenings.html.twig' %}
+                </div>
+                <p class="visually-hidden" data-programming-week-status role="status" aria-live="polite"></p>
+                <p class="alert alert-danger mt-3 d-none" data-programming-week-error role="alert"></p>
+            </section>
+        </div>
     </div>
 {% endblock %}
