@@ -84,6 +84,8 @@ final class ReservationFixturesGenerator
                     $user = $isOnline
                         ? $customers[random_int(0, count($customers) - 1)]
                         : $administrators[random_int(0, count($administrators) - 1)];
+                    $managedUser = $this->managedUser($user);
+                    $managedScreening = $this->managedScreening($screening);
                     $reservationTotalCents = 0;
                     $reservationTickets = [];
 
@@ -92,7 +94,7 @@ final class ReservationFixturesGenerator
                         $priceCents = $this->priceInCents($tariff);
                         $reservationTotalCents += $priceCents;
                         $reservationTickets[] = [
-                            'tariff' => $tariff,
+                            'tariff' => $this->managedTariff($tariff),
                             'price' => $this->formatPrice($priceCents),
                             'seatNumber' => $this->formatSeatNumber($seatNumbers[$seatIndex]),
                         ];
@@ -101,13 +103,13 @@ final class ReservationFixturesGenerator
 
                     $reservation = (new Reservation())
                         ->setReference(new Ulid())
-                        ->setUser($user)
+                        ->setUser($managedUser)
                         ->setReservedAt($reservedAt)
                         ->setTotalPrice($this->formatPrice($reservationTotalCents))
                         ->setNbPlaces($groupSize)
                         ->setStatus($status)
                         ->setChannel($channel)
-                        ->setSeance($screening);
+                        ->setSeance($managedScreening);
                     if ($isOnline) {
                         $reservation->setConfirmationEmailSentAt($reservedAt->modify('+'.random_int(1, 5).' minutes'));
                     }
@@ -139,7 +141,7 @@ final class ReservationFixturesGenerator
                 $this->flushBatch();
                 $pendingTickets = 0;
             }
-            $this->entityManager->clear(Seance::class);
+            $this->entityManager->clear();
         }
 
         return ['reservations' => $reservationsCreated, 'tickets' => $ticketsCreated];
@@ -217,7 +219,51 @@ final class ReservationFixturesGenerator
     private function flushBatch(): void
     {
         $this->entityManager->flush();
-        $this->entityManager->clear(Billet::class);
-        $this->entityManager->clear(Reservation::class);
+        $this->entityManager->clear();
+    }
+
+    private function managedScreening(Seance $screening): Seance
+    {
+        $id = $screening->getId();
+        if (null === $id) {
+            return $screening;
+        }
+
+        $managedScreening = $this->entityManager->getReference(Seance::class, $id);
+        if (!$managedScreening instanceof Seance) {
+            throw new \LogicException(sprintf('La séance %d ne peut pas être rechargée.', $id));
+        }
+
+        return $managedScreening;
+    }
+
+    private function managedUser(User $user): User
+    {
+        $id = $user->getId();
+        if (null === $id) {
+            return $user;
+        }
+
+        $managedUser = $this->entityManager->getReference(User::class, $id);
+        if (!$managedUser instanceof User) {
+            throw new \LogicException(sprintf('Le compte %s ne peut pas être rechargé.', $id));
+        }
+
+        return $managedUser;
+    }
+
+    private function managedTariff(Tarif $tariff): Tarif
+    {
+        $id = $tariff->getId();
+        if (null === $id) {
+            return $tariff;
+        }
+
+        $managedTariff = $this->entityManager->getReference(Tarif::class, $id);
+        if (!$managedTariff instanceof Tarif) {
+            throw new \LogicException(sprintf('Le tarif %s ne peut pas être rechargé.', $id));
+        }
+
+        return $managedTariff;
     }
 }

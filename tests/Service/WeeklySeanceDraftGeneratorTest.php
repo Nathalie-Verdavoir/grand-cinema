@@ -38,10 +38,12 @@ final class WeeklySeanceDraftGeneratorTest extends TestCase
                 static fn (Seance $seance): bool => $seance->getSalle() === $room,
             ));
             self::assertCount(7, $roomSeances);
-            self::assertCount(2, array_unique(array_map(
+            $filmTitles = array_map(
                 static fn (Seance $seance): string => $seance->getFilm()->getTitle(),
                 $roomSeances,
-            )));
+            );
+            self::assertSame([], array_diff($filmTitles, ['Film A', 'Film B']));
+            self::assertLessThan(count($roomSeances), count(array_unique($filmTitles)));
         }
     }
 

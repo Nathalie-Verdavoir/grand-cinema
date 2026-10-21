@@ -109,9 +109,9 @@ Les ventes caisse sont enregistrées avec le statut `paid_at_counter`, attribué
 
 5. **Chargement du jeu de données de test :**
    ```bash
-   php bin/console doctrine:fixtures:load --no-interaction
+   php bin/console app:fixtures:load --force
    ```
-   Les fixtures créent les 10 salles et les 6 tarifs, chargent les films depuis `src/DataFixtures/films.json` et réimportent les séances de `src/DataFixtures/seances.json`. Elles complètent ensuite les créneaux libres du 1er janvier 2024 au 25 décembre 2026 en respectant les horaires d'ouverture, les créneaux de 15 minutes, les durées de films et les 20 minutes de battement du programmateur automatique. Pour maximiser le nombre de séances, le générateur de fixtures privilégie les films les plus courts qui tiennent dans chaque créneau. Les séances antérieures à la date du chargement qui sont encore en brouillon passent en statut publié ; les séances du jour et futures restent en brouillon, et les séances annulées gardent leur statut.
+   Cette commande purge la base puis charge les fixtures par lots validés séparément, afin d'éviter de garder une transaction géante pendant la création des billets. Les fixtures créent les 10 salles et les 6 tarifs, chargent les films depuis `src/DataFixtures/films.json` et réimportent les séances de `src/DataFixtures/seances.json`. Elles complètent ensuite les créneaux libres du 1er janvier 2024 au 25 décembre 2026 en respectant les horaires d'ouverture, les créneaux de 15 minutes, les durées de films et les 20 minutes de battement du programmateur automatique. Pour maximiser le nombre de séances, le générateur de fixtures privilégie les films les plus courts qui tiennent dans chaque créneau. Les séances antérieures à la date du chargement qui sont encore en brouillon passent en statut publié ; les séances du jour et futures restent en brouillon, et les séances annulées gardent leur statut.
 
    Pour les séances publiées de la dernière année, les fixtures génèrent des réservations payées et leurs billets, avec un taux de remplissage variable de 15 à 45 % (30 % en moyenne). Les ventes antérieures aux 21 derniers jours sont toutes au guichet ; sur les ventes des 21 derniers jours, 70 % sont au guichet et 30 % en ligne.
 

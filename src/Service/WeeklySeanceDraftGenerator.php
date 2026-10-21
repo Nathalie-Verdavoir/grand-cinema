@@ -161,11 +161,13 @@ final class WeeklySeanceDraftGenerator
                     $film = $maximizeScreenings
                         ? $fittingFilms[0]
                         : $fittingFilms[random_int(0, count($fittingFilms) - 1)];
+                    $managedFilm = $this->managedFilm($film);
+                    $managedRoom = $this->managedRoom($room);
                     $duration = $film->getDuration();
                     $end = $cursor->modify(sprintf('+%d minutes', $duration + self::BUFFER_MINUTES));
                     $seance = (new Seance())
-                        ->setFilm($film)
-                        ->setSalle($room)
+                        ->setFilm($managedFilm)
+                        ->setSalle($managedRoom)
                         ->setDateTime(DateTime::createFromImmutable($cursor))
                         ->setStatus(
                             $includePast && $cursor < $now->setTime(0, 0)
@@ -179,7 +181,7 @@ final class WeeklySeanceDraftGenerator
                     ++$pending;
                     if ($pending >= 500) {
                         $this->entityManager->flush();
-                        $this->entityManager->clear(Seance::class);
+                        $this->entityManager->clear();
                         $pending = 0;
                     }
                     $cursor = $this->ceilToSlot($end);
@@ -222,5 +224,35 @@ final class WeeklySeanceDraftGenerator
         }
 
         return $programmingDate->setTime(self::CLOSING_HOUR, 0);
+    }
+
+    private function managedFilm(Film $film): Film
+    {
+        $id = $film->getId();
+        if (null === $id) {
+            return $film;
+        }
+
+        $managedFilm = $this->entityManager->getReference(Film::class, $id);
+        if (!$managedFilm instanceof Film) {
+            throw new \LogicException(sprintf('Le film %d ne peut pas être rechargé.', $id));
+        }
+
+        return $managedFilm;
+    }
+
+    private function managedRoom(Salle $room): Salle
+    {
+        $id = $room->getId();
+        if (null === $id) {
+            return $room;
+        }
+
+        $managedRoom = $this->entityManager->getReference(Salle::class, $id);
+        if (!$managedRoom instanceof Salle) {
+            throw new \LogicException(sprintf('La salle %d ne peut pas être rechargée.', $id));
+        }
+
+        return $managedRoom;
     }
 }
