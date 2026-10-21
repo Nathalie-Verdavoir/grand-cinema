@@ -9,7 +9,7 @@ final class ScreeningAvailability
     /**
      * @return array{reservedSeats: int, capacity: int, availableSeats: int, occupancyPercent: int}
      */
-    public function calculate(Seance $seance, ?int $reservedSeatsOverride = null): array
+    public function calculate(Seance $seance, ?int $reservedSeatsOverride = null, ?int $occupancyPercentOverride = null): array
     {
         if (null === $reservedSeatsOverride) {
             $reservedSeats = 0;
@@ -28,7 +28,7 @@ final class ScreeningAvailability
             'reservedSeats' => $reservedSeats,
             'capacity' => $capacity,
             'availableSeats' => max(0, $capacity - $reservedSeats),
-            'occupancyPercent' => $capacity > 0 ? min(100, (int) round(($reservedSeats / $capacity) * 100)) : 0,
+            'occupancyPercent' => $occupancyPercentOverride ?? ($capacity > 0 ? min(100, (int) round(($reservedSeats / $capacity) * 100)) : 0),
         ];
     }
 }

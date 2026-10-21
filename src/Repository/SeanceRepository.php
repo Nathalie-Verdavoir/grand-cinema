@@ -8,6 +8,7 @@ use App\Enum\ReservationStatus;
 use App\Enum\SeanceStatus;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\Persistence\ManagerRegistry;
 use SortDirection;
 
@@ -155,8 +156,9 @@ class SeanceRepository extends ServiceEntityRepository
     public function findForRoomBetween(Salle $salle, DateTimeImmutable $from, DateTimeImmutable $to): array
     {
         return $this->createQueryBuilder('seance')
-            ->addSelect('film', 'reservation')
+            ->addSelect('film', 'reservation', 'salle')
             ->join('seance.film', 'film')
+            ->join('seance.salle', 'salle')
             ->leftJoin('seance.reservations', 'reservation')
             ->andWhere('seance.salle = :salle')
             ->andWhere('seance.dateTime >= :from')
@@ -167,6 +169,98 @@ class SeanceRepository extends ServiceEntityRepository
             ->orderBy('seance.dateTime', SortDirection::Ascending)
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @return Seance[]
+     */
+    public function findForPlannerRoomBetween(Salle $salle, DateTimeImmutable $from, DateTimeImmutable $to): array
+    {
+        return $this->createQueryBuilder('seance')
+            ->addSelect('film', 'salle')
+            ->join('seance.film', 'film')
+            ->join('seance.salle', 'salle')
+            ->andWhere('seance.salle = :salle')
+            ->andWhere('seance.dateTime >= :from')
+            ->andWhere('seance.dateTime < :to')
+            ->setParameter('salle', $salle)
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->orderBy('seance.dateTime', SortDirection::Ascending)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Seance[]
+     */
+    public function findForPlannerBetween(DateTimeImmutable $from, DateTimeImmutable $to): array
+    {
+        return $this->createQueryBuilder('seance')
+            ->addSelect('film', 'salle')
+            ->join('seance.film', 'film')
+            ->join('seance.salle', 'salle')
+            ->andWhere('seance.dateTime >= :from')
+            ->andWhere('seance.dateTime < :to')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->orderBy('salle.name', SortDirection::Ascending)
+            ->addOrderBy('seance.dateTime', SortDirection::Ascending)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @param list<int> $seanceIds
+     *
+     * @return array<int, array{reservedSeats: int, occupancyPercent: int}>
+     */
+    public function findOccupancyBySeanceIds(array $seanceIds): array
+    {
+        if ([] === $seanceIds) {
+            return [];
+        }
+
+        $reservedStatuses = array_map(
+            static fn (ReservationStatus $status): string => $status->value,
+            array_filter(
+                ReservationStatus::cases(),
+                static fn (ReservationStatus $status): bool => $status->reservesSeats()
+            )
+        );
+        $rows = $this->getEntityManager()->getConnection()->executeQuery(
+            <<<'SQL'
+                SELECT occupancy.seanceId,
+                       occupancy.reservedSeats,
+                       CASE
+                           WHEN occupancy.capacity > 0
+                               THEN LEAST(100, ROUND(occupancy.reservedSeats * 100 / occupancy.capacity))
+                           ELSE 0
+                       END AS occupancyPercent
+                FROM (
+                    SELECT seance.id AS seanceId,
+                           salle.capacity AS capacity,
+                           COALESCE(SUM(CASE WHEN reservation.status IN (?) THEN reservation.nb_places ELSE 0 END), 0) AS reservedSeats
+                    FROM seance
+                    INNER JOIN salle ON salle.id = seance.salle_id
+                    LEFT JOIN reservation ON reservation.seance_id = seance.id
+                    WHERE seance.id IN (?)
+                    GROUP BY seance.id, salle.capacity
+                ) occupancy
+                SQL,
+            [$reservedStatuses, $seanceIds],
+            [ArrayParameterType::STRING, ArrayParameterType::INTEGER]
+        )->fetchAllAssociative();
+
+        $reservedSeatsBySeance = [];
+        foreach ($rows as $row) {
+            $reservedSeatsBySeance[(int) $row['seanceId']] = [
+                'reservedSeats' => (int) $row['reservedSeats'],
+                'occupancyPercent' => (int) $row['occupancyPercent'],
+            ];
+        }
+
+        return $reservedSeatsBySeance;
     }
 
     /**
