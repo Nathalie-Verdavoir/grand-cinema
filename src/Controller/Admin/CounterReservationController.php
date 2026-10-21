@@ -20,11 +20,21 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class CounterReservationController extends AbstractController
 {
     #[AdminRoute(path: '', name: 'index', options: ['methods' => ['GET']])]
-    public function index(ReservationRepository $reservationRepository): Response
+    public function index(Request $request, ReservationRepository $reservationRepository): Response
     {
+        $pageSize = 25;
+        $page = max(1, $request->query->getInt('page', 1));
+        $reservations = $reservationRepository->findCounterReservations($page, $pageSize + 1);
+        $hasNextPage = count($reservations) > $pageSize;
+        if ($hasNextPage) {
+            array_pop($reservations);
+        }
+
         return $this->render('admin/counter_reservations.html.twig', [
-            'reservations' => $reservationRepository->findCounterReservations(),
+            'reservations' => $reservations,
             'statuses' => ReservationStatus::cases(),
+            'currentPage' => $page,
+            'hasNextPage' => $hasNextPage,
         ]);
     }
 

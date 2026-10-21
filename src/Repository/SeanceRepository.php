@@ -9,6 +9,7 @@ use App\Enum\SeanceStatus;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use SortDirection;
 
 /**
  * @extends ServiceEntityRepository<Seance>
@@ -35,7 +36,7 @@ class SeanceRepository extends ServiceEntityRepository
             ->setParameter('from', $from)
             ->setParameter('to', $to)
             ->setParameter('status', SeanceStatus::PUBLISHED)
-            ->orderBy('seance.dateTime', 'ASC')
+            ->orderBy('seance.dateTime', SortDirection::Ascending)
             ->getQuery()
             ->getResult();
     }
@@ -53,7 +54,7 @@ class SeanceRepository extends ServiceEntityRepository
             ->andWhere('seance.status = :status')
             ->setParameter('from', $from)
             ->setParameter('status', SeanceStatus::PUBLISHED)
-            ->orderBy('seance.dateTime', 'ASC')
+            ->orderBy('seance.dateTime', SortDirection::Ascending)
             ->getQuery()
             ->getResult();
     }
@@ -91,7 +92,7 @@ class SeanceRepository extends ServiceEntityRepository
             ->setParameter('to', $to)
             ->setParameter('status', SeanceStatus::PUBLISHED)
             ->setParameter('reservedStatuses', $reservedStatuses)
-            ->orderBy('seance.dateTime', 'ASC')
+            ->orderBy('seance.dateTime', SortDirection::Ascending)
             ->getQuery()
             ->getArrayResult();
     }
@@ -111,7 +112,7 @@ class SeanceRepository extends ServiceEntityRepository
             ->setParameter('filmId', $filmId)
             ->setParameter('from', $from)
             ->setParameter('status', SeanceStatus::PUBLISHED)
-            ->orderBy('seance.dateTime', 'ASC')
+            ->orderBy('seance.dateTime', SortDirection::Ascending)
             ->getQuery()
             ->getResult();
     }
@@ -127,7 +128,7 @@ class SeanceRepository extends ServiceEntityRepository
             ->andWhere('seance.status = :status')
             ->setParameter('from', $from)
             ->setParameter('status', SeanceStatus::PUBLISHED)
-            ->orderBy('seance.dateTime', 'ASC')
+            ->orderBy('seance.dateTime', SortDirection::Ascending)
             ->getQuery()
             ->getArrayResult();
 
@@ -163,7 +164,7 @@ class SeanceRepository extends ServiceEntityRepository
             ->setParameter('salle', $salle)
             ->setParameter('from', $from)
             ->setParameter('to', $to)
-            ->orderBy('seance.dateTime', 'ASC')
+            ->orderBy('seance.dateTime', SortDirection::Ascending)
             ->getQuery()
             ->getResult();
     }
@@ -182,8 +183,8 @@ class SeanceRepository extends ServiceEntityRepository
             ->andWhere('seance.dateTime < :to')
             ->setParameter('from', $from)
             ->setParameter('to', $to)
-            ->orderBy('salle.name', 'ASC')
-            ->addOrderBy('seance.dateTime', 'ASC')
+            ->orderBy('salle.name', SortDirection::Ascending)
+            ->addOrderBy('seance.dateTime', SortDirection::Ascending)
             ->getQuery()
             ->getResult();
     }
