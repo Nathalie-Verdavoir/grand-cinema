@@ -25,6 +25,7 @@ final class ReservationCreator
         private readonly TarifRepository $tarifRepository,
         private readonly ScreeningAvailability $screeningAvailability,
         private readonly ReservationRepository $reservationRepository,
+        private readonly AdminKpiAggregateUpdaterInterface $aggregateUpdater,
     ) {
     }
 
@@ -144,6 +145,10 @@ final class ReservationCreator
                     $reservation->addBillet($billet);
                     $entityManager->persist($billet);
                 }
+            }
+
+            if (ReservationStatus::PAID_AT_COUNTER === $status) {
+                $this->aggregateUpdater->applyStatusChange($reservation, null, $status);
             }
 
             return $reservation;

@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Service\AdminKpiAggregateRebuilder;
 use Doctrine\Bundle\FixturesBundle\Loader\FixturesProvider;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,6 +20,7 @@ final class LoadAppFixturesCommand extends Command
     public function __construct(
         private readonly FixturesProvider $fixturesProvider,
         private readonly ManagerRegistry $doctrine,
+        private readonly AdminKpiAggregateRebuilder $aggregateRebuilder,
     ) {
         parent::__construct();
     }
@@ -65,6 +67,13 @@ final class LoadAppFixturesCommand extends Command
             $fixture->load($entityManager);
             $entityManager->clear();
         }
+
+        $aggregateResult = $this->aggregateRebuilder->rebuildAll();
+        $io->text(sprintf(
+            'Agrégats KPI recalculés : %d jours, %d lignes.',
+            $aggregateResult['days'],
+            $aggregateResult['rows'],
+        ));
 
         $io->success('Toutes les fixtures ont été chargées.');
 

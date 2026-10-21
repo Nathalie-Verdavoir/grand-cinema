@@ -52,23 +52,24 @@ final class AdminKpiCalculator
         $entriesBeforeTen = 0;
 
         foreach ($this->kpiRepository->findSalesByScreening($from, $until) as $row) {
-            $screeningDateTime = $this->toDateTime($row['screeningDateTime']);
+            $screeningDateTime = $this->toDateTime($row['screeningDate']);
             $screeningEntries = (int) $row['entries'];
             $entries += $screeningEntries;
             $revenue += (float) ($row['revenue'] ?? 0);
             $screeningReservations = (int) $row['reservations'];
             $reservations += $screeningReservations;
-            if (1 === (int) $row['isCounter']) {
-                $counterReservations += $screeningReservations;
-            }
+            $counterReservations += (int) $row['counterReservations'];
             $weekday = (int) $screeningDateTime->format('N');
             $entriesByWeekday[$weekday] += $screeningEntries;
 
-            $hour = (int) $screeningDateTime->format('G');
-            if ($hour < 10) {
+            $timeBucket = (int) $row['timeBucket'];
+            if (0 === $timeBucket) {
                 $entriesBeforeTen += $screeningEntries;
             } else {
-                $startHour = 10 + 2 * intdiv($hour - 10, 2);
+                if ($timeBucket < 1 || $timeBucket > 7) {
+                    throw new \LogicException(sprintf('Tranche horaire KPI invalide : %d.', $timeBucket));
+                }
+                $startHour = 8 + 2 * $timeBucket;
                 $timeOfDay = sprintf('%02d h – %02d h', $startHour, ($startHour + 2) % 24);
                 $entriesByTimeOfDay[$timeOfDay] += $screeningEntries;
             }
