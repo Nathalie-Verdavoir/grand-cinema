@@ -26,8 +26,9 @@ class SeanceRepository extends ServiceEntityRepository
     public function findPublishedBetween(DateTimeImmutable $from, DateTimeImmutable $to): array
     {
         return $this->createQueryBuilder('seance')
-            ->addSelect('film')
+            ->addSelect('film', 'salle')
             ->join('seance.film', 'film')
+            ->join('seance.salle', 'salle')
             ->andWhere('seance.dateTime >= :from')
             ->andWhere('seance.dateTime < :to')
             ->andWhere('seance.status = :status')

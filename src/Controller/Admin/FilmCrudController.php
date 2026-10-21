@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Film;
+use App\Repository\FilmRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
@@ -21,10 +22,12 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class FilmCrudController extends AbstractCrudController
 {
     private CloudinaryImageUploader $imageUploader;
+    private FilmRepository $filmRepository;
 
-    public function __construct(CloudinaryImageUploader $imageUploader)
+    public function __construct(CloudinaryImageUploader $imageUploader, FilmRepository $filmRepository)
     {
         $this->imageUploader = $imageUploader;
+        $this->filmRepository = $filmRepository;
     }
     public static function getEntityFqcn(): string
     {
@@ -39,7 +42,10 @@ class FilmCrudController extends AbstractCrudController
             ->overrideTemplate('crud/edit', 'admin/film/edit.html.twig')
             ->overrideTemplate('crud/new', 'admin/film/new.html.twig')
             ->setFormOptions([
-                'attr' => ['data-controller' => 'search-film']
+                'attr' => [
+                    'data-controller' => 'search-film film-next',
+                    'data-action' => 'submit->film-next#submit',
+                ]
             ]);
     }
 
@@ -78,6 +84,22 @@ class FilmCrudController extends AbstractCrudController
             return $this->redirect($url);
         }
 
+        if (
+            'saveAndNextFilm' === $submitButton
+            && $context->getEntity()->getInstance() instanceof Film
+        ) {
+            $nextFilm = $this->filmRepository->findNextForEditing($context->getEntity()->getInstance());
+            if (null !== $nextFilm) {
+                $url = $this->container->get(AdminUrlGenerator::class)
+                    ->setController(self::class)
+                    ->setAction(Action::EDIT)
+                    ->setEntityId($nextFilm->getId())
+                    ->generateUrl();
+
+                return $this->redirect($url);
+            }
+        }
+
         return parent::getRedirectResponseAfterSave($context, $action);
     }
 
@@ -108,6 +130,7 @@ class FilmCrudController extends AbstractCrudController
         yield TextareaField::new('description', 'Description')
             ->setRequired(false)
             ->setMaxLength(240)
+            ->setFormTypeOption('attr.data-ea-textarea-field', false)
             ->setHtmlAttribute('data-search-film-target', 'synopsisField');
 
         yield DateField::new('releaseDate', 'Date de sortie')

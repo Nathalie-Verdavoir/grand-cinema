@@ -1,16 +1,25 @@
 .film-form-layout {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: start;
     gap: 1.5rem;
 }
 
 .film-form-fields {
     min-width: 0;
+    grid-column: span 2;
+}
+
+.film-form-fields textarea[data-search-film-target="synopsisField"] {
+    height: 6rem;
+    overflow-y: auto;
+    resize: vertical;
 }
 
 .film-form-previews {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-column: span 2;
     gap: 1rem;
     position: sticky;
     top: 1rem;
@@ -20,10 +29,51 @@
     margin: 0;
 }
 
+.film-search-results-control,
+.film-duration-control {
+    align-items: center;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.film-search-results-control select,
+.film-duration-control input {
+    flex: 1;
+    min-width: 0;
+}
+
+.film-loading-spinner {
+    animation: film-search-spin 0.75s linear infinite;
+    border: 3px solid var(--color-border);
+    border-radius: 50%;
+    border-top-color: var(--color-global-2);
+    display: block;
+    box-shadow: 0 0 0 2px var(--color-surface);
+    flex: 0 0 1.5rem;
+    height: 1.5rem;
+    width: 1.5rem;
+}
+
+.film-loading-spinner:not(.is-loading) {
+    visibility: hidden;
+}
+
+@keyframes film-search-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .film-loading-spinner {
+        animation-duration: 1.5s;
+    }
+}
+
 .film-image-preview-card img {
     display: block;
     width: 100%;
-    max-height: 420px;
+    max-height: 620px;
     object-fit: contain;
 }
 
@@ -769,8 +819,13 @@
         grid-template-columns: minmax(0, 1fr);
     }
 
+    .film-form-fields {
+        grid-column: auto;
+    }
+
     .film-form-previews {
         position: static;
+        grid-column: auto;
     }
 
     .seance-planner-layout {

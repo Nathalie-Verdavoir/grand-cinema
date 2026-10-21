@@ -27,6 +27,37 @@ export default class extends Controller {
                 resultsSelect.dataset.action = 'change->search-film#selectMovie';
             }
         }
+
+        this.createSearchLoadingIndicator();
+    }
+
+    createSearchLoadingIndicator() {
+        const resultsSelect = this.resultsSelectElement;
+        if (!resultsSelect) {
+            return;
+        }
+
+        let container = resultsSelect.closest('.film-search-results-control');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'film-search-results-control';
+            resultsSelect.parentNode.insertBefore(container, resultsSelect);
+            container.append(resultsSelect);
+        }
+
+        this.searchSpinner = document.createElement('span');
+        this.searchSpinner.className = 'film-loading-spinner';
+        this.searchSpinner.setAttribute('role', 'status');
+        this.searchSpinner.setAttribute('aria-label', 'Recherche de films en cours');
+        this.searchSpinner.setAttribute('aria-hidden', 'true');
+        container.append(this.searchSpinner);
+    }
+
+    setSearchLoading(isLoading) {
+        if (this.searchSpinner) {
+            this.searchSpinner.classList.toggle('is-loading', isLoading);
+            this.searchSpinner.setAttribute('aria-hidden', String(!isLoading));
+        }
     }
 
     createImagePreview() {
@@ -132,12 +163,29 @@ export default class extends Controller {
             return;
         }
 
+        const durationControl = document.createElement('div');
+        durationControl.className = 'film-duration-control';
+        this.durationFieldTarget.parentNode.insertBefore(durationControl, this.durationFieldTarget);
+        durationControl.append(this.durationFieldTarget);
+
+        this.durationSpinner = document.createElement('span');
+        this.durationSpinner.className = 'film-loading-spinner';
+        this.durationSpinner.setAttribute('role', 'status');
+        this.durationSpinner.setAttribute('aria-label', 'Vérification de la durée en cours');
+        this.durationSpinner.setAttribute('aria-hidden', 'true');
+        durationControl.append(this.durationSpinner);
+
         this.durationStatus = document.createElement('small');
         this.durationStatus.className = 'form-text text-muted';
         this.durationStatus.setAttribute('aria-live', 'polite');
         const durationContainer = this.durationFieldTarget.closest('.form-group, .form-field')
             || this.durationFieldTarget.parentElement;
         durationContainer?.append(this.durationStatus);
+    }
+
+    setDurationLoading(isLoading) {
+        this.durationSpinner.classList.toggle('is-loading', isLoading);
+        this.durationSpinner.setAttribute('aria-hidden', String(!isLoading));
     }
 
     get resultsSelectElement() {
@@ -149,21 +197,48 @@ export default class extends Controller {
     // Étape 2 : L'admin tape un nom -> Requête API après un court délai (Debounce)
     search() {
         const query = this.searchInputTarget.value;
+        clearTimeout(this.timeout);
+        this.activeSearchController?.abort();
+        this.activeSearchController = null;
+        this.setSearchLoading(false);
+
         if (query.length < 3) return; // On attend au moins 3 caractères
 
-        clearTimeout(this.timeout);
         const resultsSelect = this.resultsSelectElement;
         if (!resultsSelect) {
             throw new Error('Le champ des résultats de recherche est introuvable.');
         }
         resultsSelect.disabled = false;
-        this.timeout = setTimeout(() => {
-            fetch(`/admin/api/film/search?q=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(data => {
+        this.timeout = setTimeout(async () => {
+            const controller = new AbortController();
+            this.activeSearchController = controller;
+            this.setSearchLoading(true);
+
+            try {
+                const response = await fetch(
+                    `/admin/api/film/search?q=${encodeURIComponent(query)}`,
+                    { signal: controller.signal }
+                );
+                if (!response.ok) {
+                    throw new Error(`La recherche de films a échoué (${response.status}).`);
+                }
+
+                const data = await response.json();
+                if (this.activeSearchController === controller) {
                     this.filmsData = data;
                     this.updateSelectOptions(data);
-                });
+                }
+            } catch (error) {
+                if ('AbortError' !== error.name) {
+                    console.error(error);
+                    resultsSelect.innerHTML = '<option value="">Recherche de films indisponible.</option>';
+                }
+            } finally {
+                if (this.activeSearchController === controller) {
+                    this.activeSearchController = null;
+                    this.setSearchLoading(false);
+                }
+            }
         }, 400); // Évite de spammer l'API à chaque lettre tapée
     }
 
@@ -216,6 +291,7 @@ export default class extends Controller {
             this.durationFieldTarget.value = '';
             this.durationStatus.textContent = 'Vérification de la durée auprès de TMDB…';
             this.durationStatus.className = 'form-text text-muted';
+            this.setDurationLoading(true);
 
             try {
                 const response = await fetch(`/admin/api/film/${encodeURIComponent(movie.id)}/details`);
@@ -239,6 +315,8 @@ export default class extends Controller {
                 this.durationStatus.textContent = 'Impossible de vérifier la durée auprès de TMDB : veuillez la saisir manuellement.';
                 this.durationStatus.className = 'form-text text-warning';
                 console.error(error);
+            } finally {
+                this.setDurationLoading(false);
             }
         }
     }

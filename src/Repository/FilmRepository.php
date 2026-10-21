@@ -76,6 +76,19 @@ class FilmRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findNextForEditing(Film $currentFilm): ?Film
+    {
+        $nextFilm = $this->createQueryBuilder('film')
+            ->andWhere('film.id > :currentId')
+            ->setParameter('currentId', $currentFilm->getId())
+            ->orderBy('film.id', 'ASC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $nextFilm ?? $this->findOneBy([], ['id' => 'ASC']);
+    }
+
     public function findMaximumDurationMinutes(): int
     {
         $maximumDuration = $this->createQueryBuilder('film')
