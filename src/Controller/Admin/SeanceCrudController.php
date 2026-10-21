@@ -197,6 +197,7 @@ class SeanceCrudController extends AbstractCrudController
                     'canPublish' => $seance->getStatus() === SeanceStatus::DRAFT,
                     'ended' => null !== $duration && $endsAt <= $now,
                     ...$this->screeningAvailability->calculate($seance),
+                    ...$this->screeningAvailability->calculate($seance),
                 ];
             }
         }
