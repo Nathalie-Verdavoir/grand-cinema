@@ -13,12 +13,21 @@ class MentionsLegalesController extends AbstractController
     #[Route('/mentions', name: 'app_mentions', methods: ['GET'])]
     public function index(): Response
     {
-        return $this->render('legals/mentions.html.twig');
+        return $this->renderLegalPage('legals/mentions.html.twig');
     }
 
     #[Route('/cgu', name: 'app_cgu', methods: ['GET'])]
     public function indexCGU(): Response
     {
-        return $this->render('legals/cgu.html.twig');
+        return $this->renderLegalPage('legals/cgu.html.twig');
+    }
+
+    private function renderLegalPage(string $template): Response
+    {
+        $response = $this->render($template);
+        $response->setSharedMaxAge(3600);
+        $response->setVary('Cookie');
+
+        return $response;
     }
 }
