@@ -90,14 +90,9 @@ final class AdminKpiCalculator
         }
         unset($filmSale);
 
-        $capacity = 0;
-        $rooms = [];
-        foreach ($this->kpiRepository->findPublishedScreeningCapacities($from, $until) as $row) {
-            $capacity += (int) $row['capacity'];
-            $rooms[(string) $row['roomId']] = true;
-        }
-
-        $activeScreens = count($rooms);
+        $capacityTotals = $this->kpiRepository->findPublishedCapacityTotals($from, $until);
+        $capacity = (int) $capacityTotals['capacity'];
+        $activeScreens = (int) $capacityTotals['activeScreens'];
         $onlineReservations = max(0, $reservations - $counterReservations);
         $weekdayRows = [];
         $maxWeekdayEntries = max($entriesByWeekday);

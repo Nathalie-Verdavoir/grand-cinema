@@ -34,10 +34,9 @@ final class AdminKpiCalculatorTest extends TestCase
         $repository->method('findSalesByFilm')->willReturn([
             ['filmTitle' => 'Film test', 'entries' => 10, 'revenue' => '85.00'],
         ]);
-        $repository->method('findPublishedScreeningCapacities')->willReturn([
-            ['screeningId' => 1, 'roomId' => 2, 'capacity' => 10],
-            ['screeningId' => 2, 'roomId' => 2, 'capacity' => 10],
-            ['screeningId' => 3, 'roomId' => 3, 'capacity' => 10],
+        $repository->method('findPublishedCapacityTotals')->willReturn([
+            'capacity' => 30,
+            'activeScreens' => 2,
         ]);
 
         $result = (new AdminKpiCalculator($repository, new DateFormatter()))->calculate(
@@ -75,7 +74,10 @@ final class AdminKpiCalculatorTest extends TestCase
             ['screeningDate' => '2026-10-14', 'timeBucket' => 7, 'entries' => 7, 'revenue' => '0.00', 'reservations' => 1, 'counterReservations' => 0],
         ]);
         $repository->method('findSalesByFilm')->willReturn([]);
-        $repository->method('findPublishedScreeningCapacities')->willReturn([]);
+        $repository->method('findPublishedCapacityTotals')->willReturn([
+            'capacity' => 0,
+            'activeScreens' => 0,
+        ]);
 
         $result = (new AdminKpiCalculator($repository, new DateFormatter()))->calculate(
             new DateTimeImmutable('2026-10-01'),
