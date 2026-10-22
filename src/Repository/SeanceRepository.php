@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Film;
 use App\Entity\Salle;
 use App\Entity\Seance;
 use App\Enum\ReservationStatus;
@@ -128,6 +129,49 @@ class SeanceRepository extends ServiceEntityRepository
             ->andWhere('seance.status = :status')
             ->setParameter('filmId', $filmId)
             ->setParameter('from', $from)
+            ->setParameter('status', SeanceStatus::PUBLISHED)
+            ->orderBy('seance.dateTime', SortDirection::Ascending)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Film[]
+     */
+    public function findPublishedFilmsBetween(DateTimeImmutable $from, DateTimeImmutable $until): array
+    {
+        return $this->getEntityManager()->createQueryBuilder()
+            ->select('film')
+            ->distinct()
+            ->from(Film::class, 'film')
+            ->join('film.seances', 'seance')
+            ->andWhere('seance.dateTime >= :from')
+            ->andWhere('seance.dateTime < :until')
+            ->andWhere('seance.status = :status')
+            ->setParameter('from', $from)
+            ->setParameter('until', $until)
+            ->setParameter('status', SeanceStatus::PUBLISHED)
+            ->orderBy('film.title', SortDirection::Ascending)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Seance[]
+     */
+    public function findPublishedForFilmBetween(int $filmId, DateTimeImmutable $from, DateTimeImmutable $until): array
+    {
+        return $this->createQueryBuilder('seance')
+            ->addSelect('film', 'salle')
+            ->join('seance.film', 'film')
+            ->join('seance.salle', 'salle')
+            ->andWhere('film.id = :filmId')
+            ->andWhere('seance.dateTime >= :from')
+            ->andWhere('seance.dateTime < :until')
+            ->andWhere('seance.status = :status')
+            ->setParameter('filmId', $filmId)
+            ->setParameter('from', $from)
+            ->setParameter('until', $until)
             ->setParameter('status', SeanceStatus::PUBLISHED)
             ->orderBy('seance.dateTime', SortDirection::Ascending)
             ->getQuery()

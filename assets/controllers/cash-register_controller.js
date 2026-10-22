@@ -2,11 +2,25 @@ import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
     static values = {
+        filmsUrl: String,
         screeningsUrl: String,
         saleDetailsUrl: String,
     };
 
-    static targets = ['film', 'screening', 'selectedFilm', 'feedback', 'saleDetails', 'ticketPreview', 'ticketFrame', 'ticketFeedback'];
+    static targets = [
+        'fromDate',
+        'toDate',
+        'fromValue',
+        'toValue',
+        'film',
+        'screening',
+        'selectedFilm',
+        'feedback',
+        'saleDetails',
+        'ticketPreview',
+        'ticketFrame',
+        'ticketFeedback',
+    ];
 
     ticketPdfUrl = null;
 
@@ -24,6 +38,71 @@ export default class extends Controller {
         if (this.ticketPdfUrl) {
             URL.revokeObjectURL(this.ticketPdfUrl);
             this.ticketPdfUrl = null;
+        }
+    }
+
+    async loadFilms() {
+        const from = this.fromDateTarget.value;
+        const to = this.toDateTarget.value;
+        const selectedFilmId = this.filmTarget.value;
+        this.fromValueTarget.value = from;
+        this.toValueTarget.value = to;
+        this.filmTarget.disabled = true;
+        this.filmTarget.replaceChildren(new Option('Chargement des films…', ''));
+        this.selectedFilmTarget.value = '';
+        this.screeningTarget.disabled = true;
+        this.screeningTarget.replaceChildren(new Option('Choisissez d’abord un film', ''));
+        this.feedbackTarget.textContent = '';
+        this.saleDetailsTarget.replaceChildren();
+        this.saleDetailsTarget.hidden = true;
+        this.clearTicketPreview();
+
+        this.requestController?.abort();
+        const controller = new AbortController();
+        this.requestController = controller;
+        const url = new URL(this.filmsUrlValue, window.location.origin);
+        url.searchParams.set('from', from);
+        url.searchParams.set('to', to);
+
+        try {
+            const response = await fetch(url, {
+                signal: controller.signal,
+                headers: { Accept: 'application/json' },
+            });
+            if (!response.ok) {
+                throw new Error(`Chargement des films impossible (${response.status}).`);
+            }
+
+            const films = await response.json();
+            if (!Array.isArray(films)) {
+                throw new Error('Réponse invalide lors du chargement des films.');
+            }
+
+            const options = [new Option(
+                films.length ? 'Sélectionner un film' : 'Aucun film pour cette période',
+                '',
+            )];
+            films.forEach((film) => {
+                if (!Number.isInteger(film.id) || typeof film.title !== 'string') {
+                    throw new Error('Réponse invalide lors du chargement des films.');
+                }
+                options.push(new Option(film.title, String(film.id)));
+            });
+
+            this.filmTarget.replaceChildren(...options);
+            this.filmTarget.disabled = films.length === 0;
+            if (films.some((film) => String(film.id) === selectedFilmId)) {
+                this.filmTarget.value = selectedFilmId;
+                this.selectedFilmTarget.value = selectedFilmId;
+                await this.loadScreenings();
+            }
+        } catch {
+            if (controller.signal.aborted) {
+                return;
+            }
+
+            this.filmTarget.replaceChildren(new Option('Films indisponibles', ''));
+            this.feedbackTarget.textContent = 'Impossible de charger les films pour cette période. Vérifiez les dates et réessayez.';
         }
     }
 
@@ -49,6 +128,8 @@ export default class extends Controller {
         this.requestController = controller;
         const url = new URL(this.screeningsUrlValue, window.location.origin);
         url.searchParams.set('film', filmId);
+        url.searchParams.set('from', this.fromDateTarget.value);
+        url.searchParams.set('to', this.toDateTarget.value);
 
         try {
             const response = await fetch(url, {
