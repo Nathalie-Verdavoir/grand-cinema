@@ -14,6 +14,7 @@ use Stripe\Exception\ApiErrorException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -23,15 +24,27 @@ use Symfony\Component\Uid\Ulid;
 class ReservationHistoryController extends AbstractController
 {
     #[Route('/mes-reservations', name: 'app_reservation_history', methods: ['GET'])]
-    public function index(ReservationRepository $reservationRepository): Response
+    public function index(Request $request, ReservationRepository $reservationRepository): Response
     {
         $user = $this->getUser();
         if (!$user instanceof User) {
             throw $this->createAccessDeniedException();
         }
 
+        $requestedPage = filter_var($request->query->get('page', '1'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        if (false === $requestedPage) {
+            throw new BadRequestHttpException('Le numéro de page est invalide.');
+        }
+
+        $pageSize = 25;
+        $totalReservations = $reservationRepository->countForUser($user);
+        $totalPages = max(1, (int) ceil($totalReservations / $pageSize));
+        $page = min($requestedPage, $totalPages);
+
         return $this->render('reservation/history.html.twig', [
-            'reservations' => $reservationRepository->findForUser($user),
+            'reservations' => $reservationRepository->findForUserPage($user, $page, $pageSize),
+            'page' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 

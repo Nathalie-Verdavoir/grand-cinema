@@ -30,6 +30,31 @@ const loadJsPdf = () => {
     return jsPdfPromise;
 };
 
+const initializeReservationCancellationModal = () => {
+    const modal = document.querySelector('#paid-cancel-reservation-modal');
+    if (!modal) {
+        return;
+    }
+
+    modal.addEventListener('show.bs.modal', (event) => {
+        const trigger = event.relatedTarget;
+        if (!(trigger instanceof HTMLElement)) {
+            return;
+        }
+
+        const form = modal.querySelector('[data-cancel-reservation-form]');
+        const token = modal.querySelector('[data-cancel-reservation-token]');
+        const film = modal.querySelector('[data-cancel-reservation-film]');
+        if (!form || !token || !film) {
+            return;
+        }
+
+        form.action = trigger.dataset.cancelUrl || '';
+        token.value = trigger.dataset.csrfToken || '';
+        film.textContent = trigger.dataset.reservationTitle || '';
+    });
+};
+
 const initializeProgrammingWeekNavigation = () => {
     const section = document.querySelector('[data-programming-week]');
     const content = section?.querySelector('[data-programming-week-content]');
@@ -590,6 +615,7 @@ if (document.readyState === 'loading') {
         initializeHomeCarousels();
         initializeReservationSelections();
         initializeReservationCountdowns();
+        initializeReservationCancellationModal();
         initializeTicketQrCodes();
         initializeTicketDownloads();
     });
@@ -598,6 +624,7 @@ if (document.readyState === 'loading') {
     initializeHomeCarousels();
     initializeReservationSelections();
     initializeReservationCountdowns();
+    initializeReservationCancellationModal();
     initializeTicketQrCodes();
     initializeTicketDownloads();
 }
