@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'seance')]
 #[ORM\Index(name: 'IDX_SEANCE_SALLE_DATE_TIME', columns: ['salle_id', 'date_time'])]
 #[ORM\Index(name: 'IDX_SEANCE_DATE_TIME', columns: ['date_time'])]
+#[ORM\Index(name: 'IDX_SEANCE_STATUS_DATE_TIME', columns: ['status', 'date_time'])]
 class Seance
 {
     #[ORM\Id]

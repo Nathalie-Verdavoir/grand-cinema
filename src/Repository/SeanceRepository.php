@@ -131,6 +131,7 @@ class SeanceRepository extends ServiceEntityRepository
             ->setParameter('status', SeanceStatus::PUBLISHED)
             ->orderBy('seance.dateTime', SortDirection::Ascending)
             ->getQuery()
+            ->enableResultCache(300)
             ->getArrayResult();
 
         return array_map(

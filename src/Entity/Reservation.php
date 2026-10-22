@@ -12,6 +12,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
+#[ORM\Table(name: 'reservation', indexes: [
+    new ORM\Index(name: 'IDX_RESERVATION_USER_STATUS_PLACES', columns: ['user_id', 'status', 'nb_places']),
+])]
 #[ORM\UniqueConstraint(name: 'UNIQ_RESERVATION_STRIPE_SESSION', columns: ['stripe_checkout_session_id'])]
 class Reservation
 {

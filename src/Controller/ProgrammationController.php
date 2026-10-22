@@ -106,7 +106,11 @@ class ProgrammationController extends AbstractController
         ];
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('programmation/_screenings.html.twig', $screeningsContext);
+            $response = $this->render('programmation/_screenings.html.twig', $screeningsContext);
+            $response->setSharedMaxAge(300);
+            $response->setVary('X-Requested-With');
+
+            return $response;
         }
 
         $featuredFilms = [];
@@ -125,10 +129,14 @@ class ProgrammationController extends AbstractController
             $featuredFilms[] = $film;
         }
 
-        return $this->render('programmation/index.html.twig', [
+        $response = $this->render('programmation/index.html.twig', [
             ...$screeningsContext,
             'featuredFilms' => $featuredFilms,
         ]);
+        $response->setSharedMaxAge(300);
+        $response->setVary('X-Requested-With');
+
+        return $response;
     }
 
     #[Route('/programmation/film/{id}', name: 'app_programmation_film', requirements: ['id' => '\d+'], methods: ['GET'])]
