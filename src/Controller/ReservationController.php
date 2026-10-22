@@ -75,10 +75,14 @@ class ReservationController extends AbstractController
             ]);
         }
 
-        return $this->render('reservation/show.html.twig', [
+        $response = $this->render('reservation/show.html.twig', [
             'seance' => $seance,
             'availableSeats' => $screeningAvailability->calculate($seance)['availableSeats'],
             'tarifs' => $tarifRepository->findBy([], ['price' => 'DESC', 'name' => 'ASC']),
         ]);
+        $response->setSharedMaxAge(10);
+        $response->setVary('Cookie');
+
+        return $response;
     }
 }

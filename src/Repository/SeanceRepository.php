@@ -9,6 +9,7 @@ use App\Enum\SeanceStatus;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\LockMode;
 use Doctrine\Persistence\ManagerRegistry;
 use SortDirection;
 
@@ -20,6 +21,21 @@ class SeanceRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Seance::class);
+    }
+
+    public function find(mixed $id, LockMode|int|null $lockMode = LockMode::NONE, int|null $lockVersion = null): ?Seance
+    {
+        if (LockMode::NONE !== $lockMode || null !== $lockVersion) {
+            return parent::find($id, $lockMode, $lockVersion);
+        }
+
+        return $this->createQueryBuilder('seance')
+            ->addSelect('reservation')
+            ->leftJoin('seance.reservations', 'reservation')
+            ->andWhere('seance.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     /**
