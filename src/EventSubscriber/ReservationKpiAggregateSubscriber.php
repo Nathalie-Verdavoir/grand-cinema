@@ -37,14 +37,27 @@ final class ReservationKpiAggregateSubscriber
             }
 
             [$previousStatus, $newStatus] = $changeSet['status'];
-            if (
-                (null !== $previousStatus && !$previousStatus instanceof ReservationStatus)
-                || (null !== $newStatus && !$newStatus instanceof ReservationStatus)
-            ) {
-                throw new LogicException('Le statut de réservation KPI est invalide.');
-            }
-
-            $this->aggregateUpdater->applyStatusChange($entity, $previousStatus, $newStatus);
+            $this->aggregateUpdater->applyStatusChange(
+                $entity,
+                $this->normalizeStatus($previousStatus),
+                $this->normalizeStatus($newStatus),
+            );
         }
+    }
+
+    private function normalizeStatus(mixed $status): ?ReservationStatus
+    {
+        if (null === $status || $status instanceof ReservationStatus) {
+            return $status;
+        }
+
+        if (is_string($status)) {
+            $status = ReservationStatus::tryFrom($status);
+            if (null !== $status) {
+                return $status;
+            }
+        }
+
+        throw new LogicException('Le statut de réservation KPI est invalide.');
     }
 }

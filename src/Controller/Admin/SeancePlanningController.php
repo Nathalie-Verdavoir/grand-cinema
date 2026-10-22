@@ -12,6 +12,7 @@ use App\Repository\SeanceRepository;
 use App\Service\WeeklySeanceDraftGenerator;
 use DateTimeImmutable;
 use DateTime;
+use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -206,7 +207,7 @@ class SeancePlanningController extends AbstractController
             return $this->json(['error' => 'La date ou le créneau horaire est invalide.'], 400);
         }
 
-        $startsAt = DateTimeImmutable::createFromFormat('!Y-m-d H:i', $date.' '.$time);
+        $startsAt = DateTimeImmutable::createFromFormat('!Y-m-d H:i', $date.' '.$time, new DateTimeZone('Europe/Paris'));
         $dateErrors = DateTimeImmutable::getLastErrors();
         if (!$startsAt || (false !== $dateErrors && (0 !== $dateErrors['warning_count'] || 0 !== $dateErrors['error_count'])) || $startsAt->format('Y-m-d H:i') !== $date.' '.$time) {
             return $this->json(['error' => 'La date ou le créneau horaire est invalide.'], 400);
@@ -299,7 +300,7 @@ class SeancePlanningController extends AbstractController
             return $this->json(['error' => 'La date ou le créneau horaire est invalide.'], 400);
         }
 
-        $startsAt = DateTimeImmutable::createFromFormat('!Y-m-d H:i', $date.' '.$time);
+        $startsAt = DateTimeImmutable::createFromFormat('!Y-m-d H:i', $date.' '.$time, new DateTimeZone('Europe/Paris'));
         $dateErrors = DateTimeImmutable::getLastErrors();
         if (!$startsAt || (false !== $dateErrors && (0 !== $dateErrors['warning_count'] || 0 !== $dateErrors['error_count'])) || $startsAt->format('Y-m-d H:i') !== $date.' '.$time) {
             return $this->json(['error' => 'La date ou le créneau horaire est invalide.'], 400);
