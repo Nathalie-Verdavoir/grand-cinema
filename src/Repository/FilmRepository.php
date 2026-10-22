@@ -56,6 +56,7 @@ class FilmRepository extends ServiceEntityRepository
             ->setParameter('status', SeanceStatus::PUBLISHED)
             ->orderBy('seance.dateTime', SortDirection::Ascending)
             ->getQuery()
+            ->enableResultCache(60, sprintf('film_current_program_by_id_%d', $id))
             ->getOneOrNullResult();
     }
 
@@ -95,6 +96,7 @@ class FilmRepository extends ServiceEntityRepository
         $maximumDuration = $this->createQueryBuilder('film')
             ->select('MAX(film.duration)')
             ->getQuery()
+            ->enableResultCache(60)
             ->getSingleScalarResult();
 
         return max(0, (int) $maximumDuration);

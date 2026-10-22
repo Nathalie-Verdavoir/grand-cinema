@@ -151,10 +151,13 @@ class ProgrammationController extends AbstractController
             throw $this->createNotFoundException('Ce film n’est pas actuellement programmé.');
         }
 
-        return $this->render('programmation/film.html.twig', [
+        $response = $this->render('programmation/film.html.twig', [
             'film' => $film,
             'screenings' => $screenings,
         ]);
+        $response->setSharedMaxAge(60);
+
+        return $response;
     }
 
     private function wednesdayStart(DateTimeImmutable $date): DateTimeImmutable
