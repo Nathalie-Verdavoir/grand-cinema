@@ -30,7 +30,8 @@ class ReservationPaymentController extends AbstractController
         StripeCheckoutService $stripeCheckoutService,
         LoggerInterface $logger,
     ): Response {
-        $reservation = $this->findReservation($reference, $reservationRepository);
+        $useCachedReservation = !$request->query->has('session_id') && !$request->query->has('checkout');
+        $reservation = $this->findReservation($reference, $reservationRepository, $useCachedReservation);
         $user = $this->getUser();
         if (!$user instanceof User) {
             return $this->redirectToRoute('login', [
@@ -125,7 +126,11 @@ class ReservationPaymentController extends AbstractController
         return $this->redirect($checkoutUrl, Response::HTTP_SEE_OTHER);
     }
 
-    private function findReservation(string $reference, ReservationRepository $reservationRepository): Reservation
+    private function findReservation(
+        string $reference,
+        ReservationRepository $reservationRepository,
+        bool $useCache = false,
+    ): Reservation
     {
         try {
             $ulid = Ulid::fromString($reference);
@@ -133,7 +138,9 @@ class ReservationPaymentController extends AbstractController
             throw $this->createNotFoundException('Cette réservation n’existe pas.', $exception);
         }
 
-        $reservation = $reservationRepository->findOneBy(['reference' => $ulid]);
+        $reservation = $useCache
+            ? $reservationRepository->findOneByReferenceCached($ulid)
+            : $reservationRepository->findOneBy(['reference' => $ulid]);
         if (!$reservation instanceof Reservation) {
             throw $this->createNotFoundException('Cette réservation n’existe pas.');
         }

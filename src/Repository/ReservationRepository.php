@@ -86,6 +86,16 @@ class ReservationRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    public function findOneByReferenceCached(Ulid $reference): ?Reservation
+    {
+        return $this->createQueryBuilder('reservation')
+            ->andWhere('reservation.reference = :reference')
+            ->setParameter('reference', $reference, UlidType::NAME)
+            ->getQuery()
+            ->enableResultCache(60, 'reservation_payment_'.$reference)
+            ->getOneOrNullResult();
+    }
+
     /**
      * @return Reservation[]
      */
