@@ -21,6 +21,8 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+            - '../src/DataFixtures/'
+            - '../src/Command/LoadAppFixturesCommand.php'
 
     App\Service\CloudinaryImageUploader:
         arguments:
@@ -35,10 +37,6 @@ services:
     App\Service\ReservationPaymentSessionManager: '@App\Service\StripeCheckoutService'
     App\Service\AdminKpiAggregateUpdaterInterface: '@App\Service\AdminKpiAggregateUpdater'
 
-    App\Command\LoadAppFixturesCommand:
-        arguments:
-            $fixturesProvider: '@doctrine.fixtures.loader'
-
     App\Controller\StripeWebhookController:
         arguments:
             $webhookSecret: '%env(STRIPE_WEBHOOK_SECRET)%'
@@ -50,3 +48,19 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+# Fixtures bundle is a dev dependency: only register fixture services where it is enabled
+when@dev: &fixtures_services
+    services:
+        _defaults:
+            autowire: true
+            autoconfigure: true
+
+        App\DataFixtures\:
+            resource: '../src/DataFixtures/'
+
+        App\Command\LoadAppFixturesCommand:
+            arguments:
+                $fixturesProvider: '@doctrine.fixtures.loader'
+
+when@test: *fixtures_services
