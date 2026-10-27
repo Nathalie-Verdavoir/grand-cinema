@@ -13,6 +13,7 @@ use App\Enum\SeanceStatus;
 use App\Exception\ReservationCreationException;
 use App\Repository\ReservationRepository;
 use App\Repository\TarifRepository;
+use App\Service\AdminKpiAggregateUpdaterInterface;
 use App\Service\ReservationCreator;
 use App\Service\ScreeningAvailability;
 use DateTime;
@@ -60,11 +61,14 @@ final class ReservationCreatorTest extends TestCase
             });
         $tarifRepository = $this->createMock(TarifRepository::class);
         $tarifRepository->method('findAll')->willReturn([$standard, $child]);
+        $aggregateUpdater = $this->createMock(AdminKpiAggregateUpdaterInterface::class);
+        $aggregateUpdater->expects(self::never())->method('applyStatusChange');
         $creator = new ReservationCreator(
             $entityManager,
             $tarifRepository,
             new ScreeningAvailability(),
-            $reservationRepository
+            $reservationRepository,
+            $aggregateUpdater,
         );
         $customer = new User();
 
@@ -103,11 +107,13 @@ final class ReservationCreatorTest extends TestCase
             ->willReturn(2);
         $tarifRepository = $this->createMock(TarifRepository::class);
         $tarifRepository->method('findAll')->willReturn([$tarif]);
+        $aggregateUpdater = $this->createMock(AdminKpiAggregateUpdaterInterface::class);
         $creator = new ReservationCreator(
             $entityManager,
             $tarifRepository,
             new ScreeningAvailability(),
-            $reservationRepository
+            $reservationRepository,
+            $aggregateUpdater,
         );
 
         $this->expectException(ReservationCreationException::class);
@@ -135,12 +141,18 @@ final class ReservationCreatorTest extends TestCase
         $reservationRepository->method('countReservedSeatsForSeance')->with($seance)->willReturn(0);
         $tarifRepository = $this->createMock(TarifRepository::class);
         $tarifRepository->method('findAll')->willReturn([$tarif]);
+        $aggregateUpdater = $this->createMock(AdminKpiAggregateUpdaterInterface::class);
+        $aggregateUpdater
+            ->expects(self::once())
+            ->method('applyStatusChange')
+            ->with(self::isInstanceOf(\App\Entity\Reservation::class), null, ReservationStatus::PAID_AT_COUNTER);
 
         $reservation = (new ReservationCreator(
             $entityManager,
             $tarifRepository,
             new ScreeningAvailability(),
-            $reservationRepository
+            $reservationRepository,
+            $aggregateUpdater,
         ))
             ->createAtCounter($seance, $admin, ['1' => '2']);
 

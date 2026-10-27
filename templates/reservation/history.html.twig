@@ -41,7 +41,15 @@
                                         </button>
                                     </form>
                                     {% if reservation.canBeCancelledAfterPayment %}
-                                        <button class="cart-reservation-action cart-reservation-cancel" type="button" data-bs-toggle="modal" data-bs-target="#paid-cancel-reservation-{{ reservation.reference }}">
+                                        <button
+                                            class="cart-reservation-action cart-reservation-cancel"
+                                            type="button"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#paid-cancel-reservation-modal"
+                                            data-reservation-title="{{ reservation.seance.film.title }}"
+                                            data-cancel-url="{{ path('app_reservation_cancel_paid', {reference: reservation.reference}) }}"
+                                            data-csrf-token="{{ csrf_token('cancel-paid-reservation-' ~ reservation.reference) }}"
+                                        >
                                             Annuler et être remboursé
                                         </button>
                                     {% endif %}
@@ -54,13 +62,56 @@
                         </div>
                         {% if reservation.status.value == 'paid' and reservation.canBeCancelledAfterPayment %}
                             <p class="cart-introduction cart-reservation-cancellation-note">Annulation possible jusqu’au {{ reservation.cancellationDeadline|date('d/m/Y à H:i') }}.</p>
-                            {% include 'cart/_cancel_reservation_modal.html.twig' with {reservation: reservation, paid: true} only %}
                         {% endif %}
                     </article>
                 {% else %}
                     <p class="cart-empty">Vous n’avez encore aucune réservation.</p>
                 {% endfor %}
             </div>
+
+            {% if totalPages > 1 %}
+                <nav class="reservation-pagination" aria-label="Pagination des réservations">
+                    <ul class="pagination">
+                        {% if page > 1 %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ path('app_reservation_history', {page: page - 1}) }}" rel="prev">Précédent</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Précédent</span></li>
+                        {% endif %}
+                        <li class="page-item disabled"><span class="page-link" aria-current="page">Page {{ page }} sur {{ totalPages }}</span></li>
+                        {% if page < totalPages %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ path('app_reservation_history', {page: page + 1}) }}" rel="next">Suivant</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
         </section>
+    </div>
+
+    <div class="modal fade" id="paid-cancel-reservation-modal" tabindex="-1" aria-labelledby="paid-cancel-reservation-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="paid-cancel-reservation-title">Annuler et rembourser cette réservation ?</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    Voulez-vous vraiment annuler votre réservation pour <strong data-cancel-reservation-film></strong> ?
+                    Le remboursement sera demandé et les places seront libérées.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Conserver ma réservation</button>
+                    <form method="post" data-cancel-reservation-form>
+                        <input type="hidden" name="_token" value="" data-cancel-reservation-token>
+                        <button type="submit" class="btn btn-danger">Confirmer l’annulation et le remboursement</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}

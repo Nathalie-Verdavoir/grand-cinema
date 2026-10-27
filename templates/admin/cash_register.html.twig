@@ -6,12 +6,25 @@
 
 {% block main %}
     {% include '_flash_messages.html.twig' %}
-    <section class="admin-cash-register" data-controller="cash-register" data-cash-register-screenings-url-value="{{ path('admin_caisse_screenings') }}" data-cash-register-sale-details-url-value="{{ path('admin_caisse_sale_details') }}">
+    <section
+        class="admin-cash-register"
+        data-controller="cash-register"
+        data-cash-register-films-url-value="{{ path('admin_caisse_films') }}"
+        data-cash-register-screenings-url-value="{{ path('admin_caisse_screenings') }}"
+        data-cash-register-sale-details-url-value="{{ path('admin_caisse_sale_details') }}"
+    >
+        <div class="admin-cash-screening-form">
+            <label for="cash-from">Séances du</label>
+            <input id="cash-from" type="date" value="{{ fromDate }}" data-cash-register-target="fromDate" data-action="change->cash-register#loadFilms">
+            <label for="cash-to">au</label>
+            <input id="cash-to" type="date" value="{{ toDate }}" data-cash-register-target="toDate" data-action="change->cash-register#loadFilms">
+        </div>
+
         <h2>1. Choisir un film</h2>
         <div class="admin-cash-screening-form">
             <label for="cash-film">Film</label>
-            <select id="cash-film" required data-cash-register-target="film" data-action="change->cash-register#loadScreenings">
-                <option value="">Sélectionner un film</option>
+            <select id="cash-film" required data-cash-register-target="film" data-action="change->cash-register#loadScreenings" {% if films is empty %}disabled{% endif %}>
+                <option value="">{% if films is empty %}Aucun film pour cette période{% else %}Sélectionner un film{% endif %}</option>
                 {% for film in films %}
                     <option value="{{ film.id }}" {% if selectedFilmId == film.id %}selected{% endif %}>
                         {{ film.title }}
@@ -23,6 +36,8 @@
         <h2>2. Choisir une séance</h2>
         <form method="get" action="{{ path('admin_caisse_index') }}" class="admin-cash-screening-form">
             <input type="hidden" name="film" value="{{ selectedFilmId ?? '' }}" data-cash-register-target="selectedFilm">
+            <input type="hidden" name="from" value="{{ fromDate }}" data-cash-register-target="fromValue">
+            <input type="hidden" name="to" value="{{ toDate }}" data-cash-register-target="toValue">
             <label for="cash-seance">Séance</label>
             <select id="cash-seance" name="seance" required data-cash-register-target="screening" data-action="change->cash-register#loadSaleDetails" {% if selectedFilmId is null %}disabled{% endif %}>
                 <option value="">{% if selectedFilmId is null %}Choisissez d’abord un film{% else %}Sélectionner une séance{% endif %}</option>

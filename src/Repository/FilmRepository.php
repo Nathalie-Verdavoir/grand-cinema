@@ -8,6 +8,7 @@ use App\Enum\SeanceStatus;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use SortDirection;
 
 /**
  * @extends ServiceEntityRepository<Film>
@@ -34,7 +35,7 @@ class FilmRepository extends ServiceEntityRepository
             ->andWhere('seance.status = :status')
             ->setParameter('now', $now->modify(sprintf('-%d minutes', $this->findMaximumDurationMinutes())))
             ->setParameter('status', SeanceStatus::PUBLISHED)
-            ->orderBy('seance.dateTime', 'ASC')
+            ->orderBy('seance.dateTime', SortDirection::Ascending)
             ->getQuery()
             ->getResult();
     }
@@ -53,8 +54,9 @@ class FilmRepository extends ServiceEntityRepository
             ->setParameter('id', $id)
             ->setParameter('now', $now->modify(sprintf('-%d minutes', $this->findMaximumDurationMinutes())))
             ->setParameter('status', SeanceStatus::PUBLISHED)
-            ->orderBy('seance.dateTime', 'ASC')
+            ->orderBy('seance.dateTime', SortDirection::Ascending)
             ->getQuery()
+            ->enableResultCache(60, sprintf('film_current_program_by_id_%d', $id))
             ->getOneOrNullResult();
     }
 
@@ -70,10 +72,23 @@ class FilmRepository extends ServiceEntityRepository
             ->setParameter('programmable', true)
             ->setParameter('minimumDuration', 1)
             ->setParameter('maximumDuration', Film::MAX_PROGRAMMABLE_DURATION_MINUTES)
-            ->orderBy('film.title', 'ASC')
-            ->addOrderBy('film.id', 'ASC')
+            ->orderBy('film.title', SortDirection::Ascending)
+            ->addOrderBy('film.id', SortDirection::Ascending)
             ->getQuery()
             ->getResult();
+    }
+
+    public function findNextForEditing(Film $currentFilm): ?Film
+    {
+        $nextFilm = $this->createQueryBuilder('film')
+            ->andWhere('film.id > :currentId')
+            ->setParameter('currentId', $currentFilm->getId())
+            ->orderBy('film.id', SortDirection::Ascending)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $nextFilm ?? $this->findOneBy([], ['id' => 'ASC']);
     }
 
     public function findMaximumDurationMinutes(): int
@@ -81,6 +96,7 @@ class FilmRepository extends ServiceEntityRepository
         $maximumDuration = $this->createQueryBuilder('film')
             ->select('MAX(film.duration)')
             ->getQuery()
+            ->enableResultCache(60)
             ->getSingleScalarResult();
 
         return max(0, (int) $maximumDuration);

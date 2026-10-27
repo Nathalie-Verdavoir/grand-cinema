@@ -28,7 +28,11 @@ final class KpiController extends AbstractController
         $now = new DateTimeImmutable();
         $data['highOccupancyScreenings'] = $highOccupancyScreeningFinder->findBetween($now, $now->modify('+2 days'));
 
-        return $this->render('admin/kpis.html.twig', $data);
+        $response = $this->render('admin/kpis.html.twig', $data);
+        $response->setSharedMaxAge(300);
+        $response->setVary('Cookie');
+
+        return $response;
     }
 
     #[AdminRoute(path: '/export-pdf', name: 'export_pdf', options: ['methods' => ['GET']])]

@@ -3,7 +3,7 @@
     {% if event.canDelete %}draggable="true"{% endif %}
     data-action="{{ event.canDelete ? 'dragstart->seance-planner#startDrag dragend->seance-planner#endDrag' : '' }}"
     style="{{ dailyEvent ? 'left: ' ~ (event.topMinutes * 12 / 5) ~ 'px; width: ' ~ (event.heightMinutes * 12 / 5) ~ 'px' : 'top: ' ~ (event.topMinutes * 6 / 5) ~ 'px; height: ' ~ (event.heightMinutes * 6 / 5) ~ 'px' }}"
-    title="{{ event.title }} — {{ event.start }}{% if event.duration %}{% if not dailyEvent %}, {% else %} · {% endif %}{{ event.duration }} min{% if not dailyEvent %} + 20 min de battement{% endif %}{% else %}{% if dailyEvent %} ·{% else %}, {% endif %} durée inconnue{% endif %} — {{ event.statusLabel }}"
+    title="{{ event.title }} — {{ event.start }}{% if event.duration %}{% if not dailyEvent %}, {% else %} · {% endif %}{{ event.duration }} min{% if not dailyEvent %} + 20 min de battement{% endif %}{% else %}{% if dailyEvent %} ·{% else %}, {% endif %} durée inconnue{% endif %} — {{ event.statusLabel }} — {{ event.occupancyPercent }}% de remplissage ({{ event.reservedSeats }}/{{ event.capacity }} places)"
     data-start-timestamp="{{ event.startTimestamp }}"
     data-end-timestamp="{{ event.endTimestamp }}"
     data-seance-id="{{ event.id }}"

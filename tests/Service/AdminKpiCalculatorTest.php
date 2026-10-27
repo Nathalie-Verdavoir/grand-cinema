@@ -15,27 +15,28 @@ final class AdminKpiCalculatorTest extends TestCase
         $repository = $this->createMock(AdminKpiRepository::class);
         $repository->method('findSalesByScreening')->willReturn([
             [
-                'screeningDateTime' => new DateTimeImmutable('2026-10-14 15:00'),
+                'screeningDate' => new DateTimeImmutable('2026-10-14'),
+                'timeBucket' => 3,
                 'entries' => 6,
                 'revenue' => '50.00',
                 'reservations' => 4,
-                'isCounter' => 0,
+                'counterReservations' => 0,
             ],
             [
-                'screeningDateTime' => new DateTimeImmutable('2026-10-14 15:00'),
+                'screeningDate' => new DateTimeImmutable('2026-10-14'),
+                'timeBucket' => 3,
                 'entries' => 4,
                 'revenue' => '35.00',
                 'reservations' => 2,
-                'isCounter' => 1,
+                'counterReservations' => 2,
             ],
         ]);
         $repository->method('findSalesByFilm')->willReturn([
             ['filmTitle' => 'Film test', 'entries' => 10, 'revenue' => '85.00'],
         ]);
-        $repository->method('findPublishedScreeningCapacities')->willReturn([
-            ['screeningId' => 1, 'roomId' => 2, 'capacity' => 10],
-            ['screeningId' => 2, 'roomId' => 2, 'capacity' => 10],
-            ['screeningId' => 3, 'roomId' => 3, 'capacity' => 10],
+        $repository->method('findPublishedCapacityTotals')->willReturn([
+            'capacity' => 30,
+            'activeScreens' => 2,
         ]);
 
         $result = (new AdminKpiCalculator($repository, new DateFormatter()))->calculate(
@@ -65,15 +66,18 @@ final class AdminKpiCalculatorTest extends TestCase
     {
         $repository = $this->createMock(AdminKpiRepository::class);
         $repository->method('findSalesByScreening')->willReturn([
-            ['screeningDateTime' => new DateTimeImmutable('2026-10-14 09:59'), 'entries' => 2, 'revenue' => '0.00', 'reservations' => 1, 'isCounter' => 0],
-            ['screeningDateTime' => new DateTimeImmutable('2026-10-14 10:00'), 'entries' => 3, 'revenue' => '0.00', 'reservations' => 1, 'isCounter' => 0],
-            ['screeningDateTime' => new DateTimeImmutable('2026-10-14 11:59'), 'entries' => 4, 'revenue' => '0.00', 'reservations' => 1, 'isCounter' => 0],
-            ['screeningDateTime' => new DateTimeImmutable('2026-10-14 12:00'), 'entries' => 5, 'revenue' => '0.00', 'reservations' => 1, 'isCounter' => 0],
-            ['screeningDateTime' => new DateTimeImmutable('2026-10-14 22:00'), 'entries' => 6, 'revenue' => '0.00', 'reservations' => 1, 'isCounter' => 0],
-            ['screeningDateTime' => new DateTimeImmutable('2026-10-14 23:59'), 'entries' => 7, 'revenue' => '0.00', 'reservations' => 1, 'isCounter' => 0],
+            ['screeningDate' => '2026-10-14', 'timeBucket' => 0, 'entries' => 2, 'revenue' => '0.00', 'reservations' => 1, 'counterReservations' => 0],
+            ['screeningDate' => '2026-10-14', 'timeBucket' => 1, 'entries' => 3, 'revenue' => '0.00', 'reservations' => 1, 'counterReservations' => 0],
+            ['screeningDate' => '2026-10-14', 'timeBucket' => 1, 'entries' => 4, 'revenue' => '0.00', 'reservations' => 1, 'counterReservations' => 0],
+            ['screeningDate' => '2026-10-14', 'timeBucket' => 2, 'entries' => 5, 'revenue' => '0.00', 'reservations' => 1, 'counterReservations' => 0],
+            ['screeningDate' => '2026-10-14', 'timeBucket' => 7, 'entries' => 6, 'revenue' => '0.00', 'reservations' => 1, 'counterReservations' => 0],
+            ['screeningDate' => '2026-10-14', 'timeBucket' => 7, 'entries' => 7, 'revenue' => '0.00', 'reservations' => 1, 'counterReservations' => 0],
         ]);
         $repository->method('findSalesByFilm')->willReturn([]);
-        $repository->method('findPublishedScreeningCapacities')->willReturn([]);
+        $repository->method('findPublishedCapacityTotals')->willReturn([
+            'capacity' => 0,
+            'activeScreens' => 0,
+        ]);
 
         $result = (new AdminKpiCalculator($repository, new DateFormatter()))->calculate(
             new DateTimeImmutable('2026-10-01'),

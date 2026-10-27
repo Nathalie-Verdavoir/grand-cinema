@@ -10,6 +10,7 @@ use App\Enum\ReservationStatus;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use SortDirection;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Ulid;
@@ -40,7 +41,7 @@ class ReservationRepository extends ServiceEntityRepository
             ->andWhere('reservation.status = :status')
             ->setParameter('userId', $user->getId(), UuidType::NAME)
             ->setParameter('status', ReservationStatus::PENDING)
-            ->orderBy('reservation.reservedAt', 'DESC')
+            ->orderBy('reservation.reservedAt', SortDirection::Descending)
             ->getQuery()
             ->getResult();
     }
@@ -48,22 +49,60 @@ class ReservationRepository extends ServiceEntityRepository
     /**
      * @return Reservation[]
      */
-    public function findForUser(User $user): array
+    public function findForUserPage(User $user, int $page, int $pageSize = 25): array
     {
-        return $this->createQueryBuilder('reservation')
+        $ids = array_map(
+            static fn (array $row): int => (int) $row['id'],
+            $this->createQueryBuilder('reservation')
+                ->select('reservation.id')
+                ->andWhere('IDENTITY(reservation.user) = :userId')
+                ->andWhere('reservation.channel != :counterChannel')
+                ->setParameter('userId', $user->getId(), UuidType::NAME)
+                ->setParameter('counterChannel', ReservationChannel::COUNTER)
+                ->orderBy('reservation.reservedAt', SortDirection::Descending)
+                ->addOrderBy('reservation.id', SortDirection::Descending)
+                ->setFirstResult(($page - 1) * $pageSize)
+                ->setMaxResults($pageSize)
+                ->getQuery()
+                ->getScalarResult(),
+        );
+
+        if ([] === $ids) {
+            return [];
+        }
+
+        $reservationsById = [];
+        foreach ($this->createQueryBuilder('reservation')
             ->addSelect('seance', 'film', 'salle', 'billet', 'tarif')
             ->join('reservation.seance', 'seance')
             ->join('seance.film', 'film')
             ->join('seance.salle', 'salle')
             ->leftJoin('reservation.billets', 'billet')
             ->leftJoin('billet.tarif', 'tarif')
+            ->andWhere('reservation.id IN (:ids)')
+            ->andWhere('reservation.channel != :counterChannel')
+            ->setParameter('ids', $ids)
+            ->setParameter('counterChannel', ReservationChannel::COUNTER)
+            ->getQuery()
+            ->getResult() as $reservation) {
+            $reservationsById[$reservation->getId()] = $reservation;
+        }
+
+        return array_values(array_filter(
+            array_map(static fn (int $id): ?Reservation => $reservationsById[$id] ?? null, $ids),
+        ));
+    }
+
+    public function countForUser(User $user): int
+    {
+        return (int) $this->createQueryBuilder('reservation')
+            ->select('COUNT(reservation.id)')
             ->andWhere('IDENTITY(reservation.user) = :userId')
             ->andWhere('reservation.channel != :counterChannel')
             ->setParameter('userId', $user->getId(), UuidType::NAME)
             ->setParameter('counterChannel', ReservationChannel::COUNTER)
-            ->orderBy('reservation.reservedAt', 'DESC')
             ->getQuery()
-            ->getResult();
+            ->getSingleScalarResult();
     }
 
     public function findOneForUserByReference(Ulid $reference, User $user): ?Reservation
@@ -85,22 +124,56 @@ class ReservationRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    public function findOneByReferenceCached(Ulid $reference): ?Reservation
+    {
+        return $this->createQueryBuilder('reservation')
+            ->andWhere('reservation.reference = :reference')
+            ->setParameter('reference', $reference, UlidType::NAME)
+            ->getQuery()
+            ->enableResultCache(60, 'reservation_payment_'.$reference)
+            ->getOneOrNullResult();
+    }
+
     /**
      * @return Reservation[]
      */
-    public function findCounterReservations(): array
+    public function findCounterReservations(int $page, int $pageSize): array
     {
-        return $this->createQueryBuilder('reservation')
+        $ids = array_map(
+            static fn (array $row): int => (int) $row['id'],
+            $this->createQueryBuilder('reservation')
+                ->select('reservation.id')
+                ->andWhere('reservation.channel = :channel')
+                ->setParameter('channel', ReservationChannel::COUNTER)
+                ->orderBy('reservation.reservedAt', SortDirection::Descending)
+                ->addOrderBy('reservation.id', SortDirection::Descending)
+                ->setFirstResult(($page - 1) * $pageSize)
+                ->setMaxResults($pageSize)
+                ->getQuery()
+                ->getScalarResult(),
+        );
+
+        if ([] === $ids) {
+            return [];
+        }
+
+        $reservationsById = [];
+        foreach ($this->createQueryBuilder('reservation')
             ->addSelect('user', 'seance', 'film', 'salle')
             ->join('reservation.user', 'user')
             ->join('reservation.seance', 'seance')
             ->join('seance.film', 'film')
             ->join('seance.salle', 'salle')
-            ->andWhere('reservation.channel = :channel')
-            ->setParameter('channel', ReservationChannel::COUNTER)
-            ->orderBy('reservation.reservedAt', 'DESC')
+            ->andWhere('reservation.id IN (:ids)')
+            ->setParameter('ids', $ids)
             ->getQuery()
-            ->getResult();
+            ->getResult() as $reservation) {
+            $reservationsById[$reservation->getId()] = $reservation;
+        }
+
+        return array_values(array_filter(
+            array_map(static fn (int $id): ?Reservation => $reservationsById[$id] ?? null, $ids),
+        ));
     }
 
     public function findCounterReservation(int $id): ?Reservation
@@ -154,7 +227,7 @@ class ReservationRepository extends ServiceEntityRepository
             ->andWhere('reservation.reservedAt <= :cutoff')
             ->setParameter('status', ReservationStatus::PENDING)
             ->setParameter('cutoff', $cutoff)
-            ->orderBy('reservation.reservedAt', 'ASC')
+            ->orderBy('reservation.reservedAt', SortDirection::Ascending)
             ->getQuery()
             ->getResult();
     }

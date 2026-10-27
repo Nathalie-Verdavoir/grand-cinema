@@ -33,6 +33,11 @@ services:
             $config: '%env(STRIPE_SECRET_KEY)%'
 
     App\Service\ReservationPaymentSessionManager: '@App\Service\StripeCheckoutService'
+    App\Service\AdminKpiAggregateUpdaterInterface: '@App\Service\AdminKpiAggregateUpdater'
+
+    App\Command\LoadAppFixturesCommand:
+        arguments:
+            $fixturesProvider: '@doctrine.fixtures.loader'
 
     App\Controller\StripeWebhookController:
         arguments:

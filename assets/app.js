@@ -9,10 +9,51 @@
 import './styles/app.css';
 import './styles/flash-messages.css';
 import './flash-messages.js';
-import QRCode from 'qrcode';
-import { jsPDF } from 'jspdf';
 
 const ticketQrInitialization = new WeakMap();
+let qrCodePromise;
+let jsPdfPromise;
+
+const loadQRCode = () => {
+    if (!qrCodePromise) {
+        qrCodePromise = import('qrcode').then(({ default: QRCode }) => QRCode);
+    }
+
+    return qrCodePromise;
+};
+
+const loadJsPdf = () => {
+    if (!jsPdfPromise) {
+        jsPdfPromise = import('jspdf').then(({ jsPDF }) => jsPDF);
+    }
+
+    return jsPdfPromise;
+};
+
+const initializeReservationCancellationModal = () => {
+    const modal = document.querySelector('#paid-cancel-reservation-modal');
+    if (!modal) {
+        return;
+    }
+
+    modal.addEventListener('show.bs.modal', (event) => {
+        const trigger = event.relatedTarget;
+        if (!(trigger instanceof HTMLElement)) {
+            return;
+        }
+
+        const form = modal.querySelector('[data-cancel-reservation-form]');
+        const token = modal.querySelector('[data-cancel-reservation-token]');
+        const film = modal.querySelector('[data-cancel-reservation-film]');
+        if (!form || !token || !film) {
+            return;
+        }
+
+        form.action = trigger.dataset.cancelUrl || '';
+        token.value = trigger.dataset.csrfToken || '';
+        film.textContent = trigger.dataset.reservationTitle || '';
+    });
+};
 
 const initializeProgrammingWeekNavigation = () => {
     const section = document.querySelector('[data-programming-week]');
@@ -326,9 +367,15 @@ const drawPosterInQrCode = async (canvas, posterUrl) => {
 };
 
 const initializeTicketQrCodes = () => {
-    document.querySelectorAll('[data-ticket-qr]').forEach(async (canvas) => {
+    const canvases = document.querySelectorAll('[data-ticket-qr]');
+    if (canvases.length === 0) {
+        return;
+    }
+
+    canvases.forEach(async (canvas) => {
         const initialization = (async () => {
             try {
+                const QRCode = await loadQRCode();
                 await QRCode.toCanvas(canvas, canvas.dataset.ticketQr, {
                     width: 240,
                     margin: 2,
@@ -370,6 +417,7 @@ const initializeTicketDownloads = () => {
         }
 
         try {
+            const jsPDF = await loadJsPdf();
             const isSingleTicket = Boolean(selectedTicket);
             const layoutPdf = new jsPDF({ unit: 'mm', format: 'a4' });
             const sheetWidth = 210;
@@ -421,6 +469,7 @@ const initializeTicketDownloads = () => {
                     console.warn('Le code QR du billet ne peut pas être exporté avec son affiche.', error);
                 }
                 if (!qrCode) {
+                    const QRCode = await loadQRCode();
                     qrCode = await QRCode.toDataURL(reference, {
                         width: 240,
                         margin: 2,
@@ -566,6 +615,7 @@ if (document.readyState === 'loading') {
         initializeHomeCarousels();
         initializeReservationSelections();
         initializeReservationCountdowns();
+        initializeReservationCancellationModal();
         initializeTicketQrCodes();
         initializeTicketDownloads();
     });
@@ -574,6 +624,7 @@ if (document.readyState === 'loading') {
     initializeHomeCarousels();
     initializeReservationSelections();
     initializeReservationCountdowns();
+    initializeReservationCancellationModal();
     initializeTicketQrCodes();
     initializeTicketDownloads();
 }

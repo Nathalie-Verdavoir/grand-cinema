@@ -106,7 +106,11 @@ class ProgrammationController extends AbstractController
         ];
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('programmation/_screenings.html.twig', $screeningsContext);
+            $response = $this->render('programmation/_screenings.html.twig', $screeningsContext);
+            $response->setSharedMaxAge(300);
+            $response->setVary('X-Requested-With');
+
+            return $response;
         }
 
         $featuredFilms = [];
@@ -125,10 +129,14 @@ class ProgrammationController extends AbstractController
             $featuredFilms[] = $film;
         }
 
-        return $this->render('programmation/index.html.twig', [
+        $response = $this->render('programmation/index.html.twig', [
             ...$screeningsContext,
             'featuredFilms' => $featuredFilms,
         ]);
+        $response->setSharedMaxAge(300);
+        $response->setVary('X-Requested-With');
+
+        return $response;
     }
 
     #[Route('/programmation/film/{id}', name: 'app_programmation_film', requirements: ['id' => '\d+'], methods: ['GET'])]
@@ -143,10 +151,13 @@ class ProgrammationController extends AbstractController
             throw $this->createNotFoundException('Ce film n’est pas actuellement programmé.');
         }
 
-        return $this->render('programmation/film.html.twig', [
+        $response = $this->render('programmation/film.html.twig', [
             'film' => $film,
             'screenings' => $screenings,
         ]);
+        $response->setSharedMaxAge(60);
+
+        return $response;
     }
 
     private function wednesdayStart(DateTimeImmutable $date): DateTimeImmutable
