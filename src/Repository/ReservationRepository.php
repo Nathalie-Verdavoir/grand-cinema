@@ -199,6 +199,32 @@ class ReservationRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /**
+     * @return list<string>
+     */
+    public function findOccupiedSeatNumbersForSeance(Seance $seance): array
+    {
+        $rows = $this->getEntityManager()->createQueryBuilder()
+            ->select('billet.seatNumber AS seatNumber')
+            ->from(\App\Entity\Billet::class, 'billet')
+            ->join('billet.reservation', 'reservation')
+            ->andWhere('IDENTITY(reservation.seance) = :seanceId')
+            ->andWhere('reservation.status IN (:statuses)')
+            ->andWhere('billet.seatNumber IS NOT NULL')
+            ->setParameter('seanceId', $seance->getId())
+            ->setParameter('statuses', array_map(
+                static fn (ReservationStatus $status): string => $status->value,
+                array_filter(
+                    ReservationStatus::cases(),
+                    static fn (ReservationStatus $status): bool => $status->reservesSeats()
+                )
+            ))
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_values(array_unique(array_column($rows, 'seatNumber')));
+    }
+
     public function countReservedSeatsForSeance(Seance $seance): int
     {
         return (int) $this->createQueryBuilder('reservation')
