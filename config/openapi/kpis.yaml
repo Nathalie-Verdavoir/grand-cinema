@@ -1,0 +1,216 @@
+openapi: 3.0.3
+info:
+  title: Grand Cinema - API des indicateurs (KPIs)
+  version: 1.0.0
+  description: |
+    Données de la vue administrateur « Indicateurs ».
+    Accès réservé aux utilisateurs ayant le rôle ROLE_ADMIN (session authentifiée).
+servers:
+  - url: /
+security:
+  - sessionCookie: []
+tags:
+  - name: KPIs
+    description: Indicateurs de fréquentation et de vente
+paths:
+  /admin/kpis/api:
+    get:
+      tags: [KPIs]
+      summary: Indicateurs d'une période
+      description: |
+        Renvoie les indicateurs de la période demandée, ainsi que ceux de la même période du mois précédent
+        et de l'année civile de la date de fin.
+      operationId: getKpis
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Date de début incluse (AAAA-MM-JJ). Par défaut, le 1er jour du mois en cours.
+          schema:
+            type: string
+            format: date
+            example: '2026-11-01'
+        - name: to
+          in: query
+          required: false
+          description: Date de fin incluse (AAAA-MM-JJ). Par défaut, aujourd'hui. Doit être supérieure ou égale à `from`.
+          schema:
+            type: string
+            format: date
+            example: '2026-11-04'
+      responses:
+        '200':
+          description: Indicateurs calculés.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KpiReport'
+        '400':
+          description: Période invalide (format de date incorrect ou `from` postérieure à `to`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '302':
+          description: Utilisateur non authentifié (redirection vers la page de connexion).
+        '403':
+          description: Utilisateur authentifié sans le rôle ROLE_ADMIN.
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: PHPSESSID
+  schemas:
+    Period:
+      type: object
+      required: [from, to]
+      properties:
+        from:
+          type: string
+          format: date
+          example: '2026-11-01'
+        to:
+          type: string
+          format: date
+          example: '2026-11-04'
+    AnnualPeriod:
+      type: object
+      required: [year, from, to]
+      properties:
+        year:
+          type: integer
+          example: 2026
+        from:
+          type: string
+          format: date
+          example: '2026-01-01'
+        to:
+          type: string
+          format: date
+          example: '2026-12-31'
+    KpiReport:
+      type: object
+      required: [period, kpis, previousPeriod, previousMonthKpis, annualPeriod, annualKpis]
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        kpis:
+          $ref: '#/components/schemas/Kpis'
+        previousPeriod:
+          $ref: '#/components/schemas/Period'
+          description: Même période décalée d'un mois en arrière.
+        previousMonthKpis:
+          $ref: '#/components/schemas/Kpis'
+        annualPeriod:
+          $ref: '#/components/schemas/AnnualPeriod'
+        annualKpis:
+          $ref: '#/components/schemas/Kpis'
+    Kpis:
+      type: object
+      required:
+        - entries
+        - revenue
+        - averageRevenuePerEntry
+        - occupancyPercent
+        - activeScreens
+        - revenuePerScreen
+        - onlineReservations
+        - counterReservations
+        - onlinePercent
+        - counterPercent
+        - occupancyChartPercent
+        - salesByFilm
+        - salesByWeekday
+        - salesByTimeOfDay
+      properties:
+        entries:
+          type: integer
+          description: Nombre d'entrées (billets) vendues.
+        revenue:
+          type: number
+          format: float
+          description: Recette totale (en euros).
+        averageRevenuePerEntry:
+          type: number
+          format: float
+          description: Recette moyenne par entrée (en euros).
+        occupancyPercent:
+          type: number
+          format: float
+          description: Taux d'occupation en pourcentage (peut dépasser 100).
+        activeScreens:
+          type: integer
+          description: Nombre de salles ayant des séances publiées sur la période.
+        revenuePerScreen:
+          type: number
+          format: float
+          description: Recette par salle active (en euros).
+        onlineReservations:
+          type: integer
+          description: Réservations en ligne (total moins réservations guichet).
+        counterReservations:
+          type: integer
+          description: Réservations effectuées au guichet.
+        onlinePercent:
+          type: number
+          format: float
+          description: Part des réservations en ligne en pourcentage.
+        counterPercent:
+          type: number
+          format: float
+          description: Part des réservations guichet en pourcentage.
+        occupancyChartPercent:
+          type: number
+          format: float
+          description: Taux d'occupation plafonné à 100 (pour les graphiques).
+        salesByFilm:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilmSales'
+        salesByWeekday:
+          type: array
+          description: Entrées par jour de la semaine (lundi à dimanche).
+          items:
+            $ref: '#/components/schemas/BucketSales'
+        salesByTimeOfDay:
+          type: array
+          description: Entrées par tranche horaire (la tranche « Avant 10 h » n'apparaît que si elle contient des entrées).
+          items:
+            $ref: '#/components/schemas/BucketSales'
+    FilmSales:
+      type: object
+      required: [title, entries, revenue, barPercent]
+      properties:
+        title:
+          type: string
+          example: Dune
+        entries:
+          type: integer
+        revenue:
+          type: number
+          format: float
+        barPercent:
+          type: number
+          format: float
+          description: Entrées rapportées au film le plus vu (0 à 100).
+    BucketSales:
+      type: object
+      required: [label, entries, barPercent]
+      properties:
+        label:
+          type: string
+          example: '14 h – 16 h'
+        entries:
+          type: integer
+        barPercent:
+          type: number
+          format: float
+          description: Entrées rapportées à la tranche la plus fréquentée (0 à 100).
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: La date de début doit précéder la date de fin.
