@@ -8,6 +8,7 @@ use App\Exception\ReservationCreationException;
 use App\Repository\ReservationRepository;
 use App\Repository\SeanceRepository;
 use App\Repository\TarifRepository;
+use App\Service\PendingReservationExpirer;
 use App\Service\ScreeningAvailability;
 use App\Service\ReservationCreator;
 use App\Service\ScreeningFormatter;
@@ -105,6 +106,7 @@ class ReservationController extends AbstractController
         ScreeningAvailability $screeningAvailability,
         ScreeningFormatter $screeningFormatter,
         SeatingPlan $seatingPlan,
+        PendingReservationExpirer $pendingReservationExpirer,
     ): Response {
         $seance = $seanceRepository->find($id);
         $dateTime = $seance instanceof Seance ? $seance->getDateTime() : null;
@@ -119,6 +121,8 @@ class ReservationController extends AbstractController
         if (!$request->isMethod('POST')) {
             return $this->redirectToRoute('app_reservation', ['id' => $id]);
         }
+
+        $pendingReservationExpirer->expireStale();
 
         $csrfToken = $request->request->get('_token');
         if (!is_string($csrfToken) || !$this->isCsrfTokenValid('reservation-'.$id, $csrfToken)) {
