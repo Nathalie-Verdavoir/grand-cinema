@@ -8,10 +8,12 @@ use App\Service\KpiPdfGenerator;
 use DateTimeImmutable;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Yaml\Yaml;
 
 #[IsGranted('ROLE_ADMIN')]
 #[AdminRoute(path: '/kpis', name: 'kpis')]
@@ -45,6 +47,59 @@ final class KpiController extends AbstractController
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => sprintf('attachment; filename="%s"', $filename),
         ]);
+    }
+
+    #[AdminRoute(path: '/api', name: 'api', options: ['methods' => ['GET']])]
+    public function api(Request $request, AdminKpiCalculator $calculator): JsonResponse
+    {
+        try {
+            $report = $this->reportData($request, $calculator);
+        } catch (BadRequestHttpException $exception) {
+            return new JsonResponse(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+
+        return new JsonResponse($this->toApiPayload($report));
+    }
+
+    #[AdminRoute(path: '/api/openapi.json', name: 'api_openapi', options: ['methods' => ['GET']])]
+    public function apiOpenapi(): JsonResponse
+    {
+        return new JsonResponse(Yaml::parseFile($this->getParameter('kernel.project_dir').'/config/openapi/kpis.yaml'));
+    }
+
+    #[AdminRoute(path: '/api/doc', name: 'api_doc', options: ['methods' => ['GET']])]
+    public function apiDoc(): Response
+    {
+        return $this->render('admin/kpis_api_doc.html.twig', [
+            'specUrl' => $this->generateUrl('admin_kpis_api_openapi'),
+        ]);
+    }
+
+    /**
+     * @param array{from: DateTimeImmutable, to: DateTimeImmutable, kpis: array<string, mixed>, previousFrom: DateTimeImmutable, previousTo: DateTimeImmutable, previousMonthKpis: array<string, mixed>, annualYear: int, annualKpis: array<string, mixed>} $report
+     *
+     * @return array<string, mixed>
+     */
+    private function toApiPayload(array $report): array
+    {
+        return [
+            'period' => [
+                'from' => $report['from']->format('Y-m-d'),
+                'to' => $report['to']->format('Y-m-d'),
+            ],
+            'kpis' => $report['kpis'],
+            'previousPeriod' => [
+                'from' => $report['previousFrom']->format('Y-m-d'),
+                'to' => $report['previousTo']->format('Y-m-d'),
+            ],
+            'previousMonthKpis' => $report['previousMonthKpis'],
+            'annualPeriod' => [
+                'year' => $report['annualYear'],
+                'from' => sprintf('%d-01-01', $report['annualYear']),
+                'to' => sprintf('%d-12-31', $report['annualYear']),
+            ],
+            'annualKpis' => $report['annualKpis'],
+        ];
     }
 
     /**
