@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Choisir mes places - {{ seance.film.title }} - Grand Cinéma{% endblock %}
+
+{% block body %}
+    <div class="container home-page reservation-page">
+        <section class="reservation-panel" aria-labelledby="reservation-seats-title">
+            <a class="film-program-back" href="{{ path('app_reservation', {id: seance.id}) }}">← Modifier mes tarifs</a>
+            <h1 id="reservation-seats-title">Choisissez vos places</h1>
+            <h2>{{ seance.film.title }}</h2>
+            <p class="reservation-availability">
+                {{ seance.salle.name }} · {{ seance.dateTime|date('d/m/Y à H:i') }} ·
+                Sélectionnez {{ totalSeats }} place{{ totalSeats > 1 ? 's' : '' }} sur le plan.
+            </p>
+
+            <form method="post" action="{{ path('app_reservation', {id: seance.id}) }}" data-seat-selection data-seat-count="{{ totalSeats }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('reservation-' ~ seance.id) }}">
+                {% for tarif in tarifs %}
+                    <input type="hidden" name="tarifs[{{ tarif.tarif.id }}]" value="{{ tarif.quantity }}">
+                {% endfor %}
+
+                <div class="seat-plan-scroll">
+                    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+                        <symbol id="seat-icon" viewBox="0 0 40 40">
+                            <rect x="9" y="3" width="22" height="19" rx="6"/>
+                            <rect x="3" y="14" width="7" height="18" rx="3.5"/>
+                            <rect x="30" y="14" width="7" height="18" rx="3.5"/>
+                            <rect x="8" y="22" width="24" height="10" rx="4"/>
+                            <rect x="11" y="33" width="3" height="4" rx="1"/>
+                            <rect x="26" y="33" width="3" height="4" rx="1"/>
+                        </symbol>
+                    </svg>
+                    <div class="seat-plan-stage">
+                    <figure class="seat-plan-screen" aria-hidden="true">
+                        <svg viewBox="0 0 400 70" role="img">
+                            <defs>
+                                <linearGradient id="screen-glow" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0" stop-color="#dbe9ff"/>
+                                    <stop offset="1" stop-color="#5b7bb5"/>
+                                </linearGradient>
+                                <linearGradient id="screen-beam" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0" stop-color="#8fb0ff" stop-opacity=".35"/>
+                                    <stop offset="1" stop-color="#8fb0ff" stop-opacity="0"/>
+                                </linearGradient>
+                            </defs>
+                            <path d="M10 48 Q200 8 390 48 L390 56 Q200 16 10 56 Z" fill="url(#screen-glow)"/>
+                            <path d="M10 56 Q200 16 390 56 L430 70 L-30 70 Z" fill="url(#screen-beam)"/>
+                        </svg>
+                        <figcaption>Écran</figcaption>
+                    </figure>
+                    <div class="seat-plan" role="group" aria-label="Plan de la salle {{ seance.salle.name }}">
+                        {% for rowLabel, seats in rows %}
+                            <div class="seat-plan-row" role="group" aria-label="Rangée {{ rowLabel }}">
+                                <span class="seat-plan-row-label" aria-hidden="true">{{ rowLabel }}</span>
+                                {% for seat in seats %}
+                                    {% set occupied = seat in occupiedSeats %}
+                                    <label class="seat{{ occupied ? ' seat-occupied' : '' }}">
+                                        <input type="checkbox" name="seats[]" value="{{ seat }}" data-seat{{ occupied ? ' disabled' : '' }}>
+                                        <svg class="seat-icon" aria-hidden="true" focusable="false"><use href="#seat-icon"/></svg>
+                                        <span class="seat-number" aria-hidden="true">{{ seat|slice(1) }}</span>
+                                        <span class="visually-hidden">{{ seat }} {{ occupied ? 'occupée' : 'disponible' }}</span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    </div>
+                </div>
+
+                <ul class="seat-legend" aria-label="Légende">
+                    <li class="seat-legend-free"><svg class="seat-icon" aria-hidden="true"><use href="#seat-icon"/></svg> Disponible</li>
+                    <li class="seat-legend-selected"><svg class="seat-icon" aria-hidden="true"><use href="#seat-icon"/></svg> Votre sélection</li>
+                    <li class="seat-legend-occupied"><svg class="seat-icon" aria-hidden="true"><use href="#seat-icon"/></svg> Occupée</li>
+                </ul>
+
+                <div class="reservation-action-row">
+                    <p class="reservation-total" role="status" aria-live="polite" data-seat-summary>
+                        0 / {{ totalSeats }} place{{ totalSeats > 1 ? 's' : '' }} choisie{{ totalSeats > 1 ? 's' : '' }} · Total : {{ totalPrice|number_format(2, ',', ' ') }} €
+                    </p>
+                    <button class="reservation-submit" type="submit" data-seat-submit disabled>Réserver</button>
+                </div>
+            </form>
+        </section>
+    </div>
+{% endblock %}

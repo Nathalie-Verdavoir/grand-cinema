@@ -30,7 +30,7 @@
                 <section class="reservation-tariffs" aria-labelledby="reservation-tariffs-title">
                     <h3 id="reservation-tariffs-title">Choisissez vos tarifs</h3>
                     {% if tarifs is not empty %}
-                        <form method="post" action="{{ path('app_reservation', {id: seance.id}) }}" data-reservation-selection data-available-seats="{{ availableSeats }}">
+                        <form method="post" action="{{ path('app_reservation_places', {id: seance.id}) }}" data-reservation-selection data-available-seats="{{ availableSeats }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('reservation-' ~ seance.id) }}">
                             <p class="reservation-availability">
                                 Sélectionnez le nombre de places pour chaque tarif ({{ availableSeats }} disponible{{ availableSeats > 1 ? 's' : '' }} au total).
@@ -80,7 +80,7 @@
                                 <p class="reservation-total" role="status" aria-live="polite" data-reservation-total>
                                     0 place sélectionnée · Total : 0,00 €
                                 </p>
-                                <button class="reservation-submit" type="submit" data-reservation-submit>Réserver</button>
+                                <button class="reservation-submit" type="submit" data-reservation-submit>Choisir mes places</button>
                             </div>
                         </form>
                     {% else %}

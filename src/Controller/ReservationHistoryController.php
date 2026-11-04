@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enum\ReservationStatus;
 use App\Repository\ReservationRepository;
 use App\Service\InvoiceSender;
+use App\Service\PendingReservationExpirer;
 use App\Service\PaidReservationCanceller;
 use App\Service\RefundConfirmationSender;
 use Psr\Log\LoggerInterface;
@@ -24,12 +25,17 @@ use Symfony\Component\Uid\Ulid;
 class ReservationHistoryController extends AbstractController
 {
     #[Route('/mes-reservations', name: 'app_reservation_history', methods: ['GET'])]
-    public function index(Request $request, ReservationRepository $reservationRepository): Response
-    {
+    public function index(
+        Request $request,
+        ReservationRepository $reservationRepository,
+        PendingReservationExpirer $pendingReservationExpirer,
+    ): Response {
         $user = $this->getUser();
         if (!$user instanceof User) {
             throw $this->createAccessDeniedException();
         }
+
+        $pendingReservationExpirer->expireStale();
 
         $requestedPage = filter_var($request->query->get('page', '1'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         if (false === $requestedPage) {

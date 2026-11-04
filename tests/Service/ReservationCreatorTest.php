@@ -121,6 +121,38 @@ final class ReservationCreatorTest extends TestCase
         $creator->create($seance, new User(), ['1' => '2']);
     }
 
+    public function testItRejectsASeatAlreadyOccupiedForTheScreening(): void
+    {
+        $tarif = $this->tarif(1, 'Tarif Normal', '8.50');
+        $seance = $this->availableSeance(10);
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager
+            ->method('wrapInTransaction')
+            ->willReturnCallback(static fn (callable $callback) => $callback($entityManager));
+        $entityManager->expects(self::never())->method('persist');
+
+        $reservationRepository = $this->createMock(ReservationRepository::class);
+        $reservationRepository->method('countReservedSeatsForSeance')->with($seance)->willReturn(1);
+        $reservationRepository
+            ->expects(self::once())
+            ->method('findOccupiedSeatNumbersForSeance')
+            ->with($seance)
+            ->willReturn(['A1']);
+        $tarifRepository = $this->createMock(TarifRepository::class);
+        $tarifRepository->method('findAll')->willReturn([$tarif]);
+        $creator = new ReservationCreator(
+            $entityManager,
+            $tarifRepository,
+            new ScreeningAvailability(),
+            $reservationRepository,
+            $this->createMock(AdminKpiAggregateUpdaterInterface::class),
+        );
+
+        $this->expectException(ReservationCreationException::class);
+        $this->expectExceptionMessage('vient d’être réservée');
+        $creator->create($seance, new User(), ['1' => '2'], ['A1', 'A2']);
+    }
+
     public function testItCreatesAPaidAtCounterReservationForTheAdmin(): void
     {
         $tarif = $this->tarif(1, 'Tarif Normal', '8.50');
