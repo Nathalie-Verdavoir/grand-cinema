@@ -7,6 +7,7 @@
 
 // any CSS you import will output into a single css file (app.css in this case)
 import './styles/app.css';
+import './styles/seat-plan.css';
 import './styles/flash-messages.css';
 import './flash-messages.js';
 
@@ -293,6 +294,35 @@ const initializeReservationSelections = () => {
             });
         });
         selection.addEventListener('submit', () => {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Enregistrement…';
+        });
+        update();
+    });
+};
+
+const initializeSeatSelections = () => {
+    document.querySelectorAll('[data-seat-selection]').forEach((form) => {
+        const limit = Number(form.dataset.seatCount);
+        const seats = Array.from(form.querySelectorAll('[data-seat]'));
+        const summary = form.querySelector('[data-seat-summary]');
+        const submitButton = form.querySelector('[data-seat-submit]');
+        const initialSummary = summary.textContent;
+
+        const update = () => {
+            const selected = seats.filter((seat) => seat.checked).length;
+            seats.forEach((seat) => {
+                seat.closest('.seat').classList.toggle('seat-selected', seat.checked);
+                if (!seat.closest('.seat-occupied')) {
+                    seat.disabled = !seat.checked && selected >= limit;
+                }
+            });
+            summary.textContent = initialSummary.replace(/^\d+/, String(selected));
+            submitButton.disabled = selected !== limit;
+        };
+
+        seats.forEach((seat) => seat.addEventListener('change', update));
+        form.addEventListener('submit', () => {
             submitButton.disabled = true;
             submitButton.textContent = 'Enregistrement…';
         });
@@ -614,6 +644,7 @@ if (document.readyState === 'loading') {
         initializeProgrammingWeekNavigation();
         initializeHomeCarousels();
         initializeReservationSelections();
+        initializeSeatSelections();
         initializeReservationCountdowns();
         initializeReservationCancellationModal();
         initializeTicketQrCodes();
@@ -623,6 +654,7 @@ if (document.readyState === 'loading') {
     initializeProgrammingWeekNavigation();
     initializeHomeCarousels();
     initializeReservationSelections();
+    initializeSeatSelections();
     initializeReservationCountdowns();
     initializeReservationCancellationModal();
     initializeTicketQrCodes();

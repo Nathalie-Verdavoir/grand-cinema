@@ -31,15 +31,17 @@ final class ReservationCreator
 
     /**
      * @param array<string|int, mixed> $submittedQuantities
+     * @param list<mixed>|null         $seatNumbers
      */
-    public function create(Seance $seance, User $user, array $submittedQuantities): Reservation
+    public function create(Seance $seance, User $user, array $submittedQuantities, ?array $seatNumbers = null): Reservation
     {
         return $this->createWithStatus(
             $seance,
             $user,
             $submittedQuantities,
             ReservationStatus::PENDING,
-            ReservationChannel::ONLINE
+            ReservationChannel::ONLINE,
+            $seatNumbers
         );
     }
 
@@ -59,6 +61,7 @@ final class ReservationCreator
 
     /**
      * @param array<string|int, mixed> $submittedQuantities
+     * @param list<mixed>|null         $seatNumbers
      */
     private function createWithStatus(
         Seance $seance,
@@ -66,9 +69,10 @@ final class ReservationCreator
         array $submittedQuantities,
         ReservationStatus $status,
         ReservationChannel $channel,
+        ?array $seatNumbers = null,
     ): Reservation
     {
-        return $this->entityManager->wrapInTransaction(function (EntityManagerInterface $entityManager) use ($seance, $user, $submittedQuantities, $status, $channel): Reservation {
+        return $this->entityManager->wrapInTransaction(function (EntityManagerInterface $entityManager) use ($seance, $user, $submittedQuantities, $status, $channel, $seatNumbers): Reservation {
             $entityManager->lock($seance, LockMode::PESSIMISTIC_WRITE);
             $dateTime = $seance->getDateTime();
             if (
@@ -123,6 +127,8 @@ final class ReservationCreator
                 throw new ReservationCreationException('Il ne reste pas assez de places pour cette sélection.');
             }
 
+            $seatsToAssign = null === $seatNumbers ? null : $this->validatedSeats($seance, $seatNumbers, $totalSeats);
+
             $reservation = (new Reservation())
                 ->setReference(new Ulid())
                 ->setUser($user)
@@ -142,6 +148,9 @@ final class ReservationCreator
                         ->setTarif($tarif)
                         ->setPriceApplied($this->formatPrice($this->priceInCents($tarif)))
                         ->setReference(new Ulid());
+                    if (null !== $seatsToAssign) {
+                        $billet->setSeatNumber(array_shift($seatsToAssign));
+                    }
                     $reservation->addBillet($billet);
                     $entityManager->persist($billet);
                 }
@@ -153,6 +162,37 @@ final class ReservationCreator
 
             return $reservation;
         });
+    }
+
+    /**
+     * @param list<mixed> $seatNumbers
+     *
+     * @return list<string>
+     */
+    private function validatedSeats(Seance $seance, array $seatNumbers, int $totalSeats): array
+    {
+        $seats = [];
+        foreach ($seatNumbers as $seatNumber) {
+            if (!is_string($seatNumber)) {
+                throw new ReservationCreationException('La sélection des places est invalide.');
+            }
+            $seats[] = strtoupper(trim($seatNumber));
+        }
+
+        if (count($seats) !== $totalSeats || count(array_unique($seats)) !== count($seats)) {
+            throw new ReservationCreationException(sprintf('Choisissez exactement %d place(s) sur le plan de salle.', $totalSeats));
+        }
+
+        $layout = (new SeatingPlan())->seats($seance->getSalle()?->getCapacity() ?? 0);
+        if ([] !== array_diff($seats, $layout)) {
+            throw new ReservationCreationException('La sélection des places est invalide.');
+        }
+
+        if ([] !== array_intersect($seats, $this->reservationRepository->findOccupiedSeatNumbersForSeance($seance))) {
+            throw new ReservationCreationException('Une des places choisies vient d’être réservée. Veuillez en choisir une autre.');
+        }
+
+        return $seats;
     }
 
     private function priceInCents(Tarif $tarif): int
